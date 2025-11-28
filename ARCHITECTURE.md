@@ -99,7 +99,7 @@ youtube-rss-generator/
 - **Error Handling**: Saves "No transcript available." if fetch fails
 
 #### `run_worker.sh`
-- Points to `/opt/miniconda3/bin/python` for dependencies
+- Dynamically detects Python executable (virtualenv or system)
 - Executes `worker.py`
 
 ---

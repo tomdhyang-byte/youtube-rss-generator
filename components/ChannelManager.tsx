@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Plus, Rss, ExternalLink, Trash2, Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
 
 // Define the type based on the Prisma model
 type Channel = {
@@ -22,7 +23,10 @@ export default function ChannelManager({ initialChannels }: { initialChannels: C
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!url) return;
+        if (!url) {
+            toast.error("Please enter a YouTube channel URL");
+            return;
+        }
 
         setLoading(true);
         setError('');
@@ -57,7 +61,7 @@ export default function ChannelManager({ initialChannels }: { initialChannels: C
     const copyRssLink = (channelId: number) => {
         const link = `${window.location.origin}/feed/${channelId}`;
         navigator.clipboard.writeText(link);
-        alert('RSS Link copied to clipboard!');
+        toast.success('RSS Link copied to clipboard!');
     };
 
     const decodeHtml = (html: string) => {
@@ -76,7 +80,7 @@ export default function ChannelManager({ initialChannels }: { initialChannels: C
                         value={url}
                         onChange={(e) => setUrl(e.target.value)}
                         placeholder="Paste YouTube Channel URL (e.g. https://youtube.com/@channel)"
-                        className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all text-black dark:text-white bg-white dark:bg-gray-700 placeholder:text-gray-500 dark:placeholder:text-gray-400"
+                        className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:border-blue-500 focus:shadow-[0_0_0_4px_rgba(59,130,246,0.5)] outline-none transition-all text-black dark:text-white bg-white dark:bg-gray-700 placeholder:text-gray-500 dark:placeholder:text-gray-400"
                         disabled={loading}
                     />
                     <button

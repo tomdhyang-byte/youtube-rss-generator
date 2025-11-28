@@ -12,7 +12,7 @@ export default async function Home() {
   });
 
   return (
-    <main className="min-h-screen bg-gray-50 dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8 transition-colors duration-300">
+    <main className="min-h-screen dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8 transition-colors duration-300">
       <div className="absolute top-4 right-4">
         <ThemeToggle />
       </div>
@@ -22,7 +22,7 @@ export default async function Home() {
             YouTube RSS Generator
           </h1>
           <p className="text-gray-600 dark:text-gray-400">
-            Generate AI-summarized RSS feeds for your favorite channels.
+            Turn YouTube videos into readable AI summaries & RSS feeds.
           </p>
         </div>
 
