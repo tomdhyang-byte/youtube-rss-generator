@@ -1,0 +1,931 @@
+Starting YouTube RSS Worker...
+Starting Worker...
+Processing Channel: Joseph Carlson (UCbta0n8i6Rljh0obO7HzG9A)
+  - Video already exists: 6 Stocks To Buy In An Overvalued Market
+  - Video already exists: Top Five AI Stocks I'm Buying Now
+  - Video already exists: The Stock Market Is Overvalued, Here's What I'm Doing Now
+  - Video already exists: What I'm Buying And Selling In my $1.3 Million Portfolio
+  - Video already exists: I’m Buying $10,000 Of This Stock, Here’s Why
+Processing Channel: Joseph Carlson After Hours (UCfCT7SSFEWyG4th9ZmaGYqQ)
+  - Video already exists: Michael Burry & Ray Dalio Say The Market Is In A Huge Bubble
+  - Video already exists: I’m Buying $10,000 to $20,000 Of This Stock
+  - Video already exists: The World's Best Investor Just Bought Google
+  - Video already exists: 5 Beaten Down Companies To Buy Now
+  - Video already exists: Michael Burry Warns About The Stock Market Again
+Processing Channel: AI News &amp; Strategy Daily | Nate B Jones (UC0C-17n9iuUQPylguM1d-lQ)
+  - Video already exists: My Take on the Hard AI Questions: Jobs, Water, Artificial Romance, School Cheating & More
+  - Video already exists: AI Certifications Focus on Tools NOT Skills—Here's a Better Way
+  - Video already exists: Real World Testing: Opus 4.5 vs. Gemini 3 vs. ChatGPT 5.1
+  - Video already exists: Prompting is the Wild West: Here's the Prompt Lifecycle Guide + 19 Tools + a Demo
+  - Video already exists: Here's the 90 Slide 'AI Eats the World' Talk in 15 Minutes—Plus My Top Takeaways
+Processing Channel: 美股咖啡館 (UCjrP2TtSTifuRJ76hW2IW1A)
+  - New Video found: Chip bombshell: Google TPU success = Nvidia GPU failure?
+  - No transcript found or error: 
+Could not retrieve a transcript for the video https://www.youtube.com/watch?v=IAQa7QBq0Ro! This is most likely caused by:
+
+No transcripts were found for any of the requested language codes: ('en',)
+
+For this video (IAQa7QBq0Ro) transcripts are available in the following languages:
+
+(MANUALLY CREATED)
+ - zh ("Chinese")
+
+(GENERATED)
+None
+
+(TRANSLATION LANGUAGES)
+None
+
+If you are sure that the described cause is not responsible for this error and that a transcript should be retrievable, please create an issue at https://github.com/jdepoix/youtube-transcript-api/issues. Please add which version of youtube_transcript_api you are using and provide the information needed to replicate the error. Also make sure that there are no open issues which already describe your problem!
+    - Saved to DB.
+  - New Video found: US stocks make a full recovery: What happened to sleeping in the park? | Google's market value ap...
+  - No transcript found or error: 
+Could not retrieve a transcript for the video https://www.youtube.com/watch?v=kEbuObe0ZbM! This is most likely caused by:
+
+No transcripts were found for any of the requested language codes: ('en',)
+
+For this video (kEbuObe0ZbM) transcripts are available in the following languages:
+
+(MANUALLY CREATED)
+ - zh ("Chinese")
+
+(GENERATED)
+None
+
+(TRANSLATION LANGUAGES)
+None
+
+If you are sure that the described cause is not responsible for this error and that a transcript should be retrievable, please create an issue at https://github.com/jdepoix/youtube-transcript-api/issues. Please add which version of youtube_transcript_api you are using and provide the information needed to replicate the error. Also make sure that there are no open issues which already describe your problem!
+    - Saved to DB.
+  - New Video found: I bought into a company nobody's heard of: The whole process of finding hidden gem stocks reveale...
+  - No transcript found or error: 
+Could not retrieve a transcript for the video https://www.youtube.com/watch?v=rP3XOQGc-Fk! This is most likely caused by:
+
+No transcripts were found for any of the requested language codes: ('en',)
+
+For this video (rP3XOQGc-Fk) transcripts are available in the following languages:
+
+(MANUALLY CREATED)
+ - zh ("Chinese")
+
+(GENERATED)
+None
+
+(TRANSLATION LANGUAGES)
+None
+
+If you are sure that the described cause is not responsible for this error and that a transcript should be retrievable, please create an issue at https://github.com/jdepoix/youtube-transcript-api/issues. Please add which version of youtube_transcript_api you are using and provide the information needed to replicate the error. Also make sure that there are no open issues which already describe your problem!
+    - Saved to DB.
+  - New Video found: Nvidia releases a set of outrageous figures: you'll be stunned! Why is Google's stock price hitti...
+  - No transcript found or error: 
+Could not retrieve a transcript for the video https://www.youtube.com/watch?v=xxS57w5cBO8! This is most likely caused by:
+
+No transcripts were found for any of the requested language codes: ('en',)
+
+For this video (xxS57w5cBO8) transcripts are available in the following languages:
+
+(MANUALLY CREATED)
+ - zh ("Chinese")
+
+(GENERATED)
+None
+
+(TRANSLATION LANGUAGES)
+None
+
+If you are sure that the described cause is not responsible for this error and that a transcript should be retrievable, please create an issue at https://github.com/jdepoix/youtube-transcript-api/issues. Please add which version of youtube_transcript_api you are using and provide the information needed to replicate the error. Also make sure that there are no open issues which already describe your problem!
+    - Saved to DB.
+  - New Video found: For the first time, I'm publicly disclosing all my assets: What percentage is currently in cash? ...
+  - No transcript found or error: 
+Could not retrieve a transcript for the video https://www.youtube.com/watch?v=JnSAoCLKwGA! This is most likely caused by:
+
+No transcripts were found for any of the requested language codes: ('en',)
+
+For this video (JnSAoCLKwGA) transcripts are available in the following languages:
+
+(MANUALLY CREATED)
+ - zh ("Chinese")
+
+(GENERATED)
+None
+
+(TRANSLATION LANGUAGES)
+None
+
+If you are sure that the described cause is not responsible for this error and that a transcript should be retrievable, please create an issue at https://github.com/jdepoix/youtube-transcript-api/issues. Please add which version of youtube_transcript_api you are using and provide the information needed to replicate the error. Also make sure that there are no open issues which already describe your problem!
+    - Saved to DB.
+Processing Channel: D的財富鏈 (UCVGYz_TsbJRiDykog88EFQg)
+  - New Video found: 【警惕拐點】財報季大好，但AI股恐慌暴跌！這一切，背後的真相是什麼？Nvidia也救不了嗎？...【D的財富鏈/美股】
+  - No transcript found or error: 
+Could not retrieve a transcript for the video https://www.youtube.com/watch?v=rJqAYiADTkk! This is most likely caused by:
+
+No transcripts were found for any of the requested language codes: ('en',)
+
+For this video (rJqAYiADTkk) transcripts are available in the following languages:
+
+(MANUALLY CREATED)
+ - zh ("Chinese")
+
+(GENERATED)
+None
+
+(TRANSLATION LANGUAGES)
+None
+
+If you are sure that the described cause is not responsible for this error and that a transcript should be retrievable, please create an issue at https://github.com/jdepoix/youtube-transcript-api/issues. Please add which version of youtube_transcript_api you are using and provide the information needed to replicate the error. Also make sure that there are no open issues which already describe your problem!
+    - Saved to DB.
+  - New Video found: 【注意】數據出問題，美股有危險！100%引起衰退的指標，被消失了？！AI引發失業潮！你該如何投資，才有保障？【D的財富鏈】
+  - No transcript found or error: 
+Could not retrieve a transcript for the video https://www.youtube.com/watch?v=vnR8tTdl52c! This is most likely caused by:
+
+No transcripts were found for any of the requested language codes: ('en',)
+
+For this video (vnR8tTdl52c) transcripts are available in the following languages:
+
+(MANUALLY CREATED)
+ - zh ("Chinese")
+
+(GENERATED)
+None
+
+(TRANSLATION LANGUAGES)
+None
+
+If you are sure that the described cause is not responsible for this error and that a transcript should be retrievable, please create an issue at https://github.com/jdepoix/youtube-transcript-api/issues. Please add which version of youtube_transcript_api you are using and provide the information needed to replicate the error. Also make sure that there are no open issues which already describe your problem!
+    - Saved to DB.
+  - New Video found: [D's Wealth Chain] Wall Street says: The US stock market is about to crash! But I think: There's ...
+  - No transcript found or error: 
+Could not retrieve a transcript for the video https://www.youtube.com/watch?v=hTIEDpujnjY! This is most likely caused by:
+
+No transcripts were found for any of the requested language codes: ('en',)
+
+For this video (hTIEDpujnjY) transcripts are available in the following languages:
+
+(MANUALLY CREATED)
+ - zh ("Chinese")
+
+(GENERATED)
+None
+
+(TRANSLATION LANGUAGES)
+None
+
+If you are sure that the described cause is not responsible for this error and that a transcript should be retrievable, please create an issue at https://github.com/jdepoix/youtube-transcript-api/issues. Please add which version of youtube_transcript_api you are using and provide the information needed to replicate the error. Also make sure that there are no open issues which already describe your problem!
+    - Saved to DB.
+  - New Video found: 股票，價格合理！暴漲，潛力驚人！3支必投的“問題股”！【D的財富鏈】美股7巨頭，深度分析！(下集）TSLA META AMZN MSFT GOOG AAPL NVDA
+  - No transcript found or error: 
+Could not retrieve a transcript for the video https://www.youtube.com/watch?v=DfqBwEljp8k! This is most likely caused by:
+
+No transcripts were found for any of the requested language codes: ('en',)
+
+For this video (DfqBwEljp8k) transcripts are available in the following languages:
+
+(MANUALLY CREATED)
+ - zh ("Chinese")
+
+(GENERATED)
+None
+
+(TRANSLATION LANGUAGES)
+None
+
+If you are sure that the described cause is not responsible for this error and that a transcript should be retrievable, please create an issue at https://github.com/jdepoix/youtube-transcript-api/issues. Please add which version of youtube_transcript_api you are using and provide the information needed to replicate the error. Also make sure that there are no open issues which already describe your problem!
+    - Saved to DB.
+  - New Video found: 【必看】Nvidia被圍毆！美股7巨頭，估值，成長，基本面，深度分析！(上集）【D的財富鏈/MSFT/GOOG/AAPL/NVDA】
+  - No transcript found or error: 
+Could not retrieve a transcript for the video https://www.youtube.com/watch?v=cbgxBMz6YY8! This is most likely caused by:
+
+No transcripts were found for any of the requested language codes: ('en',)
+
+For this video (cbgxBMz6YY8) transcripts are available in the following languages:
+
+(MANUALLY CREATED)
+ - zh ("Chinese")
+
+(GENERATED)
+None
+
+(TRANSLATION LANGUAGES)
+None
+
+If you are sure that the described cause is not responsible for this error and that a transcript should be retrievable, please create an issue at https://github.com/jdepoix/youtube-transcript-api/issues. Please add which version of youtube_transcript_api you are using and provide the information needed to replicate the error. Also make sure that there are no open issues which already describe your problem!
+    - Saved to DB.
+Processing Channel: Tom Nash (UCJwKCyEIFHwUOPQQ-4kC1Zw)
+  - New Video found: IMPORTANT WARNING: A Once in a Lifetime Event is Coming
+  - No transcript found or error: 
+Could not retrieve a transcript for the video https://www.youtube.com/watch?v=OtxK0jWmJ68! This is most likely caused by:
+
+YouTube is blocking requests from your IP. This usually is due to one of the following reasons:
+- You have done too many requests and your IP has been blocked by YouTube
+- You are doing requests from an IP belonging to a cloud provider (like AWS, Google Cloud Platform, Azure, etc.). Unfortunately, most IPs from cloud providers are blocked by YouTube.
+
+Ways to work around this are explained in the "Working around IP bans" section of the README (https://github.com/jdepoix/youtube-transcript-api?tab=readme-ov-file#working-around-ip-bans-requestblocked-or-ipblocked-exception).
+
+
+If you are sure that the described cause is not responsible for this error and that a transcript should be retrievable, please create an issue at https://github.com/jdepoix/youtube-transcript-api/issues. Please add which version of youtube_transcript_api you are using and provide the information needed to replicate the error. Also make sure that there are no open issues which already describe your problem!
+    - Saved to DB.
+  - New Video found: IMPORTANT WARNING TO ALL INVESTORS
+  - No transcript found or error: 
+Could not retrieve a transcript for the video https://www.youtube.com/watch?v=Qr12GAXQ6_4! This is most likely caused by:
+
+YouTube is blocking requests from your IP. This usually is due to one of the following reasons:
+- You have done too many requests and your IP has been blocked by YouTube
+- You are doing requests from an IP belonging to a cloud provider (like AWS, Google Cloud Platform, Azure, etc.). Unfortunately, most IPs from cloud providers are blocked by YouTube.
+
+Ways to work around this are explained in the "Working around IP bans" section of the README (https://github.com/jdepoix/youtube-transcript-api?tab=readme-ov-file#working-around-ip-bans-requestblocked-or-ipblocked-exception).
+
+
+If you are sure that the described cause is not responsible for this error and that a transcript should be retrievable, please create an issue at https://github.com/jdepoix/youtube-transcript-api/issues. Please add which version of youtube_transcript_api you are using and provide the information needed to replicate the error. Also make sure that there are no open issues which already describe your problem!
+    - Saved to DB.
+  - New Video found: If you are an NVIDIA shareholder….GET READY
+  - No transcript found or error: 
+Could not retrieve a transcript for the video https://www.youtube.com/watch?v=lYxhEB2RfOU! This is most likely caused by:
+
+YouTube is blocking requests from your IP. This usually is due to one of the following reasons:
+- You have done too many requests and your IP has been blocked by YouTube
+- You are doing requests from an IP belonging to a cloud provider (like AWS, Google Cloud Platform, Azure, etc.). Unfortunately, most IPs from cloud providers are blocked by YouTube.
+
+Ways to work around this are explained in the "Working around IP bans" section of the README (https://github.com/jdepoix/youtube-transcript-api?tab=readme-ov-file#working-around-ip-bans-requestblocked-or-ipblocked-exception).
+
+
+If you are sure that the described cause is not responsible for this error and that a transcript should be retrievable, please create an issue at https://github.com/jdepoix/youtube-transcript-api/issues. Please add which version of youtube_transcript_api you are using and provide the information needed to replicate the error. Also make sure that there are no open issues which already describe your problem!
+    - Saved to DB.
+  - New Video found: IMPORTANT WARNING: A Once in a Lifetime Event is Coming
+  - No transcript found or error: 
+Could not retrieve a transcript for the video https://www.youtube.com/watch?v=cqbDJk6bdfg! This is most likely caused by:
+
+YouTube is blocking requests from your IP. This usually is due to one of the following reasons:
+- You have done too many requests and your IP has been blocked by YouTube
+- You are doing requests from an IP belonging to a cloud provider (like AWS, Google Cloud Platform, Azure, etc.). Unfortunately, most IPs from cloud providers are blocked by YouTube.
+
+Ways to work around this are explained in the "Working around IP bans" section of the README (https://github.com/jdepoix/youtube-transcript-api?tab=readme-ov-file#working-around-ip-bans-requestblocked-or-ipblocked-exception).
+
+
+If you are sure that the described cause is not responsible for this error and that a transcript should be retrievable, please create an issue at https://github.com/jdepoix/youtube-transcript-api/issues. Please add which version of youtube_transcript_api you are using and provide the information needed to replicate the error. Also make sure that there are no open issues which already describe your problem!
+    - Saved to DB.
+  - New Video found: Tom Lee: "Buy Stocks Right NOW Before It's Too Late!"
+  - No transcript found or error: 
+Could not retrieve a transcript for the video https://www.youtube.com/watch?v=ndvUsZP8DsI! This is most likely caused by:
+
+YouTube is blocking requests from your IP. This usually is due to one of the following reasons:
+- You have done too many requests and your IP has been blocked by YouTube
+- You are doing requests from an IP belonging to a cloud provider (like AWS, Google Cloud Platform, Azure, etc.). Unfortunately, most IPs from cloud providers are blocked by YouTube.
+
+Ways to work around this are explained in the "Working around IP bans" section of the README (https://github.com/jdepoix/youtube-transcript-api?tab=readme-ov-file#working-around-ip-bans-requestblocked-or-ipblocked-exception).
+
+
+If you are sure that the described cause is not responsible for this error and that a transcript should be retrievable, please create an issue at https://github.com/jdepoix/youtube-transcript-api/issues. Please add which version of youtube_transcript_api you are using and provide the information needed to replicate the error. Also make sure that there are no open issues which already describe your problem!
+    - Saved to DB.
+Processing Channel: Money or Life 美股频道 (UC9cfcOuTT9rYkyUimMjLxuw)
+Processing Channel: Daniel Pronk (UCL-F-8nxFtFZ4M3RWkGn6Qw)
+  - New Video found: 3 High Growth Stocks That Are Down Big - Are They Buys Now?
+  - No transcript found or error: 
+Could not retrieve a transcript for the video https://www.youtube.com/watch?v=bqIchGcIAG4! This is most likely caused by:
+
+YouTube is blocking requests from your IP. This usually is due to one of the following reasons:
+- You have done too many requests and your IP has been blocked by YouTube
+- You are doing requests from an IP belonging to a cloud provider (like AWS, Google Cloud Platform, Azure, etc.). Unfortunately, most IPs from cloud providers are blocked by YouTube.
+
+Ways to work around this are explained in the "Working around IP bans" section of the README (https://github.com/jdepoix/youtube-transcript-api?tab=readme-ov-file#working-around-ip-bans-requestblocked-or-ipblocked-exception).
+
+
+If you are sure that the described cause is not responsible for this error and that a transcript should be retrievable, please create an issue at https://github.com/jdepoix/youtube-transcript-api/issues. Please add which version of youtube_transcript_api you are using and provide the information needed to replicate the error. Also make sure that there are no open issues which already describe your problem!
+    - Saved to DB.
+  - New Video found: 3 Stocks I'm Buying As The Market Crashes
+  - No transcript found or error: 
+Could not retrieve a transcript for the video https://www.youtube.com/watch?v=oD5dQTzOjlM! This is most likely caused by:
+
+YouTube is blocking requests from your IP. This usually is due to one of the following reasons:
+- You have done too many requests and your IP has been blocked by YouTube
+- You are doing requests from an IP belonging to a cloud provider (like AWS, Google Cloud Platform, Azure, etc.). Unfortunately, most IPs from cloud providers are blocked by YouTube.
+
+Ways to work around this are explained in the "Working around IP bans" section of the README (https://github.com/jdepoix/youtube-transcript-api?tab=readme-ov-file#working-around-ip-bans-requestblocked-or-ipblocked-exception).
+
+
+If you are sure that the described cause is not responsible for this error and that a transcript should be retrievable, please create an issue at https://github.com/jdepoix/youtube-transcript-api/issues. Please add which version of youtube_transcript_api you are using and provide the information needed to replicate the error. Also make sure that there are no open issues which already describe your problem!
+    - Saved to DB.
+  - New Video found: How I pick stocks from start to finish - TD Investor Education Month Live Stream
+  - No transcript found or error: 
+Could not retrieve a transcript for the video https://www.youtube.com/watch?v=8sGM465H-oc! This is most likely caused by:
+
+YouTube is blocking requests from your IP. This usually is due to one of the following reasons:
+- You have done too many requests and your IP has been blocked by YouTube
+- You are doing requests from an IP belonging to a cloud provider (like AWS, Google Cloud Platform, Azure, etc.). Unfortunately, most IPs from cloud providers are blocked by YouTube.
+
+Ways to work around this are explained in the "Working around IP bans" section of the README (https://github.com/jdepoix/youtube-transcript-api?tab=readme-ov-file#working-around-ip-bans-requestblocked-or-ipblocked-exception).
+
+
+If you are sure that the described cause is not responsible for this error and that a transcript should be retrievable, please create an issue at https://github.com/jdepoix/youtube-transcript-api/issues. Please add which version of youtube_transcript_api you are using and provide the information needed to replicate the error. Also make sure that there are no open issues which already describe your problem!
+    - Saved to DB.
+  - New Video found: I Just Bought $5,000 Worth Of This Stock + Don't Miss This Opportunity
+  - No transcript found or error: 
+Could not retrieve a transcript for the video https://www.youtube.com/watch?v=k_dPTNmR0u8! This is most likely caused by:
+
+YouTube is blocking requests from your IP. This usually is due to one of the following reasons:
+- You have done too many requests and your IP has been blocked by YouTube
+- You are doing requests from an IP belonging to a cloud provider (like AWS, Google Cloud Platform, Azure, etc.). Unfortunately, most IPs from cloud providers are blocked by YouTube.
+
+Ways to work around this are explained in the "Working around IP bans" section of the README (https://github.com/jdepoix/youtube-transcript-api?tab=readme-ov-file#working-around-ip-bans-requestblocked-or-ipblocked-exception).
+
+
+If you are sure that the described cause is not responsible for this error and that a transcript should be retrievable, please create an issue at https://github.com/jdepoix/youtube-transcript-api/issues. Please add which version of youtube_transcript_api you are using and provide the information needed to replicate the error. Also make sure that there are no open issues which already describe your problem!
+    - Saved to DB.
+  - New Video found: Buy The Dip On META Stock? + Why CRWV Is Crashing Now
+  - No transcript found or error: 
+Could not retrieve a transcript for the video https://www.youtube.com/watch?v=GKtXZWCwFPQ! This is most likely caused by:
+
+YouTube is blocking requests from your IP. This usually is due to one of the following reasons:
+- You have done too many requests and your IP has been blocked by YouTube
+- You are doing requests from an IP belonging to a cloud provider (like AWS, Google Cloud Platform, Azure, etc.). Unfortunately, most IPs from cloud providers are blocked by YouTube.
+
+Ways to work around this are explained in the "Working around IP bans" section of the README (https://github.com/jdepoix/youtube-transcript-api?tab=readme-ov-file#working-around-ip-bans-requestblocked-or-ipblocked-exception).
+
+
+If you are sure that the described cause is not responsible for this error and that a transcript should be retrievable, please create an issue at https://github.com/jdepoix/youtube-transcript-api/issues. Please add which version of youtube_transcript_api you are using and provide the information needed to replicate the error. Also make sure that there are no open issues which already describe your problem!
+    - Saved to DB.
+Worker Finished.
+Worker finished.
+Starting YouTube RSS Worker...
+Starting Worker...
+Processing Channel: 美股咖啡館 (UCjrP2TtSTifuRJ76hW2IW1A)
+  - Video already exists: Chip bombshell: Google TPU success = Nvidia GPU failure?
+  - Video already exists: US stocks make a full recovery: What happened to sleeping in the park? | Google's market value ap...
+  - Video already exists: I bought into a company nobody's heard of: The whole process of finding hidden gem stocks reveale...
+  - Video already exists: Nvidia releases a set of outrageous figures: you'll be stunned! Why is Google's stock price hitti...
+  - Video already exists: For the first time, I'm publicly disclosing all my assets: What percentage is currently in cash? ...
+Processing Channel: Tom Nash (UCJwKCyEIFHwUOPQQ-4kC1Zw)
+  - Video already exists: IMPORTANT WARNING: A Once in a Lifetime Event is Coming
+  - Video already exists: IMPORTANT WARNING TO ALL INVESTORS
+  - Video already exists: If you are an NVIDIA shareholder….GET READY
+  - Video already exists: IMPORTANT WARNING: A Once in a Lifetime Event is Coming
+  - Video already exists: Tom Lee: "Buy Stocks Right NOW Before It's Too Late!"
+Processing Channel: Money or Life 美股频道 (UC9cfcOuTT9rYkyUimMjLxuw)
+  - New Video found: US stocks are experiencing a valuation correction, but don't be afraid, the road to investing is ...
+  - No transcript found or error: 
+Could not retrieve a transcript for the video https://www.youtube.com/watch?v=tS0gfjAoRPE! This is most likely caused by:
+
+No transcripts were found for any of the requested language codes: ('en',)
+
+For this video (tS0gfjAoRPE) transcripts are available in the following languages:
+
+(MANUALLY CREATED)
+ - zh ("Chinese")
+
+(GENERATED)
+None
+
+(TRANSLATION LANGUAGES)
+None
+
+If you are sure that the described cause is not responsible for this error and that a transcript should be retrievable, please create an issue at https://github.com/jdepoix/youtube-transcript-api/issues. Please add which version of youtube_transcript_api you are using and provide the information needed to replicate the error. Also make sure that there are no open issues which already describe your problem!
+    - Saved to DB.
+  - New Video found: After the sharp drop in RKLB's price, where is a reasonable price?
+  - No transcript found or error: 
+Could not retrieve a transcript for the video https://www.youtube.com/watch?v=vcsRao13wWg! This is most likely caused by:
+
+No transcripts were found for any of the requested language codes: ('en',)
+
+For this video (vcsRao13wWg) transcripts are available in the following languages:
+
+(MANUALLY CREATED)
+ - zh ("Chinese")
+
+(GENERATED)
+None
+
+(TRANSLATION LANGUAGES)
+None
+
+If you are sure that the described cause is not responsible for this error and that a transcript should be retrievable, please create an issue at https://github.com/jdepoix/youtube-transcript-api/issues. Please add which version of youtube_transcript_api you are using and provide the information needed to replicate the error. Also make sure that there are no open issues which already describe your problem!
+    - Saved to DB.
+  - New Video found: Three ticking time bombs looming over the Coreweave CRWV?
+  - No transcript found or error: 
+Could not retrieve a transcript for the video https://www.youtube.com/watch?v=nHOeGoPLO6g! This is most likely caused by:
+
+No transcripts were found for any of the requested language codes: ('en',)
+
+For this video (nHOeGoPLO6g) transcripts are available in the following languages:
+
+(MANUALLY CREATED)
+ - zh ("Chinese")
+
+(GENERATED)
+None
+
+(TRANSLATION LANGUAGES)
+None
+
+If you are sure that the described cause is not responsible for this error and that a transcript should be retrievable, please create an issue at https://github.com/jdepoix/youtube-transcript-api/issues. Please add which version of youtube_transcript_api you are using and provide the information needed to replicate the error. Also make sure that there are no open issues which already describe your problem!
+    - Saved to DB.
+  - New Video found: Have any of your stocks plummeted this week? If so, click here!
+  - No transcript found or error: 
+Could not retrieve a transcript for the video https://www.youtube.com/watch?v=Wqa-DtEd5qo! This is most likely caused by:
+
+No transcripts were found for any of the requested language codes: ('en',)
+
+For this video (Wqa-DtEd5qo) transcripts are available in the following languages:
+
+(MANUALLY CREATED)
+ - zh ("Chinese")
+
+(GENERATED)
+None
+
+(TRANSLATION LANGUAGES)
+None
+
+If you are sure that the described cause is not responsible for this error and that a transcript should be retrievable, please create an issue at https://github.com/jdepoix/youtube-transcript-api/issues. Please add which version of youtube_transcript_api you are using and provide the information needed to replicate the error. Also make sure that there are no open issues which already describe your problem!
+    - Saved to DB.
+  - New Video found: A dramatic fall from grace! Analysis of CIRCLE's 2025-Q3 financial report.
+  - No transcript found or error: 
+Could not retrieve a transcript for the video https://www.youtube.com/watch?v=q4Dg6M34q7Y! This is most likely caused by:
+
+No transcripts were found for any of the requested language codes: ('en',)
+
+For this video (q4Dg6M34q7Y) transcripts are available in the following languages:
+
+(MANUALLY CREATED)
+ - zh ("Chinese")
+
+(GENERATED)
+None
+
+(TRANSLATION LANGUAGES)
+None
+
+If you are sure that the described cause is not responsible for this error and that a transcript should be retrievable, please create an issue at https://github.com/jdepoix/youtube-transcript-api/issues. Please add which version of youtube_transcript_api you are using and provide the information needed to replicate the error. Also make sure that there are no open issues which already describe your problem!
+    - Saved to DB.
+Processing Channel: Joseph Carlson (UCbta0n8i6Rljh0obO7HzG9A)
+  - Video already exists: 6 Stocks To Buy In An Overvalued Market
+  - Video already exists: Top Five AI Stocks I'm Buying Now
+  - Video already exists: The Stock Market Is Overvalued, Here's What I'm Doing Now
+  - Video already exists: What I'm Buying And Selling In my $1.3 Million Portfolio
+  - Video already exists: I’m Buying $10,000 Of This Stock, Here’s Why
+Processing Channel: Joseph Carlson After Hours (UCfCT7SSFEWyG4th9ZmaGYqQ)
+  - Video already exists: Michael Burry & Ray Dalio Say The Market Is In A Huge Bubble
+  - Video already exists: I’m Buying $10,000 to $20,000 Of This Stock
+  - Video already exists: The World's Best Investor Just Bought Google
+  - Video already exists: 5 Beaten Down Companies To Buy Now
+  - Video already exists: Michael Burry Warns About The Stock Market Again
+Processing Channel: AI News &amp; Strategy Daily | Nate B Jones (UC0C-17n9iuUQPylguM1d-lQ)
+  - Video already exists: My Take on the Hard AI Questions: Jobs, Water, Artificial Romance, School Cheating & More
+  - Video already exists: AI Certifications Focus on Tools NOT Skills—Here's a Better Way
+  - Video already exists: Real World Testing: Opus 4.5 vs. Gemini 3 vs. ChatGPT 5.1
+  - Video already exists: Prompting is the Wild West: Here's the Prompt Lifecycle Guide + 19 Tools + a Demo
+  - Video already exists: Here's the 90 Slide 'AI Eats the World' Talk in 15 Minutes—Plus My Top Takeaways
+Processing Channel: Daniel Pronk (UCL-F-8nxFtFZ4M3RWkGn6Qw)
+  - Video already exists: 3 High Growth Stocks That Are Down Big - Are They Buys Now?
+  - Video already exists: 3 Stocks I'm Buying As The Market Crashes
+  - Video already exists: How I pick stocks from start to finish - TD Investor Education Month Live Stream
+  - Video already exists: I Can't Stop Buying This Stock + How To Think About Volatility
+  - Video already exists: Buy The Dip On META Stock? + Why CRWV Is Crashing Now
+Processing Channel: D的財富鏈 (UCVGYz_TsbJRiDykog88EFQg)
+  - Video already exists: 【警惕拐點】財報季大好，但AI股恐慌暴跌！這一切，背後的真相是什麼？Nvidia也救不了嗎？...【D的財富鏈/美股】
+  - Video already exists: 【注意】數據出問題，美股有危險！100%引起衰退的指標，被消失了？！AI引發失業潮！你該如何投資，才有保障？【D的財富鏈】
+  - Video already exists: [D's Wealth Chain] Wall Street says: The US stock market is about to crash! But I think: There's ...
+  - Video already exists: 股票，價格合理！暴漲，潛力驚人！3支必投的“問題股”！【D的財富鏈】美股7巨頭，深度分析！(下集）TSLA META AMZN MSFT GOOG AAPL NVDA
+  - Video already exists: 【必看】Nvidia被圍毆！美股7巨頭，估值，成長，基本面，深度分析！(上集）【D的財富鏈/MSFT/GOOG/AAPL/NVDA】
+Worker Finished.
+Worker finished.
+Starting YouTube RSS Worker...
+Starting Worker...
+Processing Channel: Money or Life 美股频道 (UC9cfcOuTT9rYkyUimMjLxuw)
+  - New Video found: US stocks are experiencing a valuation correction, but don't be afraid, the road to investing is ...
+  - No transcript found or error: 
+Could not retrieve a transcript for the video https://www.youtube.com/watch?v=tS0gfjAoRPE! This is most likely caused by:
+
+No transcripts were found for any of the requested language codes: ('en',)
+
+For this video (tS0gfjAoRPE) transcripts are available in the following languages:
+
+(MANUALLY CREATED)
+ - zh ("Chinese")
+
+(GENERATED)
+None
+
+(TRANSLATION LANGUAGES)
+None
+
+If you are sure that the described cause is not responsible for this error and that a transcript should be retrievable, please create an issue at https://github.com/jdepoix/youtube-transcript-api/issues. Please add which version of youtube_transcript_api you are using and provide the information needed to replicate the error. Also make sure that there are no open issues which already describe your problem!
+    - Saved to DB.
+  - New Video found: After the sharp drop in RKLB's price, where is a reasonable price?
+  - No transcript found or error: 
+Could not retrieve a transcript for the video https://www.youtube.com/watch?v=vcsRao13wWg! This is most likely caused by:
+
+No transcripts were found for any of the requested language codes: ('en',)
+
+For this video (vcsRao13wWg) transcripts are available in the following languages:
+
+(MANUALLY CREATED)
+ - zh ("Chinese")
+
+(GENERATED)
+None
+
+(TRANSLATION LANGUAGES)
+None
+
+If you are sure that the described cause is not responsible for this error and that a transcript should be retrievable, please create an issue at https://github.com/jdepoix/youtube-transcript-api/issues. Please add which version of youtube_transcript_api you are using and provide the information needed to replicate the error. Also make sure that there are no open issues which already describe your problem!
+    - Saved to DB.
+  - New Video found: Three ticking time bombs looming over the Coreweave CRWV?
+  - No transcript found or error: 
+Could not retrieve a transcript for the video https://www.youtube.com/watch?v=nHOeGoPLO6g! This is most likely caused by:
+
+No transcripts were found for any of the requested language codes: ('en',)
+
+For this video (nHOeGoPLO6g) transcripts are available in the following languages:
+
+(MANUALLY CREATED)
+ - zh ("Chinese")
+
+(GENERATED)
+None
+
+(TRANSLATION LANGUAGES)
+None
+
+If you are sure that the described cause is not responsible for this error and that a transcript should be retrievable, please create an issue at https://github.com/jdepoix/youtube-transcript-api/issues. Please add which version of youtube_transcript_api you are using and provide the information needed to replicate the error. Also make sure that there are no open issues which already describe your problem!
+    - Saved to DB.
+  - New Video found: Have any of your stocks plummeted this week? If so, click here!
+  - No transcript found or error: 
+Could not retrieve a transcript for the video https://www.youtube.com/watch?v=Wqa-DtEd5qo! This is most likely caused by:
+
+No transcripts were found for any of the requested language codes: ('en',)
+
+For this video (Wqa-DtEd5qo) transcripts are available in the following languages:
+
+(MANUALLY CREATED)
+ - zh ("Chinese")
+
+(GENERATED)
+None
+
+(TRANSLATION LANGUAGES)
+None
+
+If you are sure that the described cause is not responsible for this error and that a transcript should be retrievable, please create an issue at https://github.com/jdepoix/youtube-transcript-api/issues. Please add which version of youtube_transcript_api you are using and provide the information needed to replicate the error. Also make sure that there are no open issues which already describe your problem!
+    - Saved to DB.
+  - New Video found: A dramatic fall from grace! Analysis of CIRCLE's 2025-Q3 financial report.
+  - No transcript found or error: 
+Could not retrieve a transcript for the video https://www.youtube.com/watch?v=q4Dg6M34q7Y! This is most likely caused by:
+
+No transcripts were found for any of the requested language codes: ('en',)
+
+For this video (q4Dg6M34q7Y) transcripts are available in the following languages:
+
+(MANUALLY CREATED)
+ - zh ("Chinese")
+
+(GENERATED)
+None
+
+(TRANSLATION LANGUAGES)
+None
+
+If you are sure that the described cause is not responsible for this error and that a transcript should be retrievable, please create an issue at https://github.com/jdepoix/youtube-transcript-api/issues. Please add which version of youtube_transcript_api you are using and provide the information needed to replicate the error. Also make sure that there are no open issues which already describe your problem!
+    - Saved to DB.
+Processing Channel: Joseph Carlson (UCbta0n8i6Rljh0obO7HzG9A)
+  - Video already exists: 6 Stocks To Buy In An Overvalued Market
+  - Video already exists: Top Five AI Stocks I'm Buying Now
+  - Video already exists: The Stock Market Is Overvalued, Here's What I'm Doing Now
+  - Video already exists: What I'm Buying And Selling In my $1.3 Million Portfolio
+  - Video already exists: I’m Buying $10,000 Of This Stock, Here’s Why
+Processing Channel: 美股咖啡館 (UCjrP2TtSTifuRJ76hW2IW1A)
+  - New Video found: Chip bombshell: Google TPU success = Nvidia GPU failure?
+  - No transcript found or error: 
+Could not retrieve a transcript for the video https://www.youtube.com/watch?v=IAQa7QBq0Ro! This is most likely caused by:
+
+No transcripts were found for any of the requested language codes: ('en',)
+
+For this video (IAQa7QBq0Ro) transcripts are available in the following languages:
+
+(MANUALLY CREATED)
+ - zh ("Chinese")
+
+(GENERATED)
+None
+
+(TRANSLATION LANGUAGES)
+None
+
+If you are sure that the described cause is not responsible for this error and that a transcript should be retrievable, please create an issue at https://github.com/jdepoix/youtube-transcript-api/issues. Please add which version of youtube_transcript_api you are using and provide the information needed to replicate the error. Also make sure that there are no open issues which already describe your problem!
+    - Saved to DB.
+  - New Video found: US stocks make a full recovery: What happened to sleeping in the park? | Google's market value ap...
+  - No transcript found or error: 
+Could not retrieve a transcript for the video https://www.youtube.com/watch?v=kEbuObe0ZbM! This is most likely caused by:
+
+No transcripts were found for any of the requested language codes: ('en',)
+
+For this video (kEbuObe0ZbM) transcripts are available in the following languages:
+
+(MANUALLY CREATED)
+ - zh ("Chinese")
+
+(GENERATED)
+None
+
+(TRANSLATION LANGUAGES)
+None
+
+If you are sure that the described cause is not responsible for this error and that a transcript should be retrievable, please create an issue at https://github.com/jdepoix/youtube-transcript-api/issues. Please add which version of youtube_transcript_api you are using and provide the information needed to replicate the error. Also make sure that there are no open issues which already describe your problem!
+    - Saved to DB.
+  - New Video found: I bought into a company nobody's heard of: The whole process of finding hidden gem stocks reveale...
+  - No transcript found or error: 
+Could not retrieve a transcript for the video https://www.youtube.com/watch?v=rP3XOQGc-Fk! This is most likely caused by:
+
+No transcripts were found for any of the requested language codes: ('en',)
+
+For this video (rP3XOQGc-Fk) transcripts are available in the following languages:
+
+(MANUALLY CREATED)
+ - zh ("Chinese")
+
+(GENERATED)
+None
+
+(TRANSLATION LANGUAGES)
+None
+
+If you are sure that the described cause is not responsible for this error and that a transcript should be retrievable, please create an issue at https://github.com/jdepoix/youtube-transcript-api/issues. Please add which version of youtube_transcript_api you are using and provide the information needed to replicate the error. Also make sure that there are no open issues which already describe your problem!
+    - Saved to DB.
+  - New Video found: Nvidia releases a set of outrageous figures: you'll be stunned! Why is Google's stock price hitti...
+  - No transcript found or error: 
+Could not retrieve a transcript for the video https://www.youtube.com/watch?v=xxS57w5cBO8! This is most likely caused by:
+
+No transcripts were found for any of the requested language codes: ('en',)
+
+For this video (xxS57w5cBO8) transcripts are available in the following languages:
+
+(MANUALLY CREATED)
+ - zh ("Chinese")
+
+(GENERATED)
+None
+
+(TRANSLATION LANGUAGES)
+None
+
+If you are sure that the described cause is not responsible for this error and that a transcript should be retrievable, please create an issue at https://github.com/jdepoix/youtube-transcript-api/issues. Please add which version of youtube_transcript_api you are using and provide the information needed to replicate the error. Also make sure that there are no open issues which already describe your problem!
+    - Saved to DB.
+  - New Video found: For the first time, I'm publicly disclosing all my assets: What percentage is currently in cash? ...
+  - No transcript found or error: 
+Could not retrieve a transcript for the video https://www.youtube.com/watch?v=JnSAoCLKwGA! This is most likely caused by:
+
+No transcripts were found for any of the requested language codes: ('en',)
+
+For this video (JnSAoCLKwGA) transcripts are available in the following languages:
+
+(MANUALLY CREATED)
+ - zh ("Chinese")
+
+(GENERATED)
+None
+
+(TRANSLATION LANGUAGES)
+None
+
+If you are sure that the described cause is not responsible for this error and that a transcript should be retrievable, please create an issue at https://github.com/jdepoix/youtube-transcript-api/issues. Please add which version of youtube_transcript_api you are using and provide the information needed to replicate the error. Also make sure that there are no open issues which already describe your problem!
+    - Saved to DB.
+Processing Channel: Tom Nash (UCJwKCyEIFHwUOPQQ-4kC1Zw)
+  - New Video found: IMPORTANT WARNING: A Once in a Lifetime Event is Coming
+  - No transcript found or error: 
+Could not retrieve a transcript for the video https://www.youtube.com/watch?v=OtxK0jWmJ68! This is most likely caused by:
+
+YouTube is blocking requests from your IP. This usually is due to one of the following reasons:
+- You have done too many requests and your IP has been blocked by YouTube
+- You are doing requests from an IP belonging to a cloud provider (like AWS, Google Cloud Platform, Azure, etc.). Unfortunately, most IPs from cloud providers are blocked by YouTube.
+
+Ways to work around this are explained in the "Working around IP bans" section of the README (https://github.com/jdepoix/youtube-transcript-api?tab=readme-ov-file#working-around-ip-bans-requestblocked-or-ipblocked-exception).
+
+
+If you are sure that the described cause is not responsible for this error and that a transcript should be retrievable, please create an issue at https://github.com/jdepoix/youtube-transcript-api/issues. Please add which version of youtube_transcript_api you are using and provide the information needed to replicate the error. Also make sure that there are no open issues which already describe your problem!
+    - Saved to DB.
+  - New Video found: IMPORTANT WARNING TO ALL INVESTORS
+  - No transcript found or error: 
+Could not retrieve a transcript for the video https://www.youtube.com/watch?v=Qr12GAXQ6_4! This is most likely caused by:
+
+YouTube is blocking requests from your IP. This usually is due to one of the following reasons:
+- You have done too many requests and your IP has been blocked by YouTube
+- You are doing requests from an IP belonging to a cloud provider (like AWS, Google Cloud Platform, Azure, etc.). Unfortunately, most IPs from cloud providers are blocked by YouTube.
+
+Ways to work around this are explained in the "Working around IP bans" section of the README (https://github.com/jdepoix/youtube-transcript-api?tab=readme-ov-file#working-around-ip-bans-requestblocked-or-ipblocked-exception).
+
+
+If you are sure that the described cause is not responsible for this error and that a transcript should be retrievable, please create an issue at https://github.com/jdepoix/youtube-transcript-api/issues. Please add which version of youtube_transcript_api you are using and provide the information needed to replicate the error. Also make sure that there are no open issues which already describe your problem!
+    - Saved to DB.
+  - New Video found: If you are an NVIDIA shareholder….GET READY
+  - No transcript found or error: 
+Could not retrieve a transcript for the video https://www.youtube.com/watch?v=lYxhEB2RfOU! This is most likely caused by:
+
+YouTube is blocking requests from your IP. This usually is due to one of the following reasons:
+- You have done too many requests and your IP has been blocked by YouTube
+- You are doing requests from an IP belonging to a cloud provider (like AWS, Google Cloud Platform, Azure, etc.). Unfortunately, most IPs from cloud providers are blocked by YouTube.
+
+Ways to work around this are explained in the "Working around IP bans" section of the README (https://github.com/jdepoix/youtube-transcript-api?tab=readme-ov-file#working-around-ip-bans-requestblocked-or-ipblocked-exception).
+
+
+If you are sure that the described cause is not responsible for this error and that a transcript should be retrievable, please create an issue at https://github.com/jdepoix/youtube-transcript-api/issues. Please add which version of youtube_transcript_api you are using and provide the information needed to replicate the error. Also make sure that there are no open issues which already describe your problem!
+    - Saved to DB.
+  - New Video found: IMPORTANT WARNING: A Once in a Lifetime Event is Coming
+  - No transcript found or error: 
+Could not retrieve a transcript for the video https://www.youtube.com/watch?v=cqbDJk6bdfg! This is most likely caused by:
+
+YouTube is blocking requests from your IP. This usually is due to one of the following reasons:
+- You have done too many requests and your IP has been blocked by YouTube
+- You are doing requests from an IP belonging to a cloud provider (like AWS, Google Cloud Platform, Azure, etc.). Unfortunately, most IPs from cloud providers are blocked by YouTube.
+
+Ways to work around this are explained in the "Working around IP bans" section of the README (https://github.com/jdepoix/youtube-transcript-api?tab=readme-ov-file#working-around-ip-bans-requestblocked-or-ipblocked-exception).
+
+
+If you are sure that the described cause is not responsible for this error and that a transcript should be retrievable, please create an issue at https://github.com/jdepoix/youtube-transcript-api/issues. Please add which version of youtube_transcript_api you are using and provide the information needed to replicate the error. Also make sure that there are no open issues which already describe your problem!
+    - Saved to DB.
+  - New Video found: Tom Lee: "Buy Stocks Right NOW Before It's Too Late!"
+  - No transcript found or error: 
+Could not retrieve a transcript for the video https://www.youtube.com/watch?v=ndvUsZP8DsI! This is most likely caused by:
+
+YouTube is blocking requests from your IP. This usually is due to one of the following reasons:
+- You have done too many requests and your IP has been blocked by YouTube
+- You are doing requests from an IP belonging to a cloud provider (like AWS, Google Cloud Platform, Azure, etc.). Unfortunately, most IPs from cloud providers are blocked by YouTube.
+
+Ways to work around this are explained in the "Working around IP bans" section of the README (https://github.com/jdepoix/youtube-transcript-api?tab=readme-ov-file#working-around-ip-bans-requestblocked-or-ipblocked-exception).
+
+
+If you are sure that the described cause is not responsible for this error and that a transcript should be retrievable, please create an issue at https://github.com/jdepoix/youtube-transcript-api/issues. Please add which version of youtube_transcript_api you are using and provide the information needed to replicate the error. Also make sure that there are no open issues which already describe your problem!
+    - Saved to DB.
+Processing Channel: Joseph Carlson After Hours (UCfCT7SSFEWyG4th9ZmaGYqQ)
+  - Video already exists: Michael Burry & Ray Dalio Say The Market Is In A Huge Bubble
+  - Video already exists: I’m Buying $10,000 to $20,000 Of This Stock
+  - Video already exists: The World's Best Investor Just Bought Google
+  - Video already exists: 5 Beaten Down Companies To Buy Now
+  - Video already exists: Michael Burry Warns About The Stock Market Again
+Processing Channel: AI News &amp; Strategy Daily | Nate B Jones (UC0C-17n9iuUQPylguM1d-lQ)
+  - Video already exists: My Take on the Hard AI Questions: Jobs, Water, Artificial Romance, School Cheating & More
+  - Video already exists: AI Certifications Focus on Tools NOT Skills—Here's a Better Way
+  - Video already exists: Real World Testing: Opus 4.5 vs. Gemini 3 vs. ChatGPT 5.1
+  - Video already exists: Prompting is the Wild West: Here's the Prompt Lifecycle Guide + 19 Tools + a Demo
+  - Video already exists: Here's the 90 Slide 'AI Eats the World' Talk in 15 Minutes—Plus My Top Takeaways
+Processing Channel: Daniel Pronk (UCL-F-8nxFtFZ4M3RWkGn6Qw)
+  - New Video found: 3 High Growth Stocks That Are Down Big - Are They Buys Now?
+  - No transcript found or error: 
+Could not retrieve a transcript for the video https://www.youtube.com/watch?v=bqIchGcIAG4! This is most likely caused by:
+
+YouTube is blocking requests from your IP. This usually is due to one of the following reasons:
+- You have done too many requests and your IP has been blocked by YouTube
+- You are doing requests from an IP belonging to a cloud provider (like AWS, Google Cloud Platform, Azure, etc.). Unfortunately, most IPs from cloud providers are blocked by YouTube.
+
+Ways to work around this are explained in the "Working around IP bans" section of the README (https://github.com/jdepoix/youtube-transcript-api?tab=readme-ov-file#working-around-ip-bans-requestblocked-or-ipblocked-exception).
+
+
+If you are sure that the described cause is not responsible for this error and that a transcript should be retrievable, please create an issue at https://github.com/jdepoix/youtube-transcript-api/issues. Please add which version of youtube_transcript_api you are using and provide the information needed to replicate the error. Also make sure that there are no open issues which already describe your problem!
+    - Saved to DB.
+  - New Video found: 3 Stocks I'm Buying As The Market Crashes
+  - No transcript found or error: 
+Could not retrieve a transcript for the video https://www.youtube.com/watch?v=oD5dQTzOjlM! This is most likely caused by:
+
+YouTube is blocking requests from your IP. This usually is due to one of the following reasons:
+- You have done too many requests and your IP has been blocked by YouTube
+- You are doing requests from an IP belonging to a cloud provider (like AWS, Google Cloud Platform, Azure, etc.). Unfortunately, most IPs from cloud providers are blocked by YouTube.
+
+Ways to work around this are explained in the "Working around IP bans" section of the README (https://github.com/jdepoix/youtube-transcript-api?tab=readme-ov-file#working-around-ip-bans-requestblocked-or-ipblocked-exception).
+
+
+If you are sure that the described cause is not responsible for this error and that a transcript should be retrievable, please create an issue at https://github.com/jdepoix/youtube-transcript-api/issues. Please add which version of youtube_transcript_api you are using and provide the information needed to replicate the error. Also make sure that there are no open issues which already describe your problem!
+    - Saved to DB.
+  - New Video found: How I pick stocks from start to finish - TD Investor Education Month Live Stream
+  - No transcript found or error: 
+Could not retrieve a transcript for the video https://www.youtube.com/watch?v=8sGM465H-oc! This is most likely caused by:
+
+YouTube is blocking requests from your IP. This usually is due to one of the following reasons:
+- You have done too many requests and your IP has been blocked by YouTube
+- You are doing requests from an IP belonging to a cloud provider (like AWS, Google Cloud Platform, Azure, etc.). Unfortunately, most IPs from cloud providers are blocked by YouTube.
+
+Ways to work around this are explained in the "Working around IP bans" section of the README (https://github.com/jdepoix/youtube-transcript-api?tab=readme-ov-file#working-around-ip-bans-requestblocked-or-ipblocked-exception).
+
+
+If you are sure that the described cause is not responsible for this error and that a transcript should be retrievable, please create an issue at https://github.com/jdepoix/youtube-transcript-api/issues. Please add which version of youtube_transcript_api you are using and provide the information needed to replicate the error. Also make sure that there are no open issues which already describe your problem!
+    - Saved to DB.
+  - New Video found: I Just Bought $5,000 Worth Of This Stock + Don't Miss This Opportunity
+  - No transcript found or error: 
+Could not retrieve a transcript for the video https://www.youtube.com/watch?v=k_dPTNmR0u8! This is most likely caused by:
+
+YouTube is blocking requests from your IP. This usually is due to one of the following reasons:
+- You have done too many requests and your IP has been blocked by YouTube
+- You are doing requests from an IP belonging to a cloud provider (like AWS, Google Cloud Platform, Azure, etc.). Unfortunately, most IPs from cloud providers are blocked by YouTube.
+
+Ways to work around this are explained in the "Working around IP bans" section of the README (https://github.com/jdepoix/youtube-transcript-api?tab=readme-ov-file#working-around-ip-bans-requestblocked-or-ipblocked-exception).
+
+
+If you are sure that the described cause is not responsible for this error and that a transcript should be retrievable, please create an issue at https://github.com/jdepoix/youtube-transcript-api/issues. Please add which version of youtube_transcript_api you are using and provide the information needed to replicate the error. Also make sure that there are no open issues which already describe your problem!
+    - Saved to DB.
+  - New Video found: Buy The Dip On META Stock? + Why CRWV Is Crashing Now
+  - No transcript found or error: 
+Could not retrieve a transcript for the video https://www.youtube.com/watch?v=GKtXZWCwFPQ! This is most likely caused by:
+
+YouTube is blocking requests from your IP. This usually is due to one of the following reasons:
+- You have done too many requests and your IP has been blocked by YouTube
+- You are doing requests from an IP belonging to a cloud provider (like AWS, Google Cloud Platform, Azure, etc.). Unfortunately, most IPs from cloud providers are blocked by YouTube.
+
+Ways to work around this are explained in the "Working around IP bans" section of the README (https://github.com/jdepoix/youtube-transcript-api?tab=readme-ov-file#working-around-ip-bans-requestblocked-or-ipblocked-exception).
+
+
+If you are sure that the described cause is not responsible for this error and that a transcript should be retrievable, please create an issue at https://github.com/jdepoix/youtube-transcript-api/issues. Please add which version of youtube_transcript_api you are using and provide the information needed to replicate the error. Also make sure that there are no open issues which already describe your problem!
+    - Saved to DB.
+Processing Channel: D的財富鏈 (UCVGYz_TsbJRiDykog88EFQg)
+  - New Video found: 【警惕拐點】財報季大好，但AI股恐慌暴跌！這一切，背後的真相是什麼？Nvidia也救不了嗎？...【D的財富鏈/美股】
+  - No transcript found or error: 
+Could not retrieve a transcript for the video https://www.youtube.com/watch?v=rJqAYiADTkk! This is most likely caused by:
+
+No transcripts were found for any of the requested language codes: ('en',)
+
+For this video (rJqAYiADTkk) transcripts are available in the following languages:
+
+(MANUALLY CREATED)
+ - zh ("Chinese")
+
+(GENERATED)
+None
+
+(TRANSLATION LANGUAGES)
+None
+
+If you are sure that the described cause is not responsible for this error and that a transcript should be retrievable, please create an issue at https://github.com/jdepoix/youtube-transcript-api/issues. Please add which version of youtube_transcript_api you are using and provide the information needed to replicate the error. Also make sure that there are no open issues which already describe your problem!
+    - Saved to DB.
+  - New Video found: 【注意】數據出問題，美股有危險！100%引起衰退的指標，被消失了？！AI引發失業潮！你該如何投資，才有保障？【D的財富鏈】
+  - No transcript found or error: 
+Could not retrieve a transcript for the video https://www.youtube.com/watch?v=vnR8tTdl52c! This is most likely caused by:
+
+No transcripts were found for any of the requested language codes: ('en',)
+
+For this video (vnR8tTdl52c) transcripts are available in the following languages:
+
+(MANUALLY CREATED)
+ - zh ("Chinese")
+
+(GENERATED)
+None
+
+(TRANSLATION LANGUAGES)
+None
+
+If you are sure that the described cause is not responsible for this error and that a transcript should be retrievable, please create an issue at https://github.com/jdepoix/youtube-transcript-api/issues. Please add which version of youtube_transcript_api you are using and provide the information needed to replicate the error. Also make sure that there are no open issues which already describe your problem!
+    - Saved to DB.
+  - New Video found: [D's Wealth Chain] Wall Street says: The US stock market is about to crash! But I think: There's ...
+  - No transcript found or error: 
+Could not retrieve a transcript for the video https://www.youtube.com/watch?v=hTIEDpujnjY! This is most likely caused by:
+
+No transcripts were found for any of the requested language codes: ('en',)
+
+For this video (hTIEDpujnjY) transcripts are available in the following languages:
+
+(MANUALLY CREATED)
+ - zh ("Chinese")
+
+(GENERATED)
+None
+
+(TRANSLATION LANGUAGES)
+None
+
+If you are sure that the described cause is not responsible for this error and that a transcript should be retrievable, please create an issue at https://github.com/jdepoix/youtube-transcript-api/issues. Please add which version of youtube_transcript_api you are using and provide the information needed to replicate the error. Also make sure that there are no open issues which already describe your problem!
+    - Saved to DB.
+  - New Video found: 股票，價格合理！暴漲，潛力驚人！3支必投的“問題股”！【D的財富鏈】美股7巨頭，深度分析！(下集）TSLA META AMZN MSFT GOOG AAPL NVDA
+  - No transcript found or error: 
+Could not retrieve a transcript for the video https://www.youtube.com/watch?v=DfqBwEljp8k! This is most likely caused by:
+
+No transcripts were found for any of the requested language codes: ('en',)
+
+For this video (DfqBwEljp8k) transcripts are available in the following languages:
+
+(MANUALLY CREATED)
+ - zh ("Chinese")
+
+(GENERATED)
+None
+
+(TRANSLATION LANGUAGES)
+None
+
+If you are sure that the described cause is not responsible for this error and that a transcript should be retrievable, please create an issue at https://github.com/jdepoix/youtube-transcript-api/issues. Please add which version of youtube_transcript_api you are using and provide the information needed to replicate the error. Also make sure that there are no open issues which already describe your problem!
+    - Saved to DB.
+  - New Video found: 【必看】Nvidia被圍毆！美股7巨頭，估值，成長，基本面，深度分析！(上集）【D的財富鏈/MSFT/GOOG/AAPL/NVDA】
+  - No transcript found or error: 
+Could not retrieve a transcript for the video https://www.youtube.com/watch?v=cbgxBMz6YY8! This is most likely caused by:
+
+No transcripts were found for any of the requested language codes: ('en',)
+
+For this video (cbgxBMz6YY8) transcripts are available in the following languages:
+
+(MANUALLY CREATED)
+ - zh ("Chinese")
+
+(GENERATED)
+None
+
+(TRANSLATION LANGUAGES)
+None
+
+If you are sure that the described cause is not responsible for this error and that a transcript should be retrievable, please create an issue at https://github.com/jdepoix/youtube-transcript-api/issues. Please add which version of youtube_transcript_api you are using and provide the information needed to replicate the error. Also make sure that there are no open issues which already describe your problem!
+    - Saved to DB.
+Worker Finished.
+Worker finished.

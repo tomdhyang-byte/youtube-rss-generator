@@ -28,10 +28,10 @@ def get_db_connection():
 
 def fetch_transcript(video_id):
     try:
-        # Instantiate the API (required in this version)
+        # Instantiate the API
         api = YouTubeTranscriptApi()
-        # fetch returns the transcript list directly in this version
-        transcript_list = api.fetch(video_id)
+        # Use fetch with language priority: Chinese (Traditional, Simplified, Generic) then English
+        transcript_list = api.fetch(video_id, languages=['zh-TW', 'zh-Hant', 'zh-Hans', 'zh', 'en'])
         # Combine text
         full_text = " ".join([t.text for t in transcript_list])
         return full_text
