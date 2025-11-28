@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import ChannelManager from '@/components/ChannelManager';
+import { ThemeToggle } from '@/components/ThemeToggle';
 
 const prisma = new PrismaClient();
 
@@ -11,13 +12,16 @@ export default async function Home() {
   });
 
   return (
-    <main className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <main className="min-h-screen bg-gray-50 dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8 transition-colors duration-300">
+      <div className="absolute top-4 right-4">
+        <ThemeToggle />
+      </div>
       <div className="max-w-3xl mx-auto">
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">
+          <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">
             YouTube RSS Generator
           </h1>
-          <p className="text-gray-600">
+          <p className="text-gray-600 dark:text-gray-400">
             Generate AI-summarized RSS feeds for your favorite channels.
           </p>
         </div>

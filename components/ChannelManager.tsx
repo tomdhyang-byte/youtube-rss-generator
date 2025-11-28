@@ -63,14 +63,14 @@ export default function ChannelManager({ initialChannels }: { initialChannels: C
     return (
         <div className="space-y-8">
             {/* Add Channel Form */}
-            <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+            <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 transition-colors">
                 <form onSubmit={handleSubmit} className="flex gap-4">
                     <input
                         type="text"
                         value={url}
                         onChange={(e) => setUrl(e.target.value)}
                         placeholder="Paste YouTube Channel URL (e.g. https://youtube.com/@channel)"
-                        className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all text-black bg-white placeholder:text-gray-500"
+                        className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all text-black dark:text-white bg-white dark:bg-gray-700 placeholder:text-gray-500 dark:placeholder:text-gray-400"
                         disabled={loading}
                     />
                     <button
@@ -90,15 +90,15 @@ export default function ChannelManager({ initialChannels }: { initialChannels: C
             </div>
 
             {/* Channel List */}
-            <div className="grid gap-4">
+            <div className="flex flex-col items-center gap-4 w-full">
                 {initialChannels.map((channel) => (
-                    <div key={channel.id} className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex items-start justify-between group hover:border-blue-100 transition-all">
-                        <div className="flex-1">
-                            <h3 className="text-lg font-bold text-gray-900 mb-1">{channel.title}</h3>
-                            <p className="text-gray-500 text-sm line-clamp-2 mb-3">{channel.description}</p>
-                            <div className="flex items-center gap-4 text-xs text-gray-400">
+                    <div key={channel.id} className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 flex items-center justify-between group hover:border-blue-100 dark:hover:border-blue-900 transition-all w-full max-w-xl">
+                        <div className="flex-1 min-w-0">
+                            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-1">{channel.title}</h3>
+                            <p className="text-gray-500 dark:text-gray-400 text-sm line-clamp-2 mb-3">{channel.description}</p>
+                            <div className="flex items-center gap-4 text-xs text-gray-400 dark:text-gray-500">
                                 <span>Updated: {new Date(channel.last_updated).toLocaleDateString()}</span>
-                                <span className="font-mono bg-gray-100 px-2 py-0.5 rounded text-gray-500">ID: {channel.youtube_id}</span>
+                                <span className="font-mono bg-gray-100 dark:bg-gray-900 px-2 py-0.5 rounded text-gray-500 dark:text-gray-400">ID: {channel.youtube_id}</span>
                             </div>
                         </div>
 
