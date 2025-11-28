@@ -70,7 +70,7 @@ export default function ChannelManager({ initialChannels }: { initialChannels: C
                         value={url}
                         onChange={(e) => setUrl(e.target.value)}
                         placeholder="Paste YouTube Channel URL (e.g. https://youtube.com/@channel)"
-                        className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                        className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all text-black bg-white placeholder:text-gray-500"
                         disabled={loading}
                     />
                     <button
