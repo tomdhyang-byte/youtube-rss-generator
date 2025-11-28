@@ -1,36 +1,81 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Personal YouTube RSS Generator
 
-## Getting Started
+This project allows you to generate personal RSS feeds for YouTube channels with AI-powered summaries. It consists of a Next.js web interface and a Python background worker.
 
-First, run the development server:
+## Prerequisites
+
+Before you begin, ensure you have the following installed on your machine:
+
+1.  **Node.js** (v18 or later)
+2.  **Python** (v3.8 or later)
+3.  **PostgreSQL** (Running locally or accessible via URL)
+4.  **OpenAI API Key** (for generating summaries)
+
+## Installation
+
+1.  **Clone the repository:**
+    ```bash
+    git clone <your-repo-url>
+    cd youtube-rss-generator
+    ```
+
+2.  **Install Frontend Dependencies:**
+    ```bash
+    npm install
+    ```
+
+3.  **Install Backend Dependencies:**
+    ```bash
+    pip install -r requirements.txt
+    ```
+
+## Configuration
+
+1.  **Environment Variables:**
+    Copy the example environment file:
+    ```bash
+    cp .env.example .env
+    ```
+
+2.  **Edit `.env`:**
+    Open `.env` and fill in your details:
+    - `DATABASE_URL`: Your PostgreSQL connection string.
+    - `OPENAI_API_KEY`: Your OpenAI API key.
+
+3.  **Setup Database:**
+    Run the Prisma migration to create the database schema:
+    ```bash
+    npx prisma migrate dev
+    ```
+
+## Running the Application
+
+### 1. Start the Web Interface
+This runs the Next.js frontend at [http://localhost:3000](http://localhost:3000).
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 2. Start the Background Worker
+The worker fetches videos and generates summaries. You can run it manually or set up a cron job.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+**Manual Run:**
+```bash
+chmod +x run_worker.sh
+./run_worker.sh
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+**Automated Run (Cron):**
+To keep feeds updated, add this to your crontab (`crontab -e`):
+```bash
+0 * * * * cd /path/to/youtube-rss-generator && ./run_worker.sh >> worker.log 2>&1
+```
 
-## Learn More
+## Usage
 
-To learn more about Next.js, take a look at the following resources:
+See [USAGE.md](USAGE.md) for detailed usage instructions.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Deployment
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+This project is designed to be deployed on **Vercel** (frontend) with a separate worker process (e.g., on a VPS, Railway, or local server) for the Python script.

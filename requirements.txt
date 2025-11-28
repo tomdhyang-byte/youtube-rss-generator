@@ -1,0 +1,5 @@
+psycopg2-binary
+scrapetube
+youtube-transcript-api
+openai
+python-dotenv
