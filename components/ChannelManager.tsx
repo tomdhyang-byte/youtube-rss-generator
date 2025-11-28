@@ -60,6 +60,12 @@ export default function ChannelManager({ initialChannels }: { initialChannels: C
         alert('RSS Link copied to clipboard!');
     };
 
+    const decodeHtml = (html: string) => {
+        const txt = document.createElement('textarea');
+        txt.innerHTML = html;
+        return txt.value;
+    };
+
     return (
         <div className="space-y-8">
             {/* Add Channel Form */}
@@ -94,11 +100,10 @@ export default function ChannelManager({ initialChannels }: { initialChannels: C
                 {initialChannels.map((channel) => (
                     <div key={channel.id} className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 flex items-center justify-between group hover:border-blue-100 dark:hover:border-blue-900 transition-all w-full max-w-xl">
                         <div className="flex-1 min-w-0">
-                            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-1">{channel.title}</h3>
-                            <p className="text-gray-500 dark:text-gray-400 text-sm line-clamp-2 mb-3">{channel.description}</p>
+                            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-1">{decodeHtml(channel.title)}</h3>
+                            <p className="text-gray-500 dark:text-gray-400 text-sm line-clamp-2 mb-3">{channel.description ? decodeHtml(channel.description) : ''}</p>
                             <div className="flex items-center gap-4 text-xs text-gray-400 dark:text-gray-500">
                                 <span>Updated: {new Date(channel.last_updated).toLocaleDateString()}</span>
-                                <span className="font-mono bg-gray-100 dark:bg-gray-900 px-2 py-0.5 rounded text-gray-500 dark:text-gray-400">ID: {channel.youtube_id}</span>
                             </div>
                         </div>
 
