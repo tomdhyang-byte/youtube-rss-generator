@@ -35,8 +35,14 @@ export default function ChannelManager({ initialChannels }: { initialChannels: C
             });
 
             if (!res.ok) {
-                const data = await res.json();
-                throw new Error(data.error || 'Failed to add channel');
+                const contentType = res.headers.get('content-type');
+                if (contentType && contentType.includes('application/json')) {
+                    const data = await res.json();
+                    throw new Error(data.error || 'Failed to add channel');
+                } else {
+                    const text = await res.text();
+                    throw new Error(`Server Error (${res.status}): ${text}`);
+                }
             }
 
             setUrl('');
