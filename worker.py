@@ -2,6 +2,7 @@ import psycopg2
 from psycopg2.extras import RealDictCursor
 import os
 import time
+import random
 from datetime import datetime
 import scrapetube
 from youtube_transcript_api import YouTubeTranscriptApi
@@ -157,8 +158,10 @@ def process_channel(conn, channel):
         conn.commit()
         print("    - Saved to DB.")
         
-        # Polite delay to avoid IP blocks
-        time.sleep(5) # Wait 5 seconds between videos
+        # Polite delay to avoid IP blocks - random 5-10 seconds with jitter
+        delay = random.uniform(5, 10)
+        print(f"    - Waiting {delay:.1f} seconds before next video...")
+        time.sleep(delay)
 
     # Update channel last_updated
     cursor = conn.cursor()
