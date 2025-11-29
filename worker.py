@@ -144,7 +144,7 @@ def process_youtube_channel(conn, channel):
                  if new_title:
                      print(f"    - Found real channel title: {new_title}")
                      cursor = conn.cursor()
-                     cursor.execute("UPDATE \"Channel\" SET title = %s, description = %s WHERE id = %s", 
+                     cursor.execute("UPDATE \"YoutubeChannel\" SET title = %s, description = %s WHERE id = %s", 
                                   (new_title, "Updated by worker", channel_id))
                      conn.commit()
                      channel_title = new_title 
@@ -153,7 +153,7 @@ def process_youtube_channel(conn, channel):
         first_video = False
         
         cursor = conn.cursor(cursor_factory=RealDictCursor)
-        cursor.execute("SELECT id FROM \"Video\" WHERE youtube_video_id = %s", (video_id,))
+        cursor.execute("SELECT id FROM \"YoutubeVideo\" WHERE youtube_video_id = %s", (video_id,))
         if cursor.fetchone():
             print(f"    - Video already exists, skipping.")
             continue
@@ -172,7 +172,7 @@ def process_youtube_channel(conn, channel):
         published_at = datetime.now()
 
         cursor.execute(
-            "INSERT INTO \"Video\" (youtube_video_id, channel_id, title, summary, published_at) VALUES (%s, %s, %s, %s, %s)",
+            "INSERT INTO \"YoutubeVideo\" (youtube_video_id, channel_id, title, summary, published_at) VALUES (%s, %s, %s, %s, %s)",
             (video_id, channel_id, title, summary, published_at)
         )
         conn.commit()
@@ -183,7 +183,7 @@ def process_youtube_channel(conn, channel):
         time.sleep(delay)
 
     cursor = conn.cursor()
-    cursor.execute("UPDATE \"Channel\" SET last_updated = %s WHERE id = %s", (datetime.now(), channel_id))
+    cursor.execute("UPDATE \"YoutubeChannel\" SET last_updated = %s WHERE id = %s", (datetime.now(), channel_id))
     conn.commit()
 
 # --- Podcast Logic ---
@@ -320,7 +320,7 @@ def main():
     try:
         # 1. Process YouTube Channels
         cursor = conn.cursor(cursor_factory=RealDictCursor)
-        cursor.execute("SELECT * FROM \"Channel\"")
+        cursor.execute("SELECT * FROM \"YoutubeChannel\"")
         channels = cursor.fetchall()
         for channel in channels:
             process_youtube_channel(conn, channel)

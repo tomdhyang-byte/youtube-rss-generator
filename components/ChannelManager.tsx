@@ -7,13 +7,13 @@ import { toast } from 'sonner';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 // Define types based on the Prisma model
-type Channel = {
+interface YoutubeChannel {
     id: number;
     youtube_id: string;
     title: string;
     description: string | null;
     rss_url: string | null;
-    last_updated: Date;
+    last_updated: string;
 };
 
 type PodcastChannel = {
@@ -26,13 +26,15 @@ type PodcastChannel = {
     last_updated: Date;
 };
 
+interface ChannelManagerProps {
+    initialChannels: YoutubeChannel[];
+    initialPodcasts: PodcastChannel[];
+}
+
 export default function ChannelManager({
     initialChannels,
     initialPodcasts
-}: {
-    initialChannels: Channel[],
-    initialPodcasts: PodcastChannel[]
-}) {
+}: ChannelManagerProps) {
     const [url, setUrl] = useState('');
     const [podcastUrl, setPodcastUrl] = useState('');
     const [loading, setLoading] = useState(false);

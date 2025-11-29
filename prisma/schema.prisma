@@ -8,24 +8,24 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
-model Channel {
-  id           Int      @id @default(autoincrement())
-  youtube_id   String   @unique
+model YoutubeChannel {
+  id           Int            @id @default(autoincrement())
+  youtube_id   String         @unique
   title        String
   description  String?
   rss_url      String?
-  last_updated DateTime @default(now())
-  videos       Video[]
+  last_updated DateTime       @default(now())
+  videos       YoutubeVideo[]
 }
 
-model Video {
-  id                Int      @id @default(autoincrement())
-  youtube_video_id  String   @unique
-  channel_id        Int
-  channel           Channel  @relation(fields: [channel_id], references: [id])
-  title             String
-  summary           String
-  published_at      DateTime
+model YoutubeVideo {
+  id               Int            @id @default(autoincrement())
+  youtube_video_id String         @unique
+  channel_id       Int
+  channel          YoutubeChannel @relation(fields: [channel_id], references: [id])
+  title            String
+  summary          String
+  published_at     DateTime
 }
 
 model PodcastChannel {

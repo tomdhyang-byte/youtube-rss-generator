@@ -9,7 +9,7 @@ export default async function Home() {
   let podcasts: any[] = [];
 
   try {
-    channels = await prisma.channel.findMany({
+    channels = await prisma.youtubeChannel.findMany({
       orderBy: { last_updated: 'desc' },
     });
 

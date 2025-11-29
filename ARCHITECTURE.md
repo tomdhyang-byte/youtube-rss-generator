@@ -1,7 +1,7 @@
 # Personal YouTube RSS Generator - Architecture Overview
 
 ## 🎯 Project Purpose
-A self-hosted web application that generates AI-summarized RSS feeds from YouTube channels. Users subscribe to channels via a web interface, a background worker fetches video transcripts, generates AI summaries, and serves them as RSS feeds.
+A self-hosted web application that generates AI-summarized RSS feeds from YouTube channels and Podcasts. Users subscribe to channels/podcasts via a web interface, a background worker fetches content (video transcripts or audio transcripts), generates AI summaries, and serves them as RSS feeds.
 
 ---
 
@@ -14,9 +14,12 @@ youtube-rss-generator/
 │   ├── layout.tsx                # Root layout with theme provider
 │   ├── globals.css               # Global styles (Tailwind)
 │   ├── api/
-│   │   └── channels/route.ts     # API: Add/list channels
+│   │   ├── channels/route.ts     # API: Add/list YouTube channels
+│   │   └── podcasts/route.ts     # API: Add/list Podcasts
 │   └── feed/
-│       └── [channelId]/route.ts  # API: Generate RSS feed
+│       ├── [channelId]/route.ts  # API: Generate YouTube RSS feed
+│       └── podcast/
+│           └── [podcastId]/route.ts # API: Generate Podcast RSS feed
 │
 ├── components/                   # React components
 │   ├── ChannelManager.tsx        # Channel list & add form
@@ -106,29 +109,60 @@ youtube-rss-generator/
 
 ## 🗄️ Database Schema (`prisma/schema.prisma`)
 
-### **Channel** Table
+### **YoutubeChannel** Table
 ```prisma
-model Channel {
-  id            Int       @id @default(autoincrement())
-  youtube_id    String    @unique
-  title         String
-  description   String?
-  rss_url       String?
-  last_updated  DateTime  @default(now())
-  videos        Video[]
+model YoutubeChannel {
+  id           Int            @id @default(autoincrement())
+  youtube_id   String         @unique
+  title        String
+  description  String?
+  rss_url      String?
+  last_updated DateTime       @default(now())
+  videos       YoutubeVideo[]
 }
 ```
 
-### **Video** Table
+### **YoutubeVideo** Table
 ```prisma
-model Video {
-  id                Int       @id @default(autoincrement())
-  youtube_video_id  String    @unique
-  channel_id        Int
-  title             String
-  summary           String    @db.Text
-  published_at      DateTime
-  channel           Channel   @relation(fields: [channel_id], references: [id])
+model YoutubeVideo {
+  id               Int            @id @default(autoincrement())
+  youtube_video_id String         @unique
+  channel_id       Int
+  channel          YoutubeChannel @relation(fields: [channel_id], references: [id])
+  title            String
+  summary          String
+  published_at     DateTime
+}
+```
+
+### **PodcastChannel** Table
+```prisma
+model PodcastChannel {
+  id           Int              @id @default(autoincrement())
+  feed_url     String           @unique
+  title        String?
+  description  String?
+  site_url     String?
+  image_url    String?
+  last_updated DateTime         @default(now())
+  episodes     PodcastEpisode[]
+}
+```
+
+### **PodcastEpisode** Table
+```prisma
+model PodcastEpisode {
+  id           Int            @id @default(autoincrement())
+  podcast_id   Int
+  podcast      PodcastChannel @relation(fields: [podcast_id], references: [id])
+  guid         String
+  title        String
+  audio_url    String
+  transcript   String?        @db.Text
+  summary      String?        @db.Text
+  published_at DateTime
+
+  @@unique([podcast_id, guid])
 }
 ```
 

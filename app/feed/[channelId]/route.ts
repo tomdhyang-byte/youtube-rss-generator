@@ -14,7 +14,7 @@ export async function GET(
             return new NextResponse('Invalid Channel ID', { status: 400 });
         }
 
-        const channel = await prisma.channel.findUnique({
+        const channel = await prisma.youtubeChannel.findUnique({
             where: { id: channelId },
             include: {
                 videos: {

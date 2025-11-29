@@ -100,7 +100,7 @@ export async function POST(request: Request) {
 
         // 4. Save to DB
         console.log('[API] Saving to DB...');
-        const channel = await prisma.channel.upsert({
+        const channel = await prisma.youtubeChannel.upsert({
             where: { youtube_id: channelId },
             update: {
                 // Only update title/desc if we actually got them, otherwise keep existing
