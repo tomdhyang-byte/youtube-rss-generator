@@ -1,8 +1,6 @@
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '@/lib/prisma';
 import ChannelManager from '@/components/ChannelManager';
 import { ThemeToggle } from '@/components/ThemeToggle';
-
-const prisma = new PrismaClient();
 
 export const dynamic = 'force-dynamic';
 
