@@ -36,6 +36,12 @@ export async function GET(
             image_url: channel.avatar_url || '', // Use channel avatar from YouTube
             language: 'en',
             pubDate: channel.last_updated,
+            custom_namespaces: {
+                'itunes': 'http://www.itunes.com/dtds/podcast-1.0.dtd'
+            },
+            custom_elements: channel.avatar_url ? [
+                { 'itunes:image': { _attr: { href: channel.avatar_url } } }
+            ] : []
         });
 
         channel.videos.forEach((video: any) => {
