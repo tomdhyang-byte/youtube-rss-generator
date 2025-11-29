@@ -14,8 +14,10 @@ youtube-rss-generator/
 │   ├── layout.tsx                # Root layout with theme provider
 │   ├── globals.css               # Global styles (Tailwind)
 │   ├── api/
+│   │   ├── auth/[...nextauth]/   # NextAuth.js API routes
 │   │   ├── channels/route.ts     # API: Add/list YouTube channels
-│   │   └── podcasts/route.ts     # API: Add/list Podcasts
+│   │   ├── podcasts/route.ts     # API: Add/list Podcasts
+│   │   └── subscriptions/        # API: Manage user subscriptions
 │   └── feed/
 │       ├── [channelId]/route.ts  # API: Generate YouTube RSS feed
 │       └── podcast/
@@ -23,13 +25,18 @@ youtube-rss-generator/
 │
 ├── components/                   # React components
 │   ├── ChannelManager.tsx        # Channel list & add form
+│   ├── AuthButton.tsx            # Login/Logout/Switch Account button
 │   ├── ThemeProvider.tsx         # Dark mode context
 │   └── ThemeToggle.tsx           # Dark mode toggle button
 │
 ├── prisma/
 │   └── schema.prisma             # Database schema (PostgreSQL)
 │
-├── middleware.ts                 # HTTP Basic Auth (excludes /feed)
+├── lib/
+│   ├── auth.ts                   # Auth helpers (getSession, isAdmin)
+│   └── prisma.ts                 # Prisma Client singleton
+│
+├── middleware.ts                 # NextAuth middleware (protects routes)
 ├── worker.py                     # Python worker (fetch + summarize)
 ├── run_worker.sh                 # Shell script to run worker
 ├── requirements.txt              # Python dependencies
@@ -46,123 +53,112 @@ youtube-rss-generator/
 #### `app/page.tsx`
 - **Purpose**: Main entry point for the web interface
 - **Logic**:
-  - Fetches all channels from PostgreSQL via Prisma
-  - Renders `<ChannelManager>` with channel data
-  - Includes `<ThemeToggle>` for dark mode
+  - Handles authentication state (loading, unauthenticated, authenticated)
+  - Fetches user subscriptions from `/api/subscriptions`
+  - Renders `<ChannelManager>` with subscription data
+  - Includes `<AuthButton>` for Google Sign-In
 
 #### `components/ChannelManager.tsx`
-- **Purpose**: UI for adding channels and displaying subscriptions
+- **Purpose**: UI for adding channels/podcasts and displaying subscriptions
 - **Key Features**:
-  - Input field for YouTube channel URLs
-  - Calls `/api/channels` POST to add new channels
-  - Displays list of channels with:
-    - Channel title & description
-    - Last updated timestamp
+  - Input fields for YouTube channel and Podcast URLs
+  - Calls `/api/channels` or `/api/podcasts` POST to add new content
+  - Displays list of subscriptions with:
+    - Title, description, last updated timestamp
     - Copy RSS link button
-    - Link to original YouTube channel
-  - **HTML Entity Handling**: Uses `decodeHtml()` to fix `&amp;` → `&`
-  - **Responsive**: Dark mode support, centered cards with text truncation
+    - Unsubscribe button
+  - **Quota Management**: Checks user quota (Admin vs Regular)
+  - **Responsive**: Dark mode support, centered cards
 
-#### `app/api/channels/route.ts`
-- **POST**: Extracts YouTube channel ID from URL, saves to DB
-- **GET**: Returns all channels ordered by `last_updated`
-
-#### `app/feed/[channelId]/route.ts`
-- **Purpose**: Generates RSS XML for a specific channel
-- **Logic**:
-  1. Queries channel + videos from DB (latest 20)
-  2. Builds RSS feed using `rss` package
-  3. Sets `Cache-Control: no-store` to prevent stale feeds
-  4. Returns XML with AI summaries as descriptions
+#### `app/api/auth/[...nextauth]/route.ts`
+- **Purpose**: NextAuth.js configuration
+- **Providers**: Google OAuth
+- **Adapter**: Prisma Adapter (stores users/sessions in DB)
+- **Callbacks**: Custom session callback to include `user.id`
 
 #### `middleware.ts`
-- **Purpose**: HTTP Basic Auth for the web interface
-- **Whitelist**:
-  - `/feed/*` → Public (for RSS readers)
-  - `/_next/*`, `/favicon.ico` → Public
-  - Everything else → Protected by `AUTH_PASSWORD`
+- **Purpose**: Protects API routes
+- **Logic**:
+  - Public: `/feed/*`, `/_next/*`, `/favicon.ico`
+  - Protected: `/api/channels`, `/api/podcasts`, `/api/subscriptions`
 
 ---
 
 ### **Backend (Python Worker)**
 
 #### `worker.py`
-- **Purpose**: Fetches new videos, generates AI summaries, saves to DB
+- **Purpose**: Fetches new videos/episodes, generates AI summaries, saves to DB
 - **Flow**:
-  1. **Fetch Videos**: Uses `scrapetube` to get latest 3 videos per channel
-  2. **Fetch Transcript**: `YouTubeTranscriptApi.fetch()` with language priority:
-     - `['zh-TW', 'zh-Hant', 'zh-Hans', 'zh', 'en']`
-  3. **Generate Summary**: Calls OpenAI GPT-4o with custom prompt (繁體中文)
-     - Prompt designed for **detailed, structured summaries** with:
-       - 🎯 核心主旨 (Executive Summary)
-       - 🔑 關鍵洞察 (Key Insights with bullet points)
-       - 💡 結論 (Action Items)
-  4. **Save to DB**: Inserts new videos with summaries
-  5. **Rate Limiting**: Random delay 5-10 seconds between videos to avoid IP bans
-- **Error Handling**: Saves "No transcript available." if fetch fails
-
-#### `run_worker.sh`
-- Dynamically detects Python executable (virtualenv or system)
-- Executes `worker.py`
+  1. **Fetch Content**:
+     - **YouTube**: Uses `scrapetube` to get latest 3 videos
+     - **Podcast**: Uses `feedparser` to get latest 3 episodes
+  2. **Fetch Transcript**:
+     - **YouTube**: `YouTubeTranscriptApi.fetch()`
+     - **Podcast**: `Deepgram API` (nova-2 model) for audio transcription
+  3. **Generate Summary**: Calls OpenAI GPT-4o-mini with custom prompt (繁體中文)
+     - **YouTube Prompt**: Focuses on visual content and key insights
+     - **Podcast Prompt**: Focuses on dialogue, speakers, and key topics
+  4. **Save to DB**: Inserts new content into `youtube_videos` or `podcast_episodes`
+  5. **Rate Limiting**: Random delay 5-10 seconds to avoid IP bans
+- **Database Access**: Uses raw SQL (`psycopg2`) with **snake_case** table names
 
 ---
 
 ## 🗄️ Database Schema (`prisma/schema.prisma`)
 
-### **YoutubeChannel** Table
+**Naming Convention**: `snake_case` for tables and columns in DB, `camelCase` in Prisma Client.
+
+### **Auth Tables (NextAuth)**
+- `users`: User profiles (name, email, image)
+- `accounts`: OAuth provider links (Google)
+- `sessions`: Login sessions
+- `verification_tokens`: (Not used for OAuth but present)
+
+### **Content Tables**
+
+#### `youtube_channels`
 ```prisma
 model YoutubeChannel {
-  id           Int            @id @default(autoincrement())
-  youtube_id   String         @unique
+  id           Int      @id @default(autoincrement())
+  youtube_id   String   @unique
   title        String
   description  String?
   rss_url      String?
-  last_updated DateTime       @default(now())
-  videos       YoutubeVideo[]
+  last_updated DateTime @default(now())
+  // Relations...
+  @@map("youtube_channels")
 }
 ```
 
-### **YoutubeVideo** Table
+#### `youtube_videos`
 ```prisma
 model YoutubeVideo {
   id               Int            @id @default(autoincrement())
   youtube_video_id String         @unique
   channel_id       Int
-  channel          YoutubeChannel @relation(fields: [channel_id], references: [id])
   title            String
   summary          String
   published_at     DateTime
+  // Relations...
+  @@map("youtube_videos")
 }
 ```
 
-### **PodcastChannel** Table
-```prisma
-model PodcastChannel {
-  id           Int              @id @default(autoincrement())
-  feed_url     String           @unique
-  title        String?
-  description  String?
-  site_url     String?
-  image_url    String?
-  last_updated DateTime         @default(now())
-  episodes     PodcastEpisode[]
-}
-```
+#### `podcast_channels` & `podcast_episodes`
+Similar structure to YouTube tables, mapped to `podcast_channels` and `podcast_episodes`.
 
-### **PodcastEpisode** Table
-```prisma
-model PodcastEpisode {
-  id           Int            @id @default(autoincrement())
-  podcast_id   Int
-  podcast      PodcastChannel @relation(fields: [podcast_id], references: [id])
-  guid         String
-  title        String
-  audio_url    String
-  transcript   String?        @db.Text
-  summary      String?        @db.Text
-  published_at DateTime
+### **Subscription Tables**
 
-  @@unique([podcast_id, guid])
+#### `youtube_subscriptions`
+```prisma
+model YoutubeSubscription {
+  id        Int      @id @default(autoincrement())
+  userId    String   @map("user_id")
+  channelId Int      @map("channel_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  // Relations...
+  @@unique([userId, channelId])
+  @@map("youtube_subscriptions")
 }
 ```
 
@@ -170,11 +166,17 @@ model PodcastEpisode {
 
 ## 🔧 Environment Variables (`.env`)
 
-| Variable            | Purpose                                  |
-|---------------------|------------------------------------------|
-| `DATABASE_URL`      | PostgreSQL connection string             |
-| `OPENAI_API_KEY`    | OpenAI API key for GPT summaries        |
-| `AUTH_PASSWORD`     | HTTP Basic Auth password (user: `admin`)|
+| Variable | Purpose |
+|---|---|
+| `DATABASE_URL` | PostgreSQL connection string |
+| `OPENAI_API_KEY` | OpenAI API key for GPT summaries |
+| `DEEPGRAM_API_KEY` | Deepgram API key for Podcast transcription |
+| `NEXTAUTH_URL` | Canonical URL of the site (e.g. https://your-domain.com) |
+| `NEXTAUTH_SECRET` | Secret key for session encryption |
+| `GOOGLE_CLIENT_ID` | Google OAuth Client ID |
+| `GOOGLE_CLIENT_SECRET` | Google OAuth Client Secret |
+| `ADMIN_EMAIL` | Email address for Admin privileges (Backend check) |
+| `NEXT_PUBLIC_ADMIN_EMAIL` | Email address for Admin badge (Frontend check) |
 
 ---
 
@@ -183,61 +185,30 @@ model PodcastEpisode {
 ### **Web App (Vercel)**
 - **Platform**: Vercel
 - **Auto-deploy**: Pushes to GitHub `main` branch trigger deployments
-- **Database**: PostgreSQL (external, e.g., Neon, Supabase)
+- **Database**: PostgreSQL (Supabase/Neon)
+- **Environment**: Requires all variables listed above to be set in Vercel Dashboard
 
 ### **Worker Automation**
 - **Method**: Crontab on local machine or server
-- **Example Schedule** (every 2, 6, 12, 14, 18, 20, 22:00):
+- **Example Schedule**:
   ```bash
   0 6,12,14,18,20,22 * * * cd /path/to/project && ./run_worker.sh >> cron_log.txt 2>&1
   ```
-- **Important**: Avoid running too frequently to prevent YouTube IP bans
 
 ---
 
 ## 🛠️ Tech Stack
 
-| Layer          | Technology                          |
-|----------------|-------------------------------------|
-| Frontend       | Next.js 16, React, TypeScript       |
-| Styling        | Tailwind CSS v4, Dark Mode          |
-| Database       | PostgreSQL + Prisma ORM             |
-| Worker         | Python 3.8+                         |
-| Transcript API | `youtube-transcript-api`            |
-| Video Fetcher  | `scrapetube`                        |
-| AI Summarizer  | OpenAI GPT-4o                       |
-| RSS Generator  | `rss` (npm)                         |
-| Auth           | Custom HTTP Basic Auth middleware   |
-
----
-
-## 🧑‍💻 Collaboration Notes
-
-### **For Frontend Work**
-- **Main Files**: `components/ChannelManager.tsx`, `app/page.tsx`
-- **Styling**: Uses Tailwind CSS with dark mode (`dark:` prefix)
-- **State Management**: Simple React state, no Redux/Zustand
-- **API Calls**: Uses native `fetch()` to `/api/channels`
-
-### **For Backend/Worker Work**
-- **Main File**: `worker.py`
-- **Dependencies**: Install via `pip install -r requirements.txt`
-- **Testing**: Run `./run_worker.sh` manually, check `cron_log.txt` for output
-- **Key Concerns**:
-  - IP blocking → Use random delays, avoid frequent runs
-  - Language support → Already handles zh/en transcripts
-  - OpenAI API costs → Currently uses GPT-4o (higher quality)
-
-### **For Database Changes**
-- Edit `prisma/schema.prisma`
-- Run `npx prisma migrate dev` to apply changes
-- Worker uses raw SQL via `psycopg2`, frontend uses Prisma Client
-
-### **Common Issues & Solutions**
-1. **"No transcript available"** → Check language codes, IP ban (wait 1-2 hours)
-2. **RSS not updating** → Verify `Cache-Control: no-store` in `/feed/[channelId]/route.ts`
-3. **Build fails on Vercel** → Ensure `DATABASE_URL` is set in Vercel environment variables
-4. **Worker not running** → Check Python path in `run_worker.sh`, verify crontab with `crontab -l`
+| Layer | Technology |
+|---|---|
+| Frontend | Next.js 16, React, TypeScript |
+| Styling | Tailwind CSS v4, Dark Mode |
+| Database | PostgreSQL + Prisma ORM |
+| Auth | NextAuth.js (Google OAuth) |
+| Worker | Python 3.8+ |
+| Transcript API | `youtube-transcript-api` (Video), Deepgram (Audio) |
+| AI Summarizer | OpenAI GPT-4o-mini |
+| RSS Generator | `rss` (npm) |
 
 ---
 
@@ -254,12 +225,13 @@ model PodcastEpisode {
 2. **Setup Environment**:
    ```bash
    cp .env.example .env
-   # Fill in DATABASE_URL, OPENAI_API_KEY, AUTH_PASSWORD
+   # Fill in all required variables
    ```
 
 3. **Database Setup**:
    ```bash
-   npx prisma migrate dev
+   npx prisma generate
+   # If starting fresh: npx prisma migrate dev
    ```
 
 4. **Run Locally**:
@@ -267,13 +239,3 @@ model PodcastEpisode {
    npm run dev              # Frontend at http://localhost:3000
    ./run_worker.sh          # Worker (run manually for testing)
    ```
-
-5. **Test**:
-   - Add a YouTube channel via the web UI
-   - Run `./run_worker.sh` to fetch summaries
-   - Access RSS feed at `http://localhost:3000/feed/1`
-
----
-
-**Last Updated**: 2025-11-28  
-**Primary Contact**: [Your Name/Email]
