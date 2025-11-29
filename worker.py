@@ -8,6 +8,7 @@ import scrapetube
 from youtube_transcript_api import YouTubeTranscriptApi
 from openai import OpenAI
 from dotenv import load_dotenv
+import yt_dlp
 
 # Load environment variables
 load_dotenv()
@@ -28,6 +29,34 @@ def get_db_connection():
     clean_url = DATABASE_URL.replace('?pgbouncer=true', '').replace('&pgbouncer=true', '')
     conn = psycopg2.connect(clean_url, connect_timeout=30)
     return conn
+
+def fetch_channel_avatar(youtube_id):
+    """Fetch channel avatar URL using yt-dlp"""
+    try:
+        channel_url = f"https://www.youtube.com/channel/{youtube_id}"
+        ydl_opts = {
+            'quiet': True,
+            'extract_flat': True,
+            'no_warnings': True,
+        }
+        
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            info = ydl.extract_info(channel_url, download=False)
+            thumbnails = info.get('thumbnails', [])
+            
+            # Find the best square avatar (usually 900x900)
+            for thumb in reversed(thumbnails):  # Start from highest quality
+                if thumb.get('width') == thumb.get('height'):  # Square thumbnail
+                    return thumb.get('url')
+            
+            # Fallback to last thumbnail if no square found
+            if thumbnails:
+                return thumbnails[-1].get('url')
+        
+        return None
+    except Exception as e:
+        print(f"    - Error fetching channel avatar: {e}")
+        return None
 
 def fetch_transcript(video_id):
     try:
@@ -131,28 +160,15 @@ def process_channel(conn, channel):
                  except Exception as e:
                      print(f"    - Could not extract channel title from video: {e}")
              
-             # Extract avatar URL (YouTube channel thumbnails can be derived from video thumbnails)
+             # Extract avatar URL using yt-dlp
              if not channel.get('avatar_url'):
-                 try:
-                     # Get channel thumbnail - try to extract from video's channel thumbnail
-                     avatar_url = None
-                     
-                     # Try to get from channelThumbnail in video metadata
-                     if 'channelThumbnail' in video:
-                         thumbnails = video.get('channelThumbnail', {}).get('thumbnails', [])
-                         if thumbnails:
-                             # Get the highest quality thumbnail
-                             avatar_url = thumbnails[-1].get('url')
-                     
-                     # Fallback: construct from channel ID (standard YouTube pattern)
-                     if not avatar_url:
-                         avatar_url = f"https://yt3.ggpht.com/ytc/{youtube_id}"
-                     
-                     if avatar_url:
-                         print(f"    - Found channel avatar: {avatar_url}")
-                         updated_fields['avatar_url'] = avatar_url
-                 except Exception as e:
-                     print(f"    - Could not extract channel avatar from video: {e}")
+                 print("    - Fetching channel avatar using yt-dlp...")
+                 avatar_url = fetch_channel_avatar(youtube_id)
+                 if avatar_url:
+                     print(f"    - Found channel avatar: {avatar_url[:80]}...")
+                     updated_fields['avatar_url'] = avatar_url
+                 else:
+                     print("    - Could not fetch channel avatar")
              
              # Update database if we have any fields to update
              if updated_fields:
