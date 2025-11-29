@@ -26,3 +26,28 @@ model Video {
   summary           String
   published_at      DateTime
 }
+
+model PodcastChannel {
+  id           Int              @id @default(autoincrement())
+  feed_url     String           @unique
+  title        String?
+  description  String?
+  site_url     String?
+  image_url    String?
+  last_updated DateTime         @default(now())
+  episodes     PodcastEpisode[]
+}
+
+model PodcastEpisode {
+  id           Int            @id @default(autoincrement())
+  podcast_id   Int
+  podcast      PodcastChannel @relation(fields: [podcast_id], references: [id])
+  guid         String
+  title        String
+  audio_url    String
+  transcript   String?        @db.Text
+  summary      String?        @db.Text
+  published_at DateTime
+
+  @@unique([podcast_id, guid])
+}

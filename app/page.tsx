@@ -9,6 +9,10 @@ export default async function Home() {
     orderBy: { last_updated: 'desc' },
   });
 
+  const podcasts = await prisma.podcastChannel.findMany({
+    orderBy: { last_updated: 'desc' },
+  });
+
   return (
     <main className="min-h-screen dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8 transition-colors duration-300">
       <div className="absolute top-4 right-4">
@@ -24,7 +28,7 @@ export default async function Home() {
           </p>
         </div>
 
-        <ChannelManager initialChannels={channels} />
+        <ChannelManager initialChannels={channels} initialPodcasts={podcasts} />
       </div>
     </main>
   );
