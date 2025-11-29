@@ -41,6 +41,13 @@ export function AuthButton() {
                     </div>
                 </div>
                 <button
+                    onClick={() => signIn("google", { prompt: "select_account" })}
+                    className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+                >
+                    <LogIn className="w-4 h-4" />
+                    <span className="hidden sm:inline">Switch Account</span>
+                </button>
+                <button
                     onClick={() => signOut()}
                     className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
                 >
