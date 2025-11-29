@@ -85,13 +85,13 @@ def process_channel(conn, channel):
     print(f"Processing Channel: {channel_title} ({youtube_id})")
     
     # Update Channel Metadata if needed (if it was added via Vercel with placeholder)
-    if channel_title == 'New Channel' or channel['description'] == 'Waiting for worker to update...':
+    if channel_title == 'New Channel' or channel['description'] == 'Waiting for worker to update...' or not channel.get('avatar_url'):
         print("  - Updating channel metadata...")
         try:
             # We can use scrapetube to get some info, or just rely on the videos.
             # Actually, scrapetube doesn't give channel description easily.
-            # But we can assume if we fetch videos, we might get the author name from the first video.
-            pass # We will update title from the first video found
+            # But we can assume if we fetch videos, we might get the author name from the first video found.
+            pass # We will update title and avatar from the first video found
         except Exception as e:
             print(f"  - Failed to update metadata: {e}")
 
@@ -110,25 +110,68 @@ def process_channel(conn, channel):
         title = video['title']['runs'][0]['text']
         print(f"  - Checking video: {title} ({video_id})")
         
-        # Update Channel Title from video if it's a placeholder
-        if first_video and (channel_title == 'New Channel'):
-             # Try to get channel name from video details
-             # scrapetube video object usually has 'ownerText' or similar in 'shortBylineText'
-             try:
-                 new_title = video.get('ownerText', {}).get('runs', [{}])[0].get('text')
-                 if not new_title:
-                     # Fallback to looking deeper if structure varies
-                     new_title = video.get('shortBylineText', {}).get('runs', [{}])[0].get('text')
+        # Update Channel Title and Avatar from video if needed
+        if first_video:
+             updated_fields = {}
+             
+             # Extract title if it's a placeholder
+             if channel_title == 'New Channel':
+                 # Try to get channel name from video details
+                 # scrapetube video object usually has 'ownerText' or similar in 'shortBylineText'
+                 try:
+                     new_title = video.get('ownerText', {}).get('runs', [{}])[0].get('text')
+                     if not new_title:
+                         # Fallback to looking deeper if structure varies
+                         new_title = video.get('shortBylineText', {}).get('runs', [{}])[0].get('text')
+                     
+                     if new_title:
+                         print(f"    - Found real channel title: {new_title}")
+                         updated_fields['title'] = new_title
+                         channel_title = new_title # Update local var
+                 except Exception as e:
+                     print(f"    - Could not extract channel title from video: {e}")
+             
+             # Extract avatar URL (YouTube channel thumbnails can be derived from video thumbnails)
+             if not channel.get('avatar_url'):
+                 try:
+                     # Get channel thumbnail - try to extract from video's channel thumbnail
+                     avatar_url = None
+                     
+                     # Try to get from channelThumbnail in video metadata
+                     if 'channelThumbnail' in video:
+                         thumbnails = video.get('channelThumbnail', {}).get('thumbnails', [])
+                         if thumbnails:
+                             # Get the highest quality thumbnail
+                             avatar_url = thumbnails[-1].get('url')
+                     
+                     # Fallback: construct from channel ID (standard YouTube pattern)
+                     if not avatar_url:
+                         avatar_url = f"https://yt3.ggpht.com/ytc/{youtube_id}"
+                     
+                     if avatar_url:
+                         print(f"    - Found channel avatar: {avatar_url}")
+                         updated_fields['avatar_url'] = avatar_url
+                 except Exception as e:
+                     print(f"    - Could not extract channel avatar from video: {e}")
+             
+             # Update database if we have any fields to update
+             if updated_fields:
+                 cursor = conn.cursor()
+                 set_parts = []
+                 values = []
+                 for key, value in updated_fields.items():
+                     set_parts.append(f"{key} = %s")
+                     values.append(value)
                  
-                 if new_title:
-                     print(f"    - Found real channel title: {new_title}")
-                     cursor = conn.cursor()
-                     cursor.execute("UPDATE \"Channel\" SET title = %s, description = %s WHERE id = %s", 
-                                  (new_title, "Updated by worker", channel_id))
-                     conn.commit()
-                     channel_title = new_title # Update local var
-             except Exception as e:
-                 print(f"    - Could not extract channel title from video: {e}")
+                 if not updated_fields.get('title'):
+                     # Also update description if we didn't update title
+                     set_parts.append("description = %s")
+                     values.append("Updated by worker")
+                 
+                 values.append(channel_id)
+                 query = f"UPDATE \"Channel\" SET {', '.join(set_parts)} WHERE id = %s"
+                 cursor.execute(query, values)
+                 conn.commit()
         first_video = False
         
         # Check if exists

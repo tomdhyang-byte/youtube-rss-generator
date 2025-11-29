@@ -33,7 +33,7 @@ export async function GET(
             description: channel.description || `AI Summaries for ${channel.title}`,
             feed_url: `${new URL(request.url).origin}/feed/${channelId}`,
             site_url: `https://www.youtube.com/channel/${channel.youtube_id}`,
-            image_url: '', // We could fetch the avatar if we stored it
+            image_url: channel.avatar_url || '', // Use channel avatar from YouTube
             language: 'en',
             pubDate: channel.last_updated,
         });
