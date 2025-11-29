@@ -33,18 +33,9 @@ export async function GET(
             description: channel.description || `AI Summaries for ${channel.title}`,
             feed_url: `${new URL(request.url).origin}/feed/${channelId}`,
             site_url: `https://www.youtube.com/channel/${channel.youtube_id}`,
-            image_url: channel.avatar_url || '', // Use channel avatar from YouTube
+            image_url: '', // We could fetch the avatar if we stored it
             language: 'en',
             pubDate: channel.last_updated,
-            custom_namespaces: {
-                'itunes': 'http://www.itunes.com/dtds/podcast-1.0.dtd',
-                'atom': 'http://www.w3.org/2005/Atom'
-            },
-            custom_elements: channel.avatar_url ? [
-                { 'itunes:image': { _attr: { href: channel.avatar_url } } },
-                { 'atom:icon': channel.avatar_url },
-                { 'atom:logo': channel.avatar_url }
-            ] : []
         });
 
         channel.videos.forEach((video: any) => {

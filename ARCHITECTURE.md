@@ -69,9 +69,8 @@ youtube-rss-generator/
 - **Logic**:
   1. Queries channel + videos from DB (latest 20)
   2. Builds RSS feed using `rss` package
-  3. Uses `channel.avatar_url` for RSS feed image (channel icon)
-  4. Sets `Cache-Control: no-store` to prevent stale feeds
-  5. Returns XML with AI summaries as descriptions
+  3. Sets `Cache-Control: no-store` to prevent stale feeds
+  4. Returns XML with AI summaries as descriptions
 
 #### `middleware.ts`
 - **Purpose**: HTTP Basic Auth for the web interface
@@ -88,19 +87,15 @@ youtube-rss-generator/
 - **Purpose**: Fetches new videos, generates AI summaries, saves to DB
 - **Flow**:
   1. **Fetch Videos**: Uses `scrapetube` to get latest 3 videos per channel
-  2. **Extract Channel Metadata**: On first video, extracts:
-     - Channel title (if placeholder "New Channel")
-     - Channel avatar URL from `channelThumbnail` metadata
-     - Fallback: Constructs avatar URL from YouTube channel ID
-  3. **Fetch Transcript**: `YouTubeTranscriptApi.fetch()` with language priority:
+  2. **Fetch Transcript**: `YouTubeTranscriptApi.fetch()` with language priority:
      - `['zh-TW', 'zh-Hant', 'zh-Hans', 'zh', 'en']`
-  4. **Generate Summary**: Calls OpenAI GPT-4o with custom prompt (繁體中文)
+  3. **Generate Summary**: Calls OpenAI GPT-4o with custom prompt (繁體中文)
      - Prompt designed for **detailed, structured summaries** with:
        - 🎯 核心主旨 (Executive Summary)
        - 🔑 關鍵洞察 (Key Insights with bullet points)
        - 💡 結論 (Action Items)
-  5. **Save to DB**: Inserts new videos with summaries
-  6. **Rate Limiting**: Random delay 5-10 seconds between videos to avoid IP bans
+  4. **Save to DB**: Inserts new videos with summaries
+  5. **Rate Limiting**: Random delay 5-10 seconds between videos to avoid IP bans
 - **Error Handling**: Saves "No transcript available." if fetch fails
 
 #### `run_worker.sh`
@@ -118,7 +113,6 @@ model Channel {
   youtube_id    String    @unique
   title         String
   description   String?
-  avatar_url    String?   # YouTube channel avatar/icon URL
   rss_url       String?
   last_updated  DateTime  @default(now())
   videos        Video[]
@@ -247,9 +241,5 @@ model Video {
 
 ---
 
-**Last Updated**: 2025-11-29  
-**Recent Changes**:
-- Added `avatar_url` field to Channel model for YouTube channel icons in RSS feeds
-- Worker now automatically fetches and stores channel avatars from video metadata
-
+**Last Updated**: 2025-11-28  
 **Primary Contact**: [Your Name/Email]
