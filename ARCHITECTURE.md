@@ -86,10 +86,10 @@ youtube-rss-generator/
 #### `worker.py`
 - **Purpose**: Fetches new videos, generates AI summaries, saves to DB
 - **Flow**:
-  1. **Fetch Videos**: Uses `scrapetube` to get latest 5 videos per channel
+  1. **Fetch Videos**: Uses `scrapetube` to get latest 3 videos per channel
   2. **Fetch Transcript**: `YouTubeTranscriptApi.fetch()` with language priority:
      - `['zh-TW', 'zh-Hant', 'zh-Hans', 'zh', 'en']`
-  3. **Generate Summary**: Calls OpenAI GPT-3.5-turbo with custom prompt (繁體中文)
+  3. **Generate Summary**: Calls OpenAI GPT-4o with custom prompt (繁體中文)
      - Prompt designed for **detailed, structured summaries** with:
        - 🎯 核心主旨 (Executive Summary)
        - 🔑 關鍵洞察 (Key Insights with bullet points)
@@ -171,7 +171,7 @@ model Video {
 | Worker         | Python 3.8+                         |
 | Transcript API | `youtube-transcript-api`            |
 | Video Fetcher  | `scrapetube`                        |
-| AI Summarizer  | OpenAI GPT-3.5-turbo                |
+| AI Summarizer  | OpenAI GPT-4o                       |
 | RSS Generator  | `rss` (npm)                         |
 | Auth           | Custom HTTP Basic Auth middleware   |
 
@@ -192,7 +192,7 @@ model Video {
 - **Key Concerns**:
   - IP blocking → Use random delays, avoid frequent runs
   - Language support → Already handles zh/en transcripts
-  - OpenAI API costs → Currently uses GPT-3.5-turbo (cheaper)
+  - OpenAI API costs → Currently uses GPT-4o (higher quality)
 
 ### **For Database Changes**
 - Edit `prisma/schema.prisma`

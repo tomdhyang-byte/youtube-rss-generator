@@ -24,7 +24,9 @@ client = OpenAI(api_key=OPENAI_API_KEY) if OPENAI_API_KEY else None
 def get_db_connection():
     if not DATABASE_URL:
         raise ValueError("DATABASE_URL environment variable is not set")
-    conn = psycopg2.connect(DATABASE_URL)
+    # Remove pgbouncer param for psycopg2
+    clean_url = DATABASE_URL.replace('?pgbouncer=true', '').replace('&pgbouncer=true', '')
+    conn = psycopg2.connect(clean_url, connect_timeout=30)
     return conn
 
 def fetch_transcript(video_id):
@@ -46,7 +48,7 @@ def generate_summary(text):
     
     try:
         response = client.chat.completions.create(
-            model="gpt-3.5-turbo", # Or gpt-4o-mini for cost efficiency
+            model="gpt-4o", # Upgraded to gpt-4o for better quality
             messages=[
                 {"role": "system", "content": """你是一位資深的繁體中文內容分析師。請針對這段影片字幕進行「深度摘要」。
     
@@ -94,8 +96,10 @@ def process_channel(conn, channel):
             print(f"  - Failed to update metadata: {e}")
 
     # Fetch latest videos (limit to last 5 to avoid quota/time issues on first run)
+    print("  - Fetching video list from YouTube...")
     try:
-        videos = scrapetube.get_channel(channel_id=youtube_id, limit=5)
+        videos = scrapetube.get_channel(channel_id=youtube_id, limit=3)
+        print("  - Video list fetched.")
     except Exception as e:
         print(f"  - Error fetching videos: {e}")
         return
@@ -104,6 +108,7 @@ def process_channel(conn, channel):
     for video in videos:
         video_id = video['videoId']
         title = video['title']['runs'][0]['text']
+        print(f"  - Checking video: {title} ({video_id})")
         
         # Update Channel Title from video if it's a placeholder
         if first_video and (channel_title == 'New Channel'):
@@ -130,18 +135,20 @@ def process_channel(conn, channel):
         cursor = conn.cursor(cursor_factory=RealDictCursor)
         cursor.execute("SELECT id FROM \"Video\" WHERE youtube_video_id = %s", (video_id,))
         if cursor.fetchone():
-            print(f"  - Video already exists: {title}")
+            print(f"    - Video already exists, skipping.")
             continue
             
-        print(f"  - New Video found: {title}")
+        print(f"    - New Video found: {title}")
         
         # Get Transcript
+        print("    - Fetching transcript...")
         transcript = fetch_transcript(video_id)
         summary = "No transcript available."
         
         if transcript:
-            print("    - Transcript fetched. Generating summary...")
+            print("    - Transcript fetched. Generating summary (calling OpenAI)...")
             summary = generate_summary(transcript)
+            print("    - Summary generated.")
         
         # Parse published time
         # For Postgres, we can store as TIMESTAMP (datetime object) or keep using milliseconds/ISO if schema allows.
@@ -170,7 +177,9 @@ def process_channel(conn, channel):
 
 def main():
     print("Starting Worker...")
+    print("Connecting to database...")
     conn = get_db_connection()
+    print("Database connected.")
     
     try:
         cursor = conn.cursor(cursor_factory=RealDictCursor)
