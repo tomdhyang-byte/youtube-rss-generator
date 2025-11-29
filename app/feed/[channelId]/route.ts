@@ -37,10 +37,13 @@ export async function GET(
             language: 'en',
             pubDate: channel.last_updated,
             custom_namespaces: {
-                'itunes': 'http://www.itunes.com/dtds/podcast-1.0.dtd'
+                'itunes': 'http://www.itunes.com/dtds/podcast-1.0.dtd',
+                'atom': 'http://www.w3.org/2005/Atom'
             },
             custom_elements: channel.avatar_url ? [
-                { 'itunes:image': { _attr: { href: channel.avatar_url } } }
+                { 'itunes:image': { _attr: { href: channel.avatar_url } } },
+                { 'atom:icon': channel.avatar_url },
+                { 'atom:logo': channel.avatar_url }
             ] : []
         });
 
