@@ -5,13 +5,21 @@ import { ThemeToggle } from '@/components/ThemeToggle';
 export const dynamic = 'force-dynamic';
 
 export default async function Home() {
-  const channels = await prisma.channel.findMany({
-    orderBy: { last_updated: 'desc' },
-  });
+  let channels: any[] = [];
+  let podcasts: any[] = [];
 
-  const podcasts = await prisma.podcastChannel.findMany({
-    orderBy: { last_updated: 'desc' },
-  });
+  try {
+    channels = await prisma.channel.findMany({
+      orderBy: { last_updated: 'desc' },
+    });
+
+    podcasts = await prisma.podcastChannel.findMany({
+      orderBy: { last_updated: 'desc' },
+    });
+  } catch (error) {
+    console.error("Failed to fetch data:", error);
+    // Fallback to empty arrays to allow page load
+  }
 
   return (
     <main className="min-h-screen dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8 transition-colors duration-300">

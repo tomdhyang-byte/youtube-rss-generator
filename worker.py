@@ -192,7 +192,7 @@ def transcribe_audio(audio_url):
     if not DEEPGRAM_API_KEY:
         return None
     
-    url = "https://api.deepgram.com/v1/listen?model=nova-2&smart_format=true"
+    url = "https://api.deepgram.com/v1/listen?model=nova-2&smart_format=true&detect_language=true"
     headers = {
         "Authorization": f"Token {DEEPGRAM_API_KEY}",
         "Content-Type": "application/json"
@@ -220,7 +220,9 @@ def process_podcast_channel(conn, podcast):
     print(f"Processing Podcast: {podcast_title} ({feed_url})")
     
     try:
-        feed = feedparser.parse(feed_url)
+        response = requests.get(feed_url, headers={'User-Agent': 'Mozilla/5.0'}, timeout=30)
+        response.raise_for_status()
+        feed = feedparser.parse(response.content)
     except Exception as e:
         print(f"  - Error parsing RSS: {e}")
         return

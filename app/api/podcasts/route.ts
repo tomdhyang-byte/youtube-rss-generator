@@ -28,7 +28,7 @@ export async function POST(request: Request) {
         }
 
         // 2. Apple Podcast Lookup
-        const appleMatch = url.match(/podcasts\.apple\.com\/[a-z]+\/podcast\/[a-z0-9-]+\/id(\d+)/);
+        const appleMatch = url.match(/podcasts\.apple\.com\/[a-z]+\/podcast\/.*\/id(\d+)/);
         if (appleMatch) {
             const id = appleMatch[1];
             const lookupRes = await fetch(`https://itunes.apple.com/lookup?id=${id}`);

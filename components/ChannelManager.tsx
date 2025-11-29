@@ -113,6 +113,7 @@ export default function ChannelManager({
     };
 
     const decodeHtml = (html: string) => {
+        if (typeof window === 'undefined') return html;
         if (!html) return '';
         const txt = document.createElement('textarea');
         txt.innerHTML = html;
