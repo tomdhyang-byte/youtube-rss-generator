@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RSS Feed Icons Test</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            background: #0d1117;
+            color: #e6edf3;
+            padding: 40px 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            text-align: center;
+            margin-bottom: 40px;
+            color: #58a6ff;
+        }
+        
+        .test-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+        
+        .channel-card {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            padding: 20px;
+            transition: all 0.2s;
+        }
+        
+        .channel-card:hover {
+            border-color: #58a6ff;
+            transform: translateY(-2px);
+        }
+        
+        .avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            margin: 0 auto 15px;
+            display: block;
+            border: 2px solid #30363d;
+        }
+        
+        .avatar.error {
+            border-color: #f85149;
+        }
+        
+        .channel-name {
+            text-align: center;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        
+        .rss-link {
+            display: block;
+            text-align: center;
+            padding: 8px 16px;
+            background: #238636;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+        
+        .rss-link:hover {
+            background: #2ea043;
+        }
+        
+        .status {
+            text-align: center;
+            font-size: 12px;
+            margin-top: 8px;
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+        
+        .status.success {
+            background: #1a7f3733;
+            color: #3fb950;
+        }
+        
+        .status.error {
+            background: #da363333;
+            color: #f85149;
+        }
+        
+        .xml-preview {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 40px;
+        }
+        
+        .xml-preview h2 {
+            margin-bottom: 15px;
+            color: #58a6ff;
+        }
+        
+        pre {
+            background: #0d1117;
+            padding: 15px;
+            border-radius: 6px;
+            overflow-x: auto;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+        
+        code {
+            color: #79c0ff;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📡 RSS Feed Icons 測試頁面</h1>
+        
+        <div class="test-grid" id="channelsGrid"></div>
+        
+        <div class="xml-preview">
+            <h2>範例 RSS Feed XML (頻道 ID: 2)</h2>
+            <pre id="xmlPreview">載入中...</pre>
+        </div>
+    </div>
+    
+    <script>
+        // Fetch channels from API
+        fetch('/api/channels')
+            .then(res => res.json())
+            .then(channels => {
+                const grid = document.getElementById('channelsGrid');
+                
+                channels.forEach(channel => {
+                    const card = document.createElement('div');
+                    card.className = 'channel-card';
+                    
+                    const img = document.createElement('img');
+                    img.className = 'avatar';
+                    img.src = channel.avatar_url || '';
+                    img.alt = channel.title;
+                    
+                    img.onerror = function() {
+                        this.classList.add('error');
+                        const status = card.querySelector('.status');
+                        if (status) {
+                            status.className = 'status error';
+                            status.textContent = '❌ 圖片載入失敗';
+                        }
+                    };
+                    
+                    img.onload = function() {
+                        const status = card.querySelector('.status');
+                        if (status) {
+                            status.className = 'status success';
+                            status.textContent = '✅ 圖片載入成功';
+                        }
+                    };
+                    
+                    const name = document.createElement('div');
+                    name.className = 'channel-name';
+                    name.textContent = channel.title;
+                    
+                    const rssLink = document.createElement('a');
+                    rssLink.className = 'rss-link';
+                    rssLink.href = `/feed/${channel.id}`;
+                    rssLink.textContent = '📡 RSS Feed';
+                    rssLink.target = '_blank';
+                    
+                    const status = document.createElement('div');
+                    status.className = 'status';
+                    status.textContent = '⏳ 載入中...';
+                    
+                    card.appendChild(img);
+                    card.appendChild(name);
+                    card.appendChild(rssLink);
+                    card.appendChild(status);
+                    
+                    grid.appendChild(card);
+                });
+            });
+        
+        // Fetch sample RSS XML
+        fetch('/feed/2')
+            .then(res => res.text())
+            .then(xml => {
+                // Extract relevant parts
+                const imageMatch = xml.match(/<image>[\s\S]*?<\/image>/);
+                const itunesMatch = xml.match(/<itunes:image[^>]*>/);
+                
+                let preview = '=== Image Tags ===\n\n';
+                if (imageMatch) {
+                    preview += imageMatch[0].replace(/</g, '&lt;').replace(/>/g, '&gt;') + '\n\n';
+                }
+                if (itunesMatch) {
+                    preview += itunesMatch[0].replace(/</g, '&lt;').replace(/>/g, '&gt;') + '\n\n';
+                }
+                
+                document.getElementById('xmlPreview').innerHTML = preview;
+            })
+            .catch(err => {
+                document.getElementById('xmlPreview').textContent = '載入失敗: ' + err;
+            });
+    </script>
+</body>
+</html>
