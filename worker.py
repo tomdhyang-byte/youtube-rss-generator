@@ -144,7 +144,7 @@ def process_youtube_channel(conn, channel):
                  if new_title:
                      print(f"    - Found real channel title: {new_title}")
                      cursor = conn.cursor()
-                     cursor.execute("UPDATE \"YoutubeChannel\" SET title = %s, description = %s WHERE id = %s", 
+                     cursor.execute("UPDATE youtube_channels SET title = %s, description = %s WHERE id = %s", 
                                   (new_title, "Updated by worker", channel_id))
                      conn.commit()
                      channel_title = new_title 
@@ -153,7 +153,7 @@ def process_youtube_channel(conn, channel):
         first_video = False
         
         cursor = conn.cursor(cursor_factory=RealDictCursor)
-        cursor.execute("SELECT id FROM \"YoutubeVideo\" WHERE youtube_video_id = %s", (video_id,))
+        cursor.execute("SELECT id FROM youtube_videos WHERE youtube_video_id = %s", (video_id,))
         if cursor.fetchone():
             print(f"    - Video already exists, skipping.")
             continue
@@ -172,7 +172,7 @@ def process_youtube_channel(conn, channel):
         published_at = datetime.now()
 
         cursor.execute(
-            "INSERT INTO \"YoutubeVideo\" (youtube_video_id, channel_id, title, summary, published_at) VALUES (%s, %s, %s, %s, %s)",
+            "INSERT INTO youtube_videos (youtube_video_id, channel_id, title, summary, published_at) VALUES (%s, %s, %s, %s, %s)",
             (video_id, channel_id, title, summary, published_at)
         )
         conn.commit()
@@ -183,7 +183,7 @@ def process_youtube_channel(conn, channel):
         time.sleep(delay)
 
     cursor = conn.cursor()
-    cursor.execute("UPDATE \"YoutubeChannel\" SET last_updated = %s WHERE id = %s", (datetime.now(), channel_id))
+    cursor.execute("UPDATE youtube_channels SET last_updated = %s WHERE id = %s", (datetime.now(), channel_id))
     conn.commit()
 
 # --- Podcast Logic ---
@@ -237,7 +237,7 @@ def process_podcast_channel(conn, podcast):
         print(f"  - Updating podcast metadata: {new_title}")
         cursor = conn.cursor()
         cursor.execute("""
-            UPDATE "PodcastChannel" 
+            UPDATE podcast_channels 
             SET title = %s, description = %s, site_url = %s, image_url = %s 
             WHERE id = %s
         """, (new_title, new_desc, new_site, new_image, podcast_id))
@@ -263,7 +263,7 @@ def process_podcast_channel(conn, podcast):
         
         # Check if exists
         cursor = conn.cursor(cursor_factory=RealDictCursor)
-        cursor.execute("SELECT id FROM \"PodcastEpisode\" WHERE podcast_id = %s AND guid = %s", (podcast_id, guid))
+        cursor.execute("SELECT id FROM podcast_episodes WHERE podcast_id = %s AND guid = %s", (podcast_id, guid))
         if cursor.fetchone():
             print(f"    - Episode already exists, skipping.")
             continue
@@ -295,7 +295,7 @@ def process_podcast_channel(conn, podcast):
              published_at = datetime.fromtimestamp(time.mktime(entry.updated_parsed))
 
         cursor.execute(
-            """INSERT INTO "PodcastEpisode" 
+            """INSERT INTO podcast_episodes 
                (podcast_id, guid, title, audio_url, transcript, summary, published_at) 
                VALUES (%s, %s, %s, %s, %s, %s, %s)""",
             (podcast_id, guid, title, audio_url, transcript, summary, published_at)
@@ -308,7 +308,7 @@ def process_podcast_channel(conn, podcast):
         time.sleep(delay)
 
     cursor = conn.cursor()
-    cursor.execute("UPDATE \"PodcastChannel\" SET last_updated = %s WHERE id = %s", (datetime.now(), podcast_id))
+    cursor.execute("UPDATE podcast_channels SET last_updated = %s WHERE id = %s", (datetime.now(), podcast_id))
     conn.commit()
 
 def main():
@@ -320,13 +320,13 @@ def main():
     try:
         # 1. Process YouTube Channels
         cursor = conn.cursor(cursor_factory=RealDictCursor)
-        cursor.execute("SELECT * FROM \"YoutubeChannel\"")
+        cursor.execute("SELECT * FROM youtube_channels")
         channels = cursor.fetchall()
         for channel in channels:
             process_youtube_channel(conn, channel)
             
         # 2. Process Podcast Channels
-        cursor.execute("SELECT * FROM \"PodcastChannel\"")
+        cursor.execute("SELECT * FROM podcast_channels")
         podcasts = cursor.fetchall()
         for podcast in podcasts:
             process_podcast_channel(conn, podcast)

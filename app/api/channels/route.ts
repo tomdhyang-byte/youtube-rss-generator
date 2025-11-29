@@ -1,8 +1,19 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { getSession, isAdmin } from '@/lib/auth';
 
 export async function POST(request: Request) {
     console.log('[API] POST /api/channels called');
+
+    // 1. Authentication Check
+    const session = await getSession();
+    if (!session || !session.user) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const userId = session.user.id;
+    const userEmail = session.user.email;
+
     try {
         const body = await request.json();
         const { url } = body;
@@ -14,13 +25,13 @@ export async function POST(request: Request) {
 
         let channelId = '';
 
-        // 1. Try to extract ID from URL regex (channel/ID)
+        // 2. Try to extract ID from URL regex (channel/ID)
         const channelIdMatch = url.match(/channel\/(UC[\w-]{22})/);
         if (channelIdMatch) {
             channelId = channelIdMatch[1];
             console.log(`[API] Extracted ID from URL: ${channelId}`);
         } else {
-            // 2. If not a direct ID, we must fetch the page to resolve Handle or Custom URL
+            // 3. If not a direct ID, we must fetch the page to resolve Handle or Custom URL
             console.log('[API] Fetching page to resolve ID...');
             try {
                 const response = await fetch(url, {
@@ -31,20 +42,19 @@ export async function POST(request: Request) {
                 });
                 const text = await response.text();
 
-                // 1. Try og:url (Most reliable)
-                // <meta property="og:url" content="https://www.youtube.com/channel/UC...">
+                // Try og:url (Most reliable)
                 const ogMatch = text.match(/<meta property="og:url" content="https:\/\/www\.youtube\.com\/channel\/(UC[\w-]{22})"/);
                 if (ogMatch) {
                     channelId = ogMatch[1];
                     console.log(`[API] Found ID in og:url: ${channelId}`);
                 } else {
-                    // 2. Try itemprop="channelId"
+                    // Try itemprop="channelId"
                     const metaMatch = text.match(/itemprop="channelId" content="(UC[\w-]{22})"/);
                     if (metaMatch) {
                         channelId = metaMatch[1];
                         console.log(`[API] Found ID in meta tag: ${channelId}`);
                     } else {
-                        // 3. Fallback: look for "channelId":"UC..." (Risky, might pick related channels)
+                        // Fallback: look for "channelId":"UC..."
                         const jsonMatch = text.match(/"channelId":"(UC[\w-]{22})"/);
                         if (jsonMatch) {
                             channelId = jsonMatch[1];
@@ -64,13 +74,68 @@ export async function POST(request: Request) {
             }, { status: 400 });
         }
 
-        // 3. Fetch Channel Details (Title, Desc)
+        // 4. Quota Check (unless admin)
+        if (!isAdmin(userEmail)) {
+            console.log(`[API] Checking quota for user ${userId}`);
+
+            const [ytSubCount, podcastSubCount] = await Promise.all([
+                prisma.youtubeSubscription.count({ where: { userId } }),
+                prisma.podcastSubscription.count({ where: { userId } }),
+            ]);
+
+            const totalSubs = ytSubCount + podcastSubCount;
+            console.log(`[API] User has ${totalSubs} total subscriptions (YT: ${ytSubCount}, Podcast: ${podcastSubCount})`);
+
+            if (totalSubs >= 1) {
+                return NextResponse.json({
+                    error: 'Subscription quota reached. Free users can only subscribe to 1 channel/podcast total. Please unsubscribe from another to add this one.',
+                    quota: { current: totalSubs, limit: 1 }
+                }, { status: 403 });
+            }
+        } else {
+            console.log(`[API] Admin user detected - skipping quota check`);
+        }
+
+        // 5. Check if already subscribed
+        const existingSub = await prisma.youtubeSubscription.findUnique({
+            where: {
+                userId_channelId: {
+                    userId,
+                    channelId: 0, // We need the DB ID, not youtube_id
+                }
+            }
+        });
+
+        // First, find or create the channel
+        let channel = await prisma.youtubeChannel.findUnique({
+            where: { youtube_id: channelId }
+        });
+
+        if (channel) {
+            // Check if user already subscribed
+            const alreadySubscribed = await prisma.youtubeSubscription.findUnique({
+                where: {
+                    userId_channelId: {
+                        userId,
+                        channelId: channel.id
+                    }
+                }
+            });
+
+            if (alreadySubscribed) {
+                return NextResponse.json({
+                    error: 'You are already subscribed to this channel',
+                    channel
+                }, { status: 409 });
+            }
+        }
+
+        // 6. Fetch Channel Details (Title, Desc)
         let title = 'New Channel';
         let description = 'Waiting for worker to update...';
 
         try {
             console.log(`[API] Fetching metadata for ${channelId}...`);
-            // Manual fetch to avoid broken libraries
             const response = await fetch(`https://www.youtube.com/channel/${channelId}`, {
                 headers: {
                     'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
@@ -80,14 +145,12 @@ export async function POST(request: Request) {
             const text = await response.text();
 
             // Extract Title
-            // <meta property="og:title" content="Veritasium">
             const titleMatch = text.match(/<meta property="og:title" content="([^"]+)">/);
             if (titleMatch) {
                 title = titleMatch[1];
             }
 
             // Extract Description
-            // <meta property="og:description" content="...>
             const descMatch = text.match(/<meta property="og:description" content="([^"]+)">/);
             if (descMatch) {
                 description = descMatch[1];
@@ -98,28 +161,89 @@ export async function POST(request: Request) {
             console.warn(`[API] Failed to fetch channel info for ${channelId}`, e);
         }
 
-        // 4. Save to DB
+        // 7. Upsert Channel & Create Subscription
         console.log('[API] Saving to DB...');
-        const channel = await prisma.youtubeChannel.upsert({
+        channel = await prisma.youtubeChannel.upsert({
             where: { youtube_id: channelId },
             update: {
-                // Only update title/desc if we actually got them, otherwise keep existing
                 ...(title !== 'New Channel' ? { title, description } : {}),
                 rss_url: `https://www.youtube.com/feeds/videos.xml?channel_id=${channelId}`
             },
             create: {
                 youtube_id: channelId,
-                title, // Might be placeholder
+                title,
                 description,
                 rss_url: `https://www.youtube.com/feeds/videos.xml?channel_id=${channelId}`
             },
         });
-        console.log('[API] DB Save successful');
 
-        return NextResponse.json(channel);
+        // 8. Create Subscription
+        await prisma.youtubeSubscription.create({
+            data: {
+                userId,
+                channelId: channel.id,
+            }
+        });
+
+        console.log('[API] Subscription created successfully');
+
+        return NextResponse.json({
+            success: true,
+            channel,
+            message: 'Successfully subscribed to channel'
+        });
 
     } catch (error) {
         console.error('Error adding channel:', error);
+        return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    }
+}
+
+// DELETE: Unsubscribe from a channel
+export async function DELETE(request: Request) {
+    console.log('[API] DELETE /api/channels called');
+
+    // 1. Authentication Check
+    const session = await getSession();
+    if (!session || !session.user) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const userId = session.user.id;
+
+    try {
+        const body = await request.json();
+        const { channelId } = body;
+
+        if (!channelId) {
+            return NextResponse.json({ error: 'channelId is required' }, { status: 400 });
+        }
+
+        console.log(`[API] Unsubscribing user ${userId} from channel ${channelId}`);
+
+        // 2. Delete the subscription (NOT the channel itself)
+        const deleted = await prisma.youtubeSubscription.deleteMany({
+            where: {
+                userId,
+                channelId: parseInt(channelId),
+            }
+        });
+
+        if (deleted.count === 0) {
+            return NextResponse.json({
+                error: 'Subscription not found or already removed'
+            }, { status: 404 });
+        }
+
+        console.log('[API] Subscription removed successfully');
+
+        return NextResponse.json({
+            success: true,
+            message: 'Successfully unsubscribed from channel'
+        });
+
+    } catch (error) {
+        console.error('Error removing subscription:', error);
         return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
     }
 }

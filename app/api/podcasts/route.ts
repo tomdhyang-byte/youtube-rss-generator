@@ -1,11 +1,22 @@
 import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '@/lib/prisma';
+import { getSession, isAdmin } from '@/lib/auth';
 import Parser from 'rss-parser';
 
-const prisma = new PrismaClient();
 const parser = new Parser();
 
 export async function POST(request: Request) {
+    console.log('[API] POST /api/podcasts called');
+
+    // 1. Authentication Check
+    const session = await getSession();
+    if (!session || !session.user) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const userId = session.user.id;
+    const userEmail = session.user.email;
+
     try {
         const { url } = await request.json();
 
@@ -19,7 +30,7 @@ export async function POST(request: Request) {
         let siteUrl = '';
         let imageUrl = '';
 
-        // 1. Spotify Rejection
+        // 2. Spotify Rejection
         if (url.includes('spotify.com')) {
             return NextResponse.json(
                 { error: 'Spotify links are not supported (Walled Garden). Please use Apple Podcasts link or RSS.' },
@@ -27,7 +38,7 @@ export async function POST(request: Request) {
             );
         }
 
-        // 2. Apple Podcast Lookup
+        // 3. Apple Podcast Lookup
         const appleMatch = url.match(/podcasts\.apple\.com\/[a-z]+\/podcast\/.*\/id(\d+)/);
         if (appleMatch) {
             const id = appleMatch[1];
@@ -41,7 +52,7 @@ export async function POST(request: Request) {
             }
         }
 
-        // 3. RSS Validation
+        // 4. RSS Validation
         try {
             const feed = await parser.parseURL(feedUrl);
             title = feed.title || '';
@@ -52,8 +63,53 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'Invalid RSS feed' }, { status: 400 });
         }
 
-        // 4. Save to DB
-        const podcast = await prisma.podcastChannel.upsert({
+        // 5. Quota Check (unless admin)
+        if (!isAdmin(userEmail)) {
+            console.log(`[API] Checking quota for user ${userId}`);
+
+            const [ytSubCount, podcastSubCount] = await Promise.all([
+                prisma.youtubeSubscription.count({ where: { userId } }),
+                prisma.podcastSubscription.count({ where: { userId } }),
+            ]);
+
+            const totalSubs = ytSubCount + podcastSubCount;
+            console.log(`[API] User has ${totalSubs} total subscriptions (YT: ${ytSubCount}, Podcast: ${podcastSubCount})`);
+
+            if (totalSubs >= 1) {
+                return NextResponse.json({
+                    error: 'Subscription quota reached. Free users can only subscribe to 1 channel/podcast total. Please unsubscribe from another to add this one.',
+                    quota: { current: totalSubs, limit: 1 }
+                }, { status: 403 });
+            }
+        } else {
+            console.log(`[API] Admin user detected - skipping quota check`);
+        }
+
+        // 6. Upsert Podcast & Create Subscription
+        let podcast = await prisma.podcastChannel.findUnique({
+            where: { feed_url: feedUrl }
+        });
+
+        if (podcast) {
+            // Check if user already subscribed
+            const alreadySubscribed = await prisma.podcastSubscription.findUnique({
+                where: {
+                    userId_podcastId: {
+                        userId,
+                        podcastId: podcast.id
+                    }
+                }
+            });
+
+            if (alreadySubscribed) {
+                return NextResponse.json({
+                    error: 'You are already subscribed to this podcast',
+                    podcast
+                }, { status: 409 });
+            }
+        }
+
+        podcast = await prisma.podcastChannel.upsert({
             where: { feed_url: feedUrl },
             update: {
                 title,
@@ -71,10 +127,73 @@ export async function POST(request: Request) {
             },
         });
 
-        return NextResponse.json(podcast);
+        // 7. Create Subscription
+        await prisma.podcastSubscription.create({
+            data: {
+                userId,
+                podcastId: podcast.id,
+            }
+        });
+
+        console.log('[API] Podcast subscription created successfully');
+
+        return NextResponse.json({
+            success: true,
+            podcast,
+            message: 'Successfully subscribed to podcast'
+        });
 
     } catch (error) {
         console.error('Error adding podcast:', error);
+        return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    }
+}
+
+// DELETE: Unsubscribe from a podcast
+export async function DELETE(request: Request) {
+    console.log('[API] DELETE /api/podcasts called');
+
+    // 1. Authentication Check
+    const session = await getSession();
+    if (!session || !session.user) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const userId = session.user.id;
+
+    try {
+        const body = await request.json();
+        const { podcastId } = body;
+
+        if (!podcastId) {
+            return NextResponse.json({ error: 'podcastId is required' }, { status: 400 });
+        }
+
+        console.log(`[API] Unsubscribing user ${userId} from podcast ${podcastId}`);
+
+        // 2. Delete the subscription (NOT the podcast itself)
+        const deleted = await prisma.podcastSubscription.deleteMany({
+            where: {
+                userId,
+                podcastId: parseInt(podcastId),
+            }
+        });
+
+        if (deleted.count === 0) {
+            return NextResponse.json({
+                error: 'Subscription not found or already removed'
+            }, { status: 404 });
+        }
+
+        console.log('[API] Podcast subscription removed successfully');
+
+        return NextResponse.json({
+            success: true,
+            message: 'Successfully unsubscribed from podcast'
+        });
+
+    } catch (error) {
+        console.error('Error removing podcast subscription:', error);
         return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
     }
 }

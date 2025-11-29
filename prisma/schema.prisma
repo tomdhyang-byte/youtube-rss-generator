@@ -8,14 +8,78 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
+// ============================================
+// NextAuth.js Models
+// ============================================
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String  @map("user_id")
+  type              String
+  provider          String
+  providerAccountId String  @map("provider_account_id")
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique @map("session_token")
+  userId       String   @map("user_id")
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model User {
+  id                   String                 @id @default(cuid())
+  name                 String?
+  email                String?                @unique
+  emailVerified        DateTime?              @map("email_verified")
+  image                String?
+  accounts             Account[]
+  sessions             Session[]
+  youtubeSubscriptions YoutubeSubscription[]
+  podcastSubscriptions PodcastSubscription[]
+
+  @@map("users")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
+}
+
+// ============================================
+// YouTube Models
+// ============================================
+
 model YoutubeChannel {
-  id           Int            @id @default(autoincrement())
-  youtube_id   String         @unique
-  title        String
-  description  String?
-  rss_url      String?
-  last_updated DateTime       @default(now())
-  videos       YoutubeVideo[]
+  id            Int                   @id @default(autoincrement())
+  youtube_id    String                @unique
+  title         String
+  description   String?
+  rss_url       String?
+  last_updated  DateTime              @default(now())
+  videos        YoutubeVideo[]
+  subscriptions YoutubeSubscription[]
+
+  @@map("youtube_channels")
 }
 
 model YoutubeVideo {
@@ -26,17 +90,38 @@ model YoutubeVideo {
   title            String
   summary          String
   published_at     DateTime
+
+  @@map("youtube_videos")
 }
 
+model YoutubeSubscription {
+  id         Int            @id @default(autoincrement())
+  userId     String         @map("user_id")
+  channelId  Int            @map("channel_id")
+  createdAt  DateTime       @default(now()) @map("created_at")
+  user       User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  channel    YoutubeChannel @relation(fields: [channelId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, channelId])
+  @@map("youtube_subscriptions")
+}
+
+// ============================================
+// Podcast Models
+// ============================================
+
 model PodcastChannel {
-  id           Int              @id @default(autoincrement())
-  feed_url     String           @unique
-  title        String?
-  description  String?
-  site_url     String?
-  image_url    String?
-  last_updated DateTime         @default(now())
-  episodes     PodcastEpisode[]
+  id            Int                   @id @default(autoincrement())
+  feed_url      String                @unique
+  title         String?
+  description   String?
+  site_url      String?
+  image_url     String?
+  last_updated  DateTime              @default(now())
+  episodes      PodcastEpisode[]
+  subscriptions PodcastSubscription[]
+
+  @@map("podcast_channels")
 }
 
 model PodcastEpisode {
@@ -51,4 +136,18 @@ model PodcastEpisode {
   published_at DateTime
 
   @@unique([podcast_id, guid])
+  @@map("podcast_episodes")
 }
+
+model PodcastSubscription {
+  id        Int            @id @default(autoincrement())
+  userId    String         @map("user_id")
+  podcastId Int            @map("podcast_id")
+  createdAt DateTime       @default(now()) @map("created_at")
+  user      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  podcast   PodcastChannel @relation(fields: [podcastId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, podcastId])
+  @@map("podcast_subscriptions")
+}
+
