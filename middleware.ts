@@ -57,12 +57,15 @@ export function middleware(req: NextRequest) {
 export const config = {
     matcher: [
         /*
-         * Match all request paths except for the ones starting with:
-         * - api/feed (handled manually above, but good to include in matcher to be safe or just match all)
+         * Match all request paths EXCEPT:
+         * - /feed/* (RSS feeds - must be public for RSS readers)
          * - _next/static (static files)
          * - _next/image (image optimization files)
          * - favicon.ico (favicon file)
+         * 
+         * The regex explicitly excludes 'feed' to ensure RSS endpoints
+         * are never protected by authentication
          */
-        '/((?!_next/static|_next/image|favicon.ico).*)',
+        '/((?!_next/static|_next/image|favicon.ico|feed).*)',
     ],
 };
