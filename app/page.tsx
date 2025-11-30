@@ -88,7 +88,7 @@ export default function Home() {
         onDiscard={handleDiscard}
         onManage={() => setConflictModalOpen(false)}
       />
-      <div className="absolute top-4 right-4 flex items-center">
+      <div className="flex justify-end w-full mb-4 sm:absolute sm:top-4 sm:right-4 sm:mb-0 items-center">
         {subscriptions?.quota && (
           subscriptions.quota.isAdmin ? (
             <div className="mr-4 px-3 py-1 rounded-full text-xs border bg-purple-600 text-white border-purple-500 font-bold">
@@ -96,8 +96,8 @@ export default function Home() {
             </div>
           ) : (
             <div className={`mr-4 px-3 py-1 rounded-full text-xs border ${subscriptions.quota.current >= (subscriptions.quota.limit || 1)
-                ? 'text-red-400 bg-red-900/20 border-red-900/50'
-                : 'text-slate-400 border-slate-700'
+              ? 'text-red-400 bg-red-900/20 border-red-900/50'
+              : 'text-slate-400 border-slate-700'
               }`}>
               Usage: {subscriptions.quota.current}/{subscriptions.quota.limit || 1}
             </div>

@@ -318,7 +318,7 @@ export default function ChannelManager({
                     <TabsContent value="youtube" className="space-y-8">
                         {/* Add Channel Form */}
                         <div className="mb-8">
-                            <form onSubmit={handleYouTubeSubmit} className="flex gap-4">
+                            <form onSubmit={handleYouTubeSubmit} className="flex flex-col sm:flex-row gap-4">
                                 <input
                                     type="text"
                                     value={url}
@@ -402,7 +402,7 @@ export default function ChannelManager({
                     <TabsContent value="podcast" className="space-y-8">
                         {/* Add Podcast Form */}
                         <div className="mb-8">
-                            <form onSubmit={handlePodcastSubmit} className="flex gap-4">
+                            <form onSubmit={handlePodcastSubmit} className="flex flex-col sm:flex-row gap-4">
                                 <input
                                     type="text"
                                     value={podcastUrl}
