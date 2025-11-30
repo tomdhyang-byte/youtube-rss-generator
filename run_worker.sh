@@ -10,6 +10,15 @@
 # 3. System python3
 # 4. System python
 
+# --- OPTIONAL: Auto-Update ---
+# Uncomment the following lines to enable auto-update from GitHub
+# echo "Checking for updates..."
+# git pull origin main
+# if [ $? -ne 0 ]; then
+#     echo "Warning: Git pull failed. Continuing with existing code..."
+# fi
+# -----------------------------
+
 PYTHON_EXEC=""
 
 # Check if VIRTUAL_ENV is set (active virtualenv)

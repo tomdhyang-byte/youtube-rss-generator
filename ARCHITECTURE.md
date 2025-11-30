@@ -29,9 +29,7 @@ youtube-rss-generator/
 │   ├── UserMenu.tsx              # User dropdown menu (Avatar + Switch/Dark/Logout)
 │   ├── LoginModal.tsx            # Modal for guest login wall
 │   ├── SyncConflictModal.tsx     # Modal for quota conflicts during sync
-│   ├── AuthButton.tsx            # [DEPRECATED] Use UserMenu instead
 │   ├── ThemeProvider.tsx         # Dark mode context
-│   ├── ThemeToggle.tsx           # [DEPRECATED] Integrated into UserMenu
 │   └── ui/
 │       └── dialog.tsx            # Shadcn dialog component
 │
@@ -48,6 +46,7 @@ youtube-rss-generator/
 │       └── useGuestSync.ts       # Custom hook for guest data synchronization
 │
 ├── middleware.ts                 # NextAuth middleware (protects routes)
+│
 ├── worker.py                     # Python worker (fetch + summarize)
 ├── run_worker.sh                 # Shell script to run worker
 ├── requirements.txt              # Python dependencies

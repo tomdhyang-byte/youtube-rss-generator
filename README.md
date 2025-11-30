@@ -1,6 +1,15 @@
 # Personal YouTube RSS Generator
 
-This project allows you to generate personal RSS feeds for YouTube channels with AI-powered summaries. It consists of a Next.js web interface and a Python background worker.
+This project allows you to generate personal RSS feeds for YouTube channels and Podcasts with AI-powered summaries. It consists of a Next.js web interface and a Python background worker.
+
+## Features
+
+-   **YouTube & Podcast Support**: Subscribe to both YouTube channels and Podcast RSS feeds.
+-   **AI Summaries**: Automatically generates concise summaries for videos and episodes using OpenAI GPT-4o-mini.
+-   **Guest Mode**: Try the app without signing in (limited to 1 channel).
+-   **User Accounts**: Sign in with Google to manage unlimited subscriptions and sync across devices.
+-   **Dark Mode**: Fully supported dark mode interface.
+-   **RSS Feeds**: Provides standard RSS 2.0 feeds compatible with any RSS reader.
 
 ## Prerequisites
 
@@ -10,6 +19,7 @@ Before you begin, ensure you have the following installed on your machine:
 2.  **Python** (v3.8 or later)
 3.  **PostgreSQL** (Running locally or accessible via URL)
 4.  **OpenAI API Key** (for generating summaries)
+5.  **Deepgram API Key** (for podcast audio transcription)
 
 ## Installation
 
@@ -39,8 +49,12 @@ Before you begin, ensure you have the following installed on your machine:
 
 2.  **Edit `.env`:**
     Open `.env` and fill in your details:
-    - `DATABASE_URL`: Your PostgreSQL connection string.
-    - `OPENAI_API_KEY`: Your OpenAI API key.
+    -   `DATABASE_URL`: Your PostgreSQL connection string.
+    -   `OPENAI_API_KEY`: Your OpenAI API key.
+    -   `DEEPGRAM_API_KEY`: Your Deepgram API key (required for podcasts).
+    -   `NEXTAUTH_URL`: The canonical URL of your site (e.g., `http://localhost:3000`).
+    -   `NEXTAUTH_SECRET`: A random string for session encryption.
+    -   `GOOGLE_CLIENT_ID` & `GOOGLE_CLIENT_SECRET`: For Google Sign-In.
 
 3.  **Setup Database:**
     Run the Prisma migration to create the database schema:
@@ -58,7 +72,7 @@ npm run dev
 ```
 
 ### 2. Start the Background Worker
-The worker fetches videos and generates summaries. You can run it manually or set up a cron job.
+The worker fetches videos/episodes and generates summaries. It handles both YouTube channels and Podcasts.
 
 **Manual Run:**
 ```bash
@@ -75,6 +89,8 @@ To keep feeds updated, add this to your crontab (`crontab -e`):
 ## Usage
 
 See [USAGE.md](USAGE.md) for detailed usage instructions.
+
+For a guide on managing code across multiple devices (e.g., MacBook Pro for dev, Mac Mini for worker), see [WORKFLOW.md](WORKFLOW.md).
 
 ## Deployment
 

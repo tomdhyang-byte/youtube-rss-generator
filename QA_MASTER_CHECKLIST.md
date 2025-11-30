@@ -64,14 +64,14 @@
 - **Status**: ⚠️ Pending
 
 ---
-### [ID: QC-010] RSS Feed
+### [ID: QC-010] RSS Feed (YouTube)
 - **Action**: Access `http://localhost:3000/feed/[id]` (YouTube)
 - **Expected Result**: Valid XML RSS feed returned with episodes
 - **Criticality**: High
 - **Status**: ⚠️ Pending
 
 ---
-### [ID: QC-011] RSS Feed
+### [ID: QC-011] RSS Feed (Podcast)
 - **Action**: Access `http://localhost:3000/feed/podcast/[id]` (Podcast)
 - **Expected Result**: Valid XML RSS feed returned with episodes
 - **Criticality**: High
@@ -151,5 +151,26 @@
 ### [ID: QC-022] Guest Channel Info
 - **Action**: As guest, add valid YouTube channel
 - **Expected Result**: Real channel name and description displayed (not placeholder)
+- **Criticality**: Medium
+- **Status**: ⚠️ Pending
+
+---
+### [ID: QC-023] Podcast Metadata
+- **Action**: Add Podcast with generic title, run worker
+- **Expected Result**: Podcast title, description, and image update from RSS feed
+- **Criticality**: Medium
+- **Status**: ⚠️ Pending
+
+---
+### [ID: QC-024] Deepgram Transcription
+- **Action**: Run worker with valid `DEEPGRAM_API_KEY`
+- **Expected Result**: Podcast episodes are transcribed and summarized
+- **Criticality**: High
+- **Status**: ⚠️ Pending
+
+---
+### [ID: QC-025] Deepgram Missing Key
+- **Action**: Run worker without `DEEPGRAM_API_KEY`
+- **Expected Result**: Worker skips transcription gracefully, logs warning
 - **Criticality**: Medium
 - **Status**: ⚠️ Pending
