@@ -1,10 +1,14 @@
 'use client';
 
 import { useState } from 'react';
+import { useSession } from 'next-auth/react';
 import { Plus, Rss, ExternalLink, Loader2, Mic, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ConfirmDialog } from "@/components/ConfirmDialog"
+import { LoginModal } from "@/components/LoginModal"
+import { useLocalStorage } from "@/lib/hooks/useLocalStorage"
+import { GuestChannel } from "@/lib/types"
 
 // Define types based on the Prisma model
 interface YoutubeChannel {
@@ -43,12 +47,20 @@ export default function ChannelManager({
     quota,
     onRefresh
 }: ChannelManagerProps) {
+    const { data: session } = useSession();
     const [url, setUrl] = useState('');
     const [podcastUrl, setPodcastUrl] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
     const [deleteTarget, setDeleteTarget] = useState<{ id: number; type: 'youtube' | 'podcast'; name: string } | null>(null);
+    const [loginModalOpen, setLoginModalOpen] = useState(false);
+
+    // Guest mode state
+    const [localChannels, setLocalChannels, removeLocalChannels] = useLocalStorage<GuestChannel[]>('guest_channels', []);
+
+    // Determine which channels to display
+    const displayChannels = session ? initialChannels : localChannels;
 
     const handleYouTubeSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -57,9 +69,60 @@ export default function ChannelManager({
             return;
         }
 
+        // Guest mode: Show login modal if trying to add 2nd channel
+        if (!session && localChannels.length >= 1) {
+            setLoginModalOpen(true);
+            return;
+        }
+
         setLoading(true);
         setError('');
 
+        // Guest mode: Fetch real channel info via backend proxy
+        if (!session) {
+            try {
+                toast.info('Fetching channel information...');
+
+                // Call backend proxy to avoid CORS
+                const response = await fetch('/api/channel-info', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url }),
+                });
+
+                if (!response.ok) {
+                    const data = await response.json().catch(() => ({}));
+                    throw new Error(data.error || 'Failed to fetch channel info');
+                }
+
+                const { youtube_id, title, description } = await response.json();
+
+                // Generate negative ID for guest channel
+                const mockId = -(Date.now());
+                const mockChannel: GuestChannel = {
+                    id: mockId,
+                    youtube_id: youtube_id || 'guest-' + mockId,
+                    title: title || 'YouTube Channel',
+                    description: description,
+                    rss_url: null,
+                    last_updated: new Date().toISOString(),
+                    url: url, // Store original URL for sync
+                };
+
+                setLocalChannels([...localChannels, mockChannel]);
+                setUrl('');
+                toast.success('Channel added! Sign in to save permanently.');
+                toast.info('You can add 1 free channel. Sign in to add more.');
+            } catch (err: any) {
+                setError(err.message);
+                toast.error(err.message);
+            } finally {
+                setLoading(false);
+            }
+            return;
+        }
+
+        // Authenticated mode: Normal API call
         try {
             const res = await fetch('/api/channels', {
                 method: 'POST',
@@ -155,6 +218,12 @@ export default function ChannelManager({
     };
 
     const copyRssLink = (id: number, type: 'youtube' | 'podcast') => {
+        // Guest mode: Show login modal
+        if (!session) {
+            setLoginModalOpen(true);
+            return;
+        }
+
         const path = type === 'youtube' ? `/feed/${id}` : `/feed/podcast/${id}`;
         const link = `${window.location.origin}${path}`;
         navigator.clipboard.writeText(link);
@@ -176,6 +245,7 @@ export default function ChannelManager({
 
     return (
         <>
+            <LoginModal isOpen={loginModalOpen} onClose={() => setLoginModalOpen(false)} />
             <ConfirmDialog
                 isOpen={showDeleteDialog}
                 title="Confirm Unsubscribe"
@@ -247,7 +317,7 @@ export default function ChannelManager({
 
                         {/* Channel List */}
                         <div className="flex flex-col items-center gap-4 w-full">
-                            {initialChannels.map((channel) => (
+                            {displayChannels.map((channel) => (
                                 <div key={channel.id} className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 flex items-center justify-between group hover:border-blue-100 dark:hover:border-blue-900 transition-all w-full max-w-xl">
                                     <div className="flex-1 min-w-0">
                                         <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-1">{decodeHtml(channel.title)}</h3>
@@ -259,9 +329,15 @@ export default function ChannelManager({
 
                                     <div className="flex items-center gap-2 ml-4">
                                         <button
-                                            onClick={() => handleUnsubscribe(channel.id, 'youtube', channel.title)}
+                                            onClick={() => {
+                                                if (!session) {
+                                                    setLoginModalOpen(true);
+                                                } else {
+                                                    handleUnsubscribe(channel.id, 'youtube', channel.title);
+                                                }
+                                            }}
                                             className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-950 rounded-lg transition-colors"
-                                            title="Unsubscribe"
+                                            title={!session ? "Sign in to manage subscriptions" : "Unsubscribe"}
                                             disabled={loading}
                                         >
                                             <Trash2 className="w-5 h-5" />
@@ -286,7 +362,7 @@ export default function ChannelManager({
                                 </div>
                             ))}
 
-                            {initialChannels.length === 0 && (
+                            {displayChannels.length === 0 && (
                                 <div className="text-center py-12 text-gray-400">
                                     No YouTube channels added yet.
                                 </div>

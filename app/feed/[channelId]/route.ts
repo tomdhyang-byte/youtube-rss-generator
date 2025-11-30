@@ -38,6 +38,18 @@ export async function GET(
             pubDate: channel.last_updated,
         });
 
+        // Add welcome message if no videos yet
+        if (channel.videos.length === 0) {
+            feed.item({
+                title: "Welcome to Your RSS Feed!",
+                description: "This feed is empty because no videos have been processed yet. Our AI worker processes new channels every few hours. Please check back in a few minutes, or up to 6 hours for the first update. Thank you for your patience!",
+                url: `https://www.youtube.com/channel/${channel.youtube_id}`,
+                guid: `welcome-msg-channel-${channelId}`,
+                date: channel.last_updated,
+                author: channel.title,
+            });
+        }
+
         channel.videos.forEach((video: any) => {
             feed.item({
                 title: video.title,
