@@ -59,8 +59,15 @@ export default function ChannelManager({
     // Guest mode state
     const [localChannels, setLocalChannels, removeLocalChannels] = useLocalStorage<GuestChannel[]>('guest_channels', []);
 
+    // Optimistic UI state for deletions
+    const [optimisticDeletedIds, setOptimisticDeletedIds] = useState<number[]>([]);
+
     // Determine which channels to display
-    const displayChannels = session ? initialChannels : localChannels;
+    const displayChannels = (session ? initialChannels : localChannels)
+        .filter(channel => !optimisticDeletedIds.includes(channel.id));
+
+    const displayPodcasts = initialPodcasts
+        .filter(podcast => !optimisticDeletedIds.includes(podcast.id));
 
     const handleYouTubeSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -194,17 +201,37 @@ export default function ChannelManager({
     const confirmUnsubscribe = async () => {
         if (!deleteTarget) return;
 
+        const targetId = deleteTarget.id;
+        const targetType = deleteTarget.type;
+        const targetName = deleteTarget.name;
+
+        // 1. Optimistic Update: Hide immediately
         setShowDeleteDialog(false);
-        setLoading(true);
+        setOptimisticDeletedIds(prev => [...prev, targetId]);
+
+        // Guest mode: Remove from local storage immediately
+        if (!session && targetType === 'youtube') {
+            const updatedLocal = localChannels.filter(c => c.id !== targetId);
+            setLocalChannels(updatedLocal);
+            toast.success(`Successfully unsubscribed from ${targetName}!`);
+            setDeleteTarget(null);
+            return;
+        }
+
+        // Authenticated mode
+        toast.success(`Successfully unsubscribed from ${targetName}!`);
+
+        // Don't set global loading to keep UI responsive
+        // setLoading(true); 
 
         try {
-            const endpoint = deleteTarget.type === 'youtube' ? '/api/channels' : '/api/podcasts';
-            const idKey = deleteTarget.type === 'youtube' ? 'channelId' : 'podcastId';
+            const endpoint = targetType === 'youtube' ? '/api/channels' : '/api/podcasts';
+            const idKey = targetType === 'youtube' ? 'channelId' : 'podcastId';
 
             const res = await fetch(endpoint, {
                 method: 'DELETE',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ [idKey]: deleteTarget.id }),
+                body: JSON.stringify({ [idKey]: targetId }),
             });
 
             if (!res.ok) {
@@ -212,10 +239,12 @@ export default function ChannelManager({
                 throw new Error(data.error || 'Failed to unsubscribe');
             }
 
-            toast.success(`Successfully unsubscribed from ${deleteTarget.name}!`);
+            // Success: Trigger refresh to get real state (which will eventually remove it from props)
             onRefresh?.();
         } catch (err: any) {
-            toast.error(err.message);
+            // Revert optimistic update on failure
+            setOptimisticDeletedIds(prev => prev.filter(id => id !== targetId));
+            toast.error(err.message || "Failed to unsubscribe");
         } finally {
             setLoading(false);
             setDeleteTarget(null);
@@ -406,7 +435,7 @@ export default function ChannelManager({
 
                         {/* Podcast List */}
                         <div className="flex flex-col items-center gap-4 w-full">
-                            {initialPodcasts.map((podcast) => (
+                            {displayPodcasts.map((podcast) => (
                                 <div key={podcast.id} className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 flex items-center justify-between group hover:border-purple-100 dark:hover:border-purple-900 transition-all w-full max-w-xl">
                                     <div className="flex-1 min-w-0">
                                         <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-1">{podcast.title || 'Untitled Podcast'}</h3>
@@ -447,7 +476,7 @@ export default function ChannelManager({
                                 </div>
                             ))}
 
-                            {initialPodcasts.length === 0 && (
+                            {displayPodcasts.length === 0 && (
                                 <div className="text-center py-12 text-gray-400">
                                     No podcasts added yet.
                                 </div>
