@@ -88,7 +88,7 @@ export default function Home() {
         onDiscard={handleDiscard}
         onManage={() => setConflictModalOpen(false)}
       />
-      <div className="flex justify-end w-full mb-4 sm:absolute sm:top-4 sm:right-4 sm:mb-0 items-center">
+      <div className="w-full h-16 flex items-center justify-end px-4 mb-8">
         {subscriptions?.quota && (
           subscriptions.quota.isAdmin ? (
             <div className="mr-4 px-3 py-1 rounded-full text-xs border bg-purple-600 text-white border-purple-500 font-bold">

@@ -107,10 +107,11 @@ export function UserMenu() {
     return (
         <button
             onClick={() => signIn('google')}
-            className="flex items-center gap-2 px-6 py-3 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors shadow-lg hover:shadow-xl"
+            className="flex items-center gap-2 px-3 py-2 md:px-6 md:py-3 text-sm font-medium text-gray-300 hover:text-white hover:bg-white/10 md:text-white md:bg-blue-600 md:hover:bg-blue-700 rounded-lg transition-colors md:shadow-lg md:hover:shadow-xl"
         >
             <LogIn className="w-5 h-5" />
-            Sign in with Google
+            <span className="hidden md:inline">Sign in with Google</span>
+            <span className="md:hidden">Sign in</span>
         </button>
     );
 }

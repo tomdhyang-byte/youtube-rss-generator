@@ -318,19 +318,19 @@ export default function ChannelManager({
                     <TabsContent value="youtube" className="space-y-8">
                         {/* Add Channel Form */}
                         <div className="mb-8">
-                            <form onSubmit={handleYouTubeSubmit} className="flex flex-col sm:flex-row gap-4">
+                            <form onSubmit={handleYouTubeSubmit} className="flex flex-col gap-3 sm:flex-row sm:gap-4">
                                 <input
                                     type="text"
                                     value={url}
                                     onChange={(e) => setUrl(e.target.value)}
-                                    placeholder="Paste YouTube Channel URL (e.g. https://youtube.com/@channel)"
-                                    className="flex-1 px-4 h-12 border border-gray-300 dark:border-gray-600 rounded-lg focus:border-blue-500 focus:shadow-[0_0_0_4px_rgba(59,130,246,0.5)] outline-none transition-all text-black dark:text-white bg-white dark:bg-gray-700 placeholder:text-gray-500 dark:placeholder:text-gray-400"
+                                    placeholder="Paste YouTube Channel URL"
+                                    className="w-full px-4 h-12 border border-slate-600 rounded-lg focus:border-blue-500 focus:shadow-[0_0_0_4px_rgba(59,130,246,0.5)] outline-none transition-all text-white bg-slate-800 placeholder:text-gray-400"
                                     disabled={loading}
                                 />
                                 <button
                                     type="submit"
                                     disabled={loading || !canAddMore}
-                                    className="bg-blue-600 hover:bg-blue-700 text-white px-6 h-12 rounded-lg font-medium flex items-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+                                    className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white px-6 h-12 rounded-lg font-medium flex items-center justify-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
                                     title={!canAddMore ? 'Quota reached - please unsubscribe from another to add' : ''}
                                 >
                                     {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Plus className="w-5 h-5" />}
@@ -402,19 +402,19 @@ export default function ChannelManager({
                     <TabsContent value="podcast" className="space-y-8">
                         {/* Add Podcast Form */}
                         <div className="mb-8">
-                            <form onSubmit={handlePodcastSubmit} className="flex flex-col sm:flex-row gap-4">
+                            <form onSubmit={handlePodcastSubmit} className="flex flex-col gap-3 sm:flex-row sm:gap-4">
                                 <input
                                     type="text"
                                     value={podcastUrl}
                                     onChange={(e) => setPodcastUrl(e.target.value)}
                                     placeholder="Paste Apple Podcast Link or RSS URL"
-                                    className="flex-1 px-4 h-12 border border-gray-300 dark:border-gray-600 rounded-lg focus:border-purple-500 focus:shadow-[0_0_0_4px_rgba(168,85,247,0.5)] outline-none transition-all text-black dark:text-white bg-white dark:bg-gray-700 placeholder:text-gray-500 dark:placeholder:text-gray-400"
+                                    className="w-full px-4 h-12 border border-slate-600 rounded-lg focus:border-purple-500 focus:shadow-[0_0_0_4px_rgba(168,85,247,0.5)] outline-none transition-all text-white bg-slate-800 placeholder:text-gray-400"
                                     disabled={loading}
                                 />
                                 <button
                                     type="submit"
                                     disabled={loading || !canAddMore}
-                                    className="bg-purple-600 hover:bg-purple-700 text-white px-6 h-12 rounded-lg font-medium flex items-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+                                    className="w-full sm:w-auto bg-purple-600 hover:bg-purple-700 text-white px-6 h-12 rounded-lg font-medium flex items-center justify-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
                                     title={!canAddMore ? 'Quota reached - please unsubscribe from another to add' : ''}
                                 >
                                     {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Mic className="w-5 h-5" />}
