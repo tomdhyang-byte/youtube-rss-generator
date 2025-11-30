@@ -72,15 +72,11 @@ export function UserMenu() {
                         <div className="py-1">
                             {/* Switch Account */}
                             <button
-                                onClick={async () => {
+                                onClick={() => {
                                     setIsOpen(false);
-                                    // Sign out and redirect to force account selection
-                                    const currentUrl = window.location.origin;
-                                    await signOut({
-                                        redirect: false
-                                    });
-                                    // Redirect to Google OAuth with forced account selector
-                                    window.location.href = `/api/auth/signin/google?callbackUrl=${encodeURIComponent(currentUrl)}`;
+                                    // Sign out and redirect directly to Google sign-in with account selector
+                                    const googleAuthUrl = `/api/auth/signin/google`;
+                                    signOut({ callbackUrl: googleAuthUrl });
                                 }}
                                 className="flex w-full items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors"
                             >
