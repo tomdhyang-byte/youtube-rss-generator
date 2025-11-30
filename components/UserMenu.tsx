@@ -2,14 +2,12 @@
 
 import { signIn, signOut, useSession } from 'next-auth/react';
 import { useState, useRef, useEffect } from 'react';
-import { LogIn, LogOut, Loader2, ChevronDown, RefreshCw, Moon, Sun } from 'lucide-react';
-import { useTheme } from 'next-themes';
+import { LogIn, LogOut, Loader2, ChevronDown, RefreshCw } from 'lucide-react';
 
 export function UserMenu() {
     const { data: session, status } = useSession();
     const [isOpen, setIsOpen] = useState(false);
     const menuRef = useRef<HTMLDivElement>(null);
-    const { theme, setTheme } = useTheme();
 
     // Close dropdown when clicking outside
     useEffect(() => {
@@ -82,26 +80,6 @@ export function UserMenu() {
                             >
                                 <RefreshCw className="w-4 h-4" />
                                 Switch Account
-                            </button>
-
-                            {/* Dark Mode Toggle */}
-                            <button
-                                onClick={() => {
-                                    setTheme(theme === 'dark' ? 'light' : 'dark');
-                                }}
-                                className="flex w-full items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors"
-                            >
-                                {theme === 'dark' ? (
-                                    <>
-                                        <Sun className="w-4 h-4" />
-                                        Light Mode
-                                    </>
-                                ) : (
-                                    <>
-                                        <Moon className="w-4 h-4" />
-                                        Dark Mode
-                                    </>
-                                )}
                             </button>
 
                             {/* Divider */}

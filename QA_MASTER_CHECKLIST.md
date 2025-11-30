@@ -87,9 +87,9 @@
 ---
 ### [ID: QC-013] Theme
 - **Action**: Click Theme Toggle in UserMenu dropdown
-- **Expected Result**: UI switches between Light/Dark mode
+- **Expected Result**: Feature Removed (Dark Mode Enforced)
 - **Criticality**: Low
-- **Status**: ⚠️ Pending
+- **Status**: ✅ Removed
 
 ---
 ### [ID: QC-014] Guest Mode
@@ -129,7 +129,7 @@
 ---
 ### [ID: QC-019] UserMenu
 - **Action**: Click avatar/name in top-right corner
-- **Expected Result**: Dropdown menu opens with Switch Account, Dark Mode, Sign Out
+- **Expected Result**: Dropdown menu opens with Switch Account, Sign Out (Dark Mode removed)
 - **Criticality**: Medium
 - **Status**: ⚠️ Pending
 
