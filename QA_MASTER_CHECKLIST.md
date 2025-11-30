@@ -86,7 +86,70 @@
 
 ---
 ### [ID: QC-013] Theme
-- **Action**: Click Theme Toggle
+- **Action**: Click Theme Toggle in UserMenu dropdown
 - **Expected Result**: UI switches between Light/Dark mode
 - **Criticality**: Low
+- **Status**: ⚠️ Pending
+
+---
+### [ID: QC-014] Guest Mode
+- **Action**: Visit site without signing in, add YouTube channel
+- **Expected Result**: Channel appears in list with real name/description, "Sign in to save" toast
+- **Criticality**: High
+- **Status**: ⚠️ Pending
+
+---
+### [ID: QC-015] Guest Mode
+- **Action**: As guest, try to add 2nd channel
+- **Expected Result**: Login modal appears, cannot add without signing in
+- **Criticality**: High
+- **Status**: ⚠️ Pending
+
+---
+### [ID: QC-016] Login Wall
+- **Action**: As guest, click "Copy RSS" button
+- **Expected Result**: Login modal appears prompting sign-in
+- **Criticality**: High
+- **Status**: ⚠️ Pending
+
+---
+### [ID: QC-017] Silent Sync
+- **Action**: As guest with 1 channel, sign in (account has space)
+- **Expected Result**: Guest channel auto-syncs, localStorage cleared, success toast
+- **Criticality**: High
+- **Status**: ⚠️ Pending
+
+---
+### [ID: QC-018] Quota Conflict
+- **Action**: As guest with 1 channel, sign in (account quota full)
+- **Expected Result**: Conflict modal appears with "Discard" and "Manage" options
+- **Criticality**: High
+- **Status**: ⚠️ Pending
+
+---
+### [ID: QC-019] UserMenu
+- **Action**: Click avatar/name in top-right corner
+- **Expected Result**: Dropdown menu opens with Switch Account, Dark Mode, Sign Out
+- **Criticality**: Medium
+- **Status**: ⚠️ Pending
+
+---
+### [ID: QC-020] Switch Account
+- **Action**: Click "Switch Account" in UserMenu
+- **Expected Result**: Redirects to Google sign-in page with account selector
+- **Criticality**: Medium
+- **Status**: ⚠️ Pending
+
+---
+### [ID: QC-021] RSS Empty State
+- **Action**: Access RSS feed for newly added channel (no videos yet)
+- **Expected Result**: RSS contains welcome message explaining processing time
+- **Criticality**: Low
+- **Status**: ⚠️ Pending
+
+---
+### [ID: QC-022] Guest Channel Info
+- **Action**: As guest, add valid YouTube channel
+- **Expected Result**: Real channel name and description displayed (not placeholder)
+- **Criticality**: Medium
 - **Status**: ⚠️ Pending

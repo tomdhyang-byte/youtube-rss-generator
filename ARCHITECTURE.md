@@ -10,31 +10,42 @@ A self-hosted web application that generates AI-summarized RSS feeds from YouTub
 ```
 youtube-rss-generator/
 ├── app/                          # Next.js App Router
-│   ├── page.tsx                  # Main UI (channel management)
+│   ├── page.tsx                  # Main UI (channel management + guest sync)
 │   ├── layout.tsx                # Root layout with theme provider
 │   ├── globals.css               # Global styles (Tailwind)
 │   ├── api/
 │   │   ├── auth/[...nextauth]/   # NextAuth.js API routes
 │   │   ├── channels/route.ts     # API: Add/list YouTube channels
+│   │   ├── channel-info/route.ts # API: Fetch channel metadata (public, no auth)
 │   │   ├── podcasts/route.ts     # API: Add/list Podcasts
 │   │   └── subscriptions/        # API: Manage user subscriptions
 │   └── feed/
-│       ├── [channelId]/route.ts  # API: Generate YouTube RSS feed
+│       ├── [channelId]/route.ts  # API: Generate YouTube RSS feed (with empty state)
 │       └── podcast/
 │           └── [podcastId]/route.ts # API: Generate Podcast RSS feed
 │
 ├── components/                   # React components
-│   ├── ChannelManager.tsx        # Channel list & add form
-│   ├── AuthButton.tsx            # Login/Logout/Switch Account button
+│   ├── ChannelManager.tsx        # Channel list & add form (with guest mode)
+│   ├── UserMenu.tsx              # User dropdown menu (Avatar + Switch/Dark/Logout)
+│   ├── LoginModal.tsx            # Modal for guest login wall
+│   ├── SyncConflictModal.tsx     # Modal for quota conflicts during sync
+│   ├── AuthButton.tsx            # [DEPRECATED] Use UserMenu instead
 │   ├── ThemeProvider.tsx         # Dark mode context
-│   └── ThemeToggle.tsx           # Dark mode toggle button
+│   ├── ThemeToggle.tsx           # [DEPRECATED] Integrated into UserMenu
+│   └── ui/
+│       └── dialog.tsx            # Shadcn dialog component
 │
 ├── prisma/
 │   └── schema.prisma             # Database schema (PostgreSQL)
 │
 ├── lib/
 │   ├── auth.ts                   # Auth helpers (getSession, isAdmin)
-│   └── prisma.ts                 # Prisma Client singleton
+│   ├── prisma.ts                 # Prisma Client singleton
+│   ├── types.ts                  # Shared TypeScript types (Channel, GuestChannel)
+│   ├── utils.ts                  # Utility functions (cn for classNames)
+│   └── hooks/
+│       ├── useLocalStorage.ts    # Custom hook for localStorage management
+│       └── useGuestSync.ts       # Custom hook for guest data synchronization
 │
 ├── middleware.ts                 # NextAuth middleware (protects routes)
 ├── worker.py                     # Python worker (fetch + summarize)
@@ -54,33 +65,95 @@ youtube-rss-generator/
 - **Purpose**: Main entry point for the web interface
 - **Logic**:
   - Handles authentication state (loading, unauthenticated, authenticated)
-  - Fetches user subscriptions from `/api/subscriptions`
+  - **Guest Mode**: Unauthenticated users see `<ChannelManager>` with empty initial data
+  - **Authenticated**: Fetches user subscriptions from `/api/subscriptions`
+  - **Silent Sync**: Uses `useGuestSync` hook to auto-sync guest channels on login
   - Renders `<ChannelManager>` with subscription data
-  - Includes `<AuthButton>` for Google Sign-In
+  - Includes `<UserMenu>` for user actions and `<SyncConflictModal>` for quota handling
 
 #### `components/ChannelManager.tsx`
 - **Purpose**: UI for adding channels/podcasts and displaying subscriptions
 - **Key Features**:
+  - **Guest Mode Support**:
+    - Uses `useLocalStorage` to manage guest channels (stored locally)
+    - Allows guests to add 1 free channel without signing in
+    - Shows real channel name/description via `/api/channel-info`
+    - Displays `session ? serverChannels : localChannels`
+  - **Login Wall**:
+    - Blocks "Copy RSS" for guests → Opens `<LoginModal>`
+    - Blocks 2nd channel add for guests → Opens `<LoginModal>`
   - Input fields for YouTube channel and Podcast URLs
   - Calls `/api/channels` or `/api/podcasts` POST to add new content
   - Displays list of subscriptions with:
     - Title, description, last updated timestamp
-    - Copy RSS link button
-    - Unsubscribe button
+    - Copy RSS link button (triggers login for guests)
+    - Unsubscribe button (triggers login for guests)
   - **Quota Management**: Checks user quota (Admin vs Regular)
   - **Responsive**: Dark mode support, centered cards
 
 #### `app/api/auth/[...nextauth]/route.ts`
 - **Purpose**: NextAuth.js configuration
 - **Providers**: Google OAuth
+  - **Authorization Params**: `prompt: "consent select_account"` (forces account selector)
 - **Adapter**: Prisma Adapter (stores users/sessions in DB)
 - **Callbacks**: Custom session callback to include `user.id`
 
 #### `middleware.ts`
 - **Purpose**: Protects API routes
 - **Logic**:
-  - Public: `/feed/*`, `/_next/*`, `/favicon.ico`
+  - Public: `/feed/*`, `/_next/*`, `/favicon.ico`, `/api/channel-info`
   - Protected: `/api/channels`, `/api/podcasts`, `/api/subscriptions`
+
+---
+
+### **New Components (Guest Experience)**
+
+#### `components/UserMenu.tsx`
+- **Purpose**: Consolidated user menu dropdown
+- **Features**:
+  - Avatar + Name + ChevronDown toggle
+  - Dropdown with: Switch Account, Dark Mode toggle, Sign Out
+  - Click-outside-to-close with `useRef`
+  - Shows admin badge if applicable
+
+#### `components/LoginModal.tsx`
+- **Purpose**: Login wall modal for guest users
+- **UI**: Google sign-in prompt with compelling CTA
+- **Triggered by**: Copy RSS, Add 2nd channel (as guest)
+
+#### `components/SyncConflictModal.tsx`
+- **Purpose**: Handles quota conflicts during guest sync
+- **Actions**:
+  - "Discard Guest Data" → Clears localStorage
+  - "Manage Subscriptions" → Allows user to delete existing channels
+
+#### `lib/hooks/useLocalStorage.ts`
+- **Purpose**: Custom hook for localStorage management
+- **Features**:
+  - JSON serialization/deserialization
+  - SSR-safe (checks for `window`)
+  - Returns `[value, setValue, removeValue]`
+
+#### `lib/hooks/useGuestSync.ts`
+- **Purpose**: Manages guest data synchronization on login
+- **Flow**:
+  1. Detects `session && localChannels.length > 0`
+  2. POSTs each channel to `/api/channels`
+  3. Handles 200/409 (success), 403 (quota full)
+  4. Clears localStorage on success
+  5. Opens conflict modal on quota full
+
+---
+
+### **New API Endpoints**
+
+#### `app/api/channel-info/route.ts`
+- **Purpose**: Fetch YouTube channel metadata without authentication
+- **Method**: POST
+- **Auth**: Public (no auth required)
+- **Body**: `{ url: string }`
+- **Response**: `{ youtube_id, title, description }`
+- **Use Case**: Guest mode - fetch real channel info to bypass CORS
 
 ---
 
