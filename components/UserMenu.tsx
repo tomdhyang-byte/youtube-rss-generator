@@ -72,8 +72,10 @@ export function UserMenu() {
                         <div className="py-1">
                             {/* Switch Account */}
                             <button
-                                onClick={() => {
+                                onClick={async () => {
                                     setIsOpen(false);
+                                    // Sign out first, then sign in with account picker
+                                    await signOut({ redirect: false });
                                     signIn('google', { prompt: 'select_account' });
                                 }}
                                 className="flex w-full items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors"
