@@ -107,6 +107,11 @@ export default function ChannelManager({
                     rss_url: null,
                     last_updated: new Date().toISOString(),
                     url: url, // Store original URL for sync
+                    cached_metadata: { // ✨ Cache metadata for faster sync
+                        youtube_id: youtube_id || 'guest-' + mockId,
+                        title: title || 'YouTube Channel',
+                        description: description,
+                    },
                 };
 
                 setLocalChannels([...localChannels, mockChannel]);

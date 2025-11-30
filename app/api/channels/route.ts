@@ -16,8 +16,12 @@ export async function POST(request: Request) {
 
     try {
         const body = await request.json();
-        const { url } = body;
+        const { url, metadata } = body;
         console.log(`[API] Received URL: ${url}`);
+
+        if (metadata) {
+            console.log(`[API] Using cached metadata (skip YouTube fetch)`);
+        }
 
         if (!url) {
             return NextResponse.json({ error: 'URL is required' }, { status: 400 });
@@ -25,45 +29,52 @@ export async function POST(request: Request) {
 
         let channelId = '';
 
-        // 2. Try to extract ID from URL regex (channel/ID)
-        const channelIdMatch = url.match(/channel\/(UC[\w-]{22})/);
-        if (channelIdMatch) {
-            channelId = channelIdMatch[1];
-            console.log(`[API] Extracted ID from URL: ${channelId}`);
-        } else {
-            // 3. If not a direct ID, we must fetch the page to resolve Handle or Custom URL
-            console.log('[API] Fetching page to resolve ID...');
-            try {
-                const response = await fetch(url, {
-                    headers: {
-                        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-                        'Accept-Language': 'en-US,en;q=0.9',
-                    }
-                });
-                const text = await response.text();
+        // 2. Try to use cached metadata first (performance optimization)
+        if (metadata?.youtube_id) {
+            channelId = metadata.youtube_id;
+            console.log(`[API] Using cached channel ID: ${channelId}`);
+        }
+        // 3. Try to extract ID from URL regex (channel/ID)
+        else {
+            const channelIdMatch = url.match(/channel\/(UC[\w-]{22})/);
+            if (channelIdMatch) {
+                channelId = channelIdMatch[1];
+                console.log(`[API] Extracted ID from URL: ${channelId}`);
+            } else {
+                // 4. If not a direct ID, we must fetch the page to resolve Handle or Custom URL
+                console.log('[API] Fetching page to resolve ID...');
+                try {
+                    const response = await fetch(url, {
+                        headers: {
+                            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                            'Accept-Language': 'en-US,en;q=0.9',
+                        }
+                    });
+                    const text = await response.text();
 
-                // Try og:url (Most reliable)
-                const ogMatch = text.match(/<meta property="og:url" content="https:\/\/www\.youtube\.com\/channel\/(UC[\w-]{22})"/);
-                if (ogMatch) {
-                    channelId = ogMatch[1];
-                    console.log(`[API] Found ID in og:url: ${channelId}`);
-                } else {
-                    // Try itemprop="channelId"
-                    const metaMatch = text.match(/itemprop="channelId" content="(UC[\w-]{22})"/);
-                    if (metaMatch) {
-                        channelId = metaMatch[1];
-                        console.log(`[API] Found ID in meta tag: ${channelId}`);
+                    // Try og:url (Most reliable)
+                    const ogMatch = text.match(/<meta property="og:url" content="https:\/\/www\.youtube\.com\/channel\/(UC[\w-]{22})"/);
+                    if (ogMatch) {
+                        channelId = ogMatch[1];
+                        console.log(`[API] Found ID in og:url: ${channelId}`);
                     } else {
-                        // Fallback: look for "channelId":"UC..."
-                        const jsonMatch = text.match(/"channelId":"(UC[\w-]{22})"/);
-                        if (jsonMatch) {
-                            channelId = jsonMatch[1];
-                            console.log(`[API] Found ID in JSON: ${channelId}`);
+                        // Try itemprop="channelId"
+                        const metaMatch = text.match(/itemprop="channelId" content="(UC[\w-]{22})"/);
+                        if (metaMatch) {
+                            channelId = metaMatch[1];
+                            console.log(`[API] Found ID in meta tag: ${channelId}`);
+                        } else {
+                            // Fallback: look for "channelId":"UC..."
+                            const jsonMatch = text.match(/"channelId":"(UC[\w-]{22})"/);
+                            if (jsonMatch) {
+                                channelId = jsonMatch[1];
+                                console.log(`[API] Found ID in JSON: ${channelId}`);
+                            }
                         }
                     }
+                } catch (e) {
+                    console.error("[API] Failed to fetch page for ID extraction", e);
                 }
-            } catch (e) {
-                console.error("[API] Failed to fetch page for ID extraction", e);
             }
         }
 

@@ -48,9 +48,13 @@ export function useGuestSync({
             return;
         }
 
-        const syncGuestChannels = async () => {
+        // 🚀 OPTIMISTIC UPDATE: Immediately trigger UI update with guest data
+        console.log(`[useGuestSync] Optimistic update - showing ${localChannels.length} guest channels immediately`);
+        onSyncComplete(); // This will trigger fetchSubscriptions, which will show guest channels momentarily
+
+        const syncGuestChannelsInBackground = async () => {
             isSyncing.current = true;
-            console.log(`[useGuestSync] Starting sync of ${localChannels.length} guest channels...`);
+            console.log(`[useGuestSync] Starting background sync of ${localChannels.length} guest channels...`);
 
             let successCount = 0;
             let skipCount = 0;
@@ -61,7 +65,10 @@ export function useGuestSync({
                     const res = await fetch('/api/channels', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ url: channel.url }),
+                        body: JSON.stringify({
+                            url: channel.url,
+                            metadata: channel.cached_metadata, // ✨ Use cached metadata
+                        }),
                     });
 
                     if (res.ok) {
@@ -103,12 +110,16 @@ export function useGuestSync({
                     );
                 }
 
-                // Trigger refresh
-                onSyncComplete();
+                // Silent revalidation after a short delay
+                setTimeout(() => {
+                    console.log('[useGuestSync] Silent revalidation - fetching real data from server');
+                    onSyncComplete();
+                }, 1500);
             }
         };
 
-        syncGuestChannels();
+        // Start background sync
+        syncGuestChannelsInBackground();
     }, [session, localChannels, onSyncComplete]);
 
     return {
