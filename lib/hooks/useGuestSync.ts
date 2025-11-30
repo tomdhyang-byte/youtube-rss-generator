@@ -51,6 +51,9 @@ export function useGuestSync({
         // 🚀 OPTIMISTIC UPDATE: Immediately trigger UI update with guest data
         console.log(`[useGuestSync] Optimistic update - showing ${localChannels.length} guest channels immediately`);
         onSyncComplete(localChannels); // Pass local channels for immediate rendering
+        toast.success(
+            `Successfully synced ${localChannels.length} channel${localChannels.length > 1 ? 's' : ''}!`
+        );
 
         const syncGuestChannelsInBackground = async () => {
             isSyncing.current = true;
@@ -103,12 +106,6 @@ export function useGuestSync({
                 localStorage.removeItem('guest_channels');
                 hasSynced.current = true;
                 isSyncing.current = false;
-
-                if (successCount > 0 || skipCount > 0) {
-                    toast.success(
-                        `Successfully synced ${successCount + skipCount} channel${successCount + skipCount > 1 ? 's' : ''}!`
-                    );
-                }
 
                 // Silent revalidation after a short delay
                 setTimeout(() => {
