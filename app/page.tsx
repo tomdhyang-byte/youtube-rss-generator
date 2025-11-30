@@ -21,8 +21,25 @@ export default function Home() {
   // Optimistic UI state
   const [optimisticChannels, setOptimisticChannels] = useState<GuestChannel[] | null>(null);
 
-  const fetchSubscriptions = async (optimisticData?: GuestChannel[]) => {
-    if (optimisticData) {
+  const fetchSubscriptions = async (optimisticData?: GuestChannel[] | any) => {
+    // Handle optimistic update for new channel (single object)
+    if (optimisticData && !Array.isArray(optimisticData)) {
+      const newChannel = optimisticData;
+      setSubscriptions((prev: any) => {
+        if (!prev) return prev;
+        return {
+          ...prev,
+          youtube: [
+            ...prev.youtube,
+            { channel: newChannel }
+          ]
+        };
+      });
+      // Continue to fetch real data in background
+    }
+
+    // Handle optimistic update for Guest Mode (array)
+    else if (optimisticData) {
       setOptimisticChannels(optimisticData);
       // Don't return here, we still want to fetch real data in background if needed
       // But for now, just showing optimistic data is enough
@@ -71,7 +88,21 @@ export default function Home() {
         onDiscard={handleDiscard}
         onManage={() => setConflictModalOpen(false)}
       />
-      <div className="absolute top-4 right-4">
+      <div className="absolute top-4 right-4 flex items-center">
+        {subscriptions?.quota && (
+          subscriptions.quota.isAdmin ? (
+            <div className="mr-4 px-3 py-1 rounded-full text-xs border bg-purple-600 text-white border-purple-500 font-bold">
+              Admin ∞
+            </div>
+          ) : (
+            <div className={`mr-4 px-3 py-1 rounded-full text-xs border ${subscriptions.quota.current >= (subscriptions.quota.limit || 1)
+                ? 'text-red-400 bg-red-900/20 border-red-900/50'
+                : 'text-slate-400 border-slate-700'
+              }`}>
+              Usage: {subscriptions.quota.current}/{subscriptions.quota.limit || 1}
+            </div>
+          )
+        )}
         <UserMenu />
       </div>
 

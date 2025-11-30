@@ -38,7 +38,7 @@ interface ChannelManagerProps {
         limit: number | null;
         isAdmin: boolean;
     };
-    onRefresh?: () => void;
+    onRefresh?: (newChannel?: any) => void;
 }
 
 export default function ChannelManager({
@@ -150,7 +150,10 @@ export default function ChannelManager({
             setUrl('');
             toast.success('YouTube channel added successfully!');
             toast.info("Don't Panic. If the feed is empty, wait for 5 mins and retry.");
-            onRefresh?.();
+
+            // Pass the new channel to onRefresh for optimistic update
+            const data = await res.json();
+            onRefresh?.(data.channel);
         } catch (err: any) {
             setError(err.message);
             toast.error(err.message);
@@ -294,48 +297,40 @@ export default function ChannelManager({
                 }}
             />
             <div className="space-y-8">
-                {quota && (
-                    <div className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950 dark:to-purple-950 p-4 rounded-lg border border-blue-200 dark:border-blue-800">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                                    Subscription Quota
-                                </p>
-                                <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                                    {quotaText}
-                                </p>
-                            </div>
-                            {quota.isAdmin && (
-                                <div className="px-3 py-1 bg-purple-600 text-white text-xs font-bold rounded-full">
-                                    ADMIN
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                )}
+
 
                 <Tabs defaultValue="youtube" className="w-full">
-                    <TabsList className="grid w-full grid-cols-2 mb-8">
-                        <TabsTrigger value="youtube">YouTube Channels</TabsTrigger>
-                        <TabsTrigger value="podcast">Podcasts</TabsTrigger>
+                    <TabsList className="grid w-full grid-cols-2 mb-8 bg-slate-800/50 rounded-lg p-1 h-auto">
+                        <TabsTrigger
+                            value="youtube"
+                            className="data-[state=active]:bg-slate-700 data-[state=active]:text-white text-slate-400 hover:text-slate-200 transition-colors py-2"
+                        >
+                            YouTube Channels
+                        </TabsTrigger>
+                        <TabsTrigger
+                            value="podcast"
+                            className="data-[state=active]:bg-slate-700 data-[state=active]:text-white text-slate-400 hover:text-slate-200 transition-colors py-2"
+                        >
+                            Podcasts
+                        </TabsTrigger>
                     </TabsList>
 
                     <TabsContent value="youtube" className="space-y-8">
                         {/* Add Channel Form */}
-                        <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 transition-colors">
+                        <div className="mb-8">
                             <form onSubmit={handleYouTubeSubmit} className="flex gap-4">
                                 <input
                                     type="text"
                                     value={url}
                                     onChange={(e) => setUrl(e.target.value)}
                                     placeholder="Paste YouTube Channel URL (e.g. https://youtube.com/@channel)"
-                                    className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:border-blue-500 focus:shadow-[0_0_0_4px_rgba(59,130,246,0.5)] outline-none transition-all text-black dark:text-white bg-white dark:bg-gray-700 placeholder:text-gray-500 dark:placeholder:text-gray-400"
+                                    className="flex-1 px-4 h-12 border border-gray-300 dark:border-gray-600 rounded-lg focus:border-blue-500 focus:shadow-[0_0_0_4px_rgba(59,130,246,0.5)] outline-none transition-all text-black dark:text-white bg-white dark:bg-gray-700 placeholder:text-gray-500 dark:placeholder:text-gray-400"
                                     disabled={loading}
                                 />
                                 <button
                                     type="submit"
                                     disabled={loading || !canAddMore}
-                                    className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium flex items-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                    className="bg-blue-600 hover:bg-blue-700 text-white px-6 h-12 rounded-lg font-medium flex items-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
                                     title={!canAddMore ? 'Quota reached - please unsubscribe from another to add' : ''}
                                 >
                                     {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Plus className="w-5 h-5" />}
@@ -406,20 +401,20 @@ export default function ChannelManager({
 
                     <TabsContent value="podcast" className="space-y-8">
                         {/* Add Podcast Form */}
-                        <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 transition-colors">
+                        <div className="mb-8">
                             <form onSubmit={handlePodcastSubmit} className="flex gap-4">
                                 <input
                                     type="text"
                                     value={podcastUrl}
                                     onChange={(e) => setPodcastUrl(e.target.value)}
                                     placeholder="Paste Apple Podcast Link or RSS URL"
-                                    className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:border-purple-500 focus:shadow-[0_0_0_4px_rgba(168,85,247,0.5)] outline-none transition-all text-black dark:text-white bg-white dark:bg-gray-700 placeholder:text-gray-500 dark:placeholder:text-gray-400"
+                                    className="flex-1 px-4 h-12 border border-gray-300 dark:border-gray-600 rounded-lg focus:border-purple-500 focus:shadow-[0_0_0_4px_rgba(168,85,247,0.5)] outline-none transition-all text-black dark:text-white bg-white dark:bg-gray-700 placeholder:text-gray-500 dark:placeholder:text-gray-400"
                                     disabled={loading}
                                 />
                                 <button
                                     type="submit"
                                     disabled={loading || !canAddMore}
-                                    className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-lg font-medium flex items-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                    className="bg-purple-600 hover:bg-purple-700 text-white px-6 h-12 rounded-lg font-medium flex items-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
                                     title={!canAddMore ? 'Quota reached - please unsubscribe from another to add' : ''}
                                 >
                                     {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Mic className="w-5 h-5" />}
