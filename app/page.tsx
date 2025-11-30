@@ -52,7 +52,13 @@ export default function Home() {
 
   useEffect(() => {
     if (status === "authenticated") {
-      fetchSubscriptions();
+      // If we have local channels, let useGuestSync handle the initial fetch/update
+      // to prevent race conditions that clear optimistic state
+      if (localChannels.length > 0) {
+        console.log("Skipping initial fetch in useEffect - waiting for guest sync");
+      } else {
+        fetchSubscriptions();
+      }
     } else if (status === "unauthenticated") {
       setLoading(false);
     }
