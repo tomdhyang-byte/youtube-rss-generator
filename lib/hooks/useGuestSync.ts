@@ -8,7 +8,7 @@ import { GuestChannel } from '@/lib/types';
 interface UseGuestSyncProps {
     session: Session | null;
     localChannels: GuestChannel[];
-    onSyncComplete: () => void;
+    onSyncComplete: (optimisticChannels?: GuestChannel[]) => void;
 }
 
 interface UseGuestSyncReturn {
@@ -50,7 +50,7 @@ export function useGuestSync({
 
         // 🚀 OPTIMISTIC UPDATE: Immediately trigger UI update with guest data
         console.log(`[useGuestSync] Optimistic update - showing ${localChannels.length} guest channels immediately`);
-        onSyncComplete(); // This will trigger fetchSubscriptions, which will show guest channels momentarily
+        onSyncComplete(localChannels); // Pass local channels for immediate rendering
 
         const syncGuestChannelsInBackground = async () => {
             isSyncing.current = true;

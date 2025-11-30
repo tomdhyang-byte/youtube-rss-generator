@@ -18,11 +18,24 @@ export default function Home() {
   // Guest mode state
   const [localChannels] = useLocalStorage<GuestChannel[]>('guest_channels', []);
 
-  const fetchSubscriptions = async () => {
+  // Optimistic UI state
+  const [optimisticChannels, setOptimisticChannels] = useState<GuestChannel[] | null>(null);
+
+  const fetchSubscriptions = async (optimisticData?: GuestChannel[]) => {
+    if (optimisticData) {
+      setOptimisticChannels(optimisticData);
+      // Don't return here, we still want to fetch real data in background if needed
+      // But for now, just showing optimistic data is enough
+    }
+
     try {
       const res = await fetch('/api/subscriptions');
       const data = await res.json();
       setSubscriptions(data);
+      // Clear optimistic state once real data arrives
+      if (!optimisticData) {
+        setOptimisticChannels(null);
+      }
     } catch (error) {
       console.error("Failed to fetch subscriptions:", error);
     } finally {
@@ -79,11 +92,19 @@ export default function Home() {
             onRefresh={() => { }}
           />
         ) : (
-          subscriptions && (
+          (subscriptions || optimisticChannels) && (
             <ChannelManager
-              initialChannels={subscriptions.youtube.map((sub: any) => sub.channel)}
-              initialPodcasts={subscriptions.podcasts.map((sub: any) => sub.podcast)}
-              quota={subscriptions.quota}
+              initialChannels={
+                optimisticChannels
+                  ? optimisticChannels
+                  : subscriptions?.youtube.map((sub: any) => sub.channel) || []
+              }
+              initialPodcasts={
+                optimisticChannels
+                  ? []
+                  : subscriptions?.podcasts.map((sub: any) => sub.podcast) || []
+              }
+              quota={subscriptions?.quota}
               onRefresh={fetchSubscriptions}
             />
           )
