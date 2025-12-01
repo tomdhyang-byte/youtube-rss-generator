@@ -1254,3 +1254,151 @@ Processing Podcast: 曼報 Manny's Newsletter (https://feed.firstory.me/rss/user
 Worker Finished.
 Worker finished successfully.
 ========================================
+========================================
+Run started at Mon Dec  1 13:00:00 CST 2025
+Using Python: /usr/bin/python3
+Starting YouTube RSS Worker...
+Traceback (most recent call last):
+  File "/Users/a01-0218-0512/.gemini/antigravity/scratch/youtube-rss-generator/worker.py", line 1, in <module>
+    import pg8000.dbapi
+ModuleNotFoundError: No module named 'pg8000'
+Worker failed with exit code 1.
+========================================
+========================================
+Run started at Mon Dec  1 13:05:33 CST 2025
+Using Python: ./.venv/bin/python
+Starting YouTube RSS Worker...
+Starting Worker...
+Connecting to database...
+Database connected.
+Processing YouTube Channel: Joseph Carlson After Hours (UCfCT7SSFEWyG4th9ZmaGYqQ)
+  - Fetching video list from YouTube...
+  - Video list fetched.
+  - Checking video: Michael Burry & Ray Dalio Say The Market Is In A Huge Bubble (JuREVPfvhpw)
+    - Video already exists, skipping.
+  - Checking video: I’m Buying $10,000 to $20,000 Of This Stock (Wf0IF1I96EY)
+    - Video already exists, skipping.
+  - Checking video: The World's Best Investor Just Bought Google (AkB1hkkFR14)
+    - Video already exists, skipping.
+Processing YouTube Channel: D的財富鏈 (UCVGYz_TsbJRiDykog88EFQg)
+  - Fetching video list from YouTube...
+  - Video list fetched.
+  - Checking video: 【真相】市場：3顆大雷！史上最大騙局！足以令股市崩盤的風險，何時引爆？...Nvidia財報造假？【D的財富鏈】 (88IGaa_WdMc)
+    - Video already exists, skipping.
+  - Checking video: 【警惕拐點】財報季大好，但AI股恐慌暴跌！這一切，背後的真相是什麼？Nvidia也救不了嗎？...【D的財富鏈/美股】 (rJqAYiADTkk)
+    - Video already exists, skipping.
+  - Checking video: 【注意】數據出問題，美股有危險！100%引起衰退的指標，被消失了？！AI引發失業潮！你該如何投資，才有保障？【D的財富鏈】 (vnR8tTdl52c)
+    - Video already exists, skipping.
+Processing YouTube Channel: 美股咖啡館 (UCjrP2TtSTifuRJ76hW2IW1A)
+  - Fetching video list from YouTube...
+  - Video list fetched.
+  - Checking video: 大戶近期「大量賣出」的股票 Top 5：散戶持股要小心了！ (KYnRe-IDIdA)
+    - Video already exists, skipping.
+  - Checking video: 晶片震撼彈：Google TPU 的成功 = Nvidia GPU 的失敗？ (IAQa7QBq0Ro)
+    - Video already exists, skipping.
+  - Checking video: US stocks make a full recovery: What happened to sleeping in the park? | Google's market value ap... (kEbuObe0ZbM)
+    - Video already exists, skipping.
+Processing YouTube Channel: Joseph Carlson (UCbta0n8i6Rljh0obO7HzG9A)
+  - Fetching video list from YouTube...
+  - Video list fetched.
+  - Checking video: 6 Stocks To Buy In An Overvalued Market (--P9ha_OTJA)
+    - Video already exists, skipping.
+  - Checking video: Top Five AI Stocks I'm Buying Now (QwwVJfvfqN8)
+    - Video already exists, skipping.
+  - Checking video: The Stock Market Is Overvalued, Here's What I'm Doing Now (XuIVc5pDN5c)
+    - Video already exists, skipping.
+Processing YouTube Channel: Value Investing with Sven Carlin, Ph.D. (UCrTTBSUr0zhPU56UQljag5A)
+  - Fetching video list from YouTube...
+  - Video list fetched.
+  - Checking video: Stocks You Want To Buy: VISA (V), MA, Udemy (UDMY), Sprouts Farmers Market (SFM), Adecoagro (AGRO) (BLQBQJ6zgVE)
+    - Video already exists, skipping.
+  - Checking video: Macro Matters When Irrational & Wall Street Is Getting DELULU!!! (fO2JiVMarF8)
+    - Video already exists, skipping.
+  - Checking video: FLOWERS FOODS STOCK CRASH MAKES IT A BUY (NYSE: FLOW) (Dy0JYdZZJ3c)
+    - Video already exists, skipping.
+Processing YouTube Channel: AI News &amp; Strategy Daily | Nate B Jones (UC0C-17n9iuUQPylguM1d-lQ)
+  - Fetching video list from YouTube...
+  - Video list fetched.
+  - Checking video: Agents Will Kill Your Ul by 2026--Unless You Build This Instead (x-01UrScIrA)
+    - Video already exists, skipping.
+  - Checking video: ChatGPT vs. Gemini vs. Claude Head-to-Head on Black Friday Deals: Prompts & Demo (DcnTK7E1Ayc)
+    - Video already exists, skipping.
+  - Checking video: My Take on the Hard AI Questions: Jobs, Water, Artificial Romance, School Cheating & More (l8m9eb1Y-Ao)
+    - Video already exists, skipping.
+Processing YouTube Channel: Tom Nash (UCJwKCyEIFHwUOPQQ-4kC1Zw)
+  - Fetching video list from YouTube...
+  - Video list fetched.
+  - Checking video: The Investment Opportunity of a Lifetime (lwOYvvr5pxY)
+    - Video already exists, skipping.
+  - Checking video: IMPORTANT WARNING: A Once in a Lifetime Event is Coming (OtxK0jWmJ68)
+    - Video already exists, skipping.
+  - Checking video: IMPORTANT WARNING TO ALL INVESTORS (Qr12GAXQ6_4)
+    - Video already exists, skipping.
+Processing YouTube Channel: Dr. Harvey不廢話 (UC36FfchJRvraEqWGb4MUdDA)
+  - Fetching video list from YouTube...
+  - Video list fetched.
+Processing YouTube Channel: Money or Life 美股频道 (UC9cfcOuTT9rYkyUimMjLxuw)
+  - Fetching video list from YouTube...
+  - Video list fetched.
+  - Checking video: Only by accepting a 50% drop in stock prices can one enjoy the long-term investment returns of US... (0k99Ll0FyX4)
+    - Video already exists, skipping.
+  - Checking video: Advertising knowledge you must know to invest in companies like Meta, Google, and AppLovin! (eXXE553YhWE)
+    - Video already exists, skipping.
+  - Checking video: US stocks are experiencing a valuation correction, but don't be afraid, the road to investing is ... (tS0gfjAoRPE)
+    - Video already exists, skipping.
+Processing YouTube Channel: Daniel Pronk (UCL-F-8nxFtFZ4M3RWkGn6Qw)
+  - Fetching video list from YouTube...
+  - Video list fetched.
+  - Checking video: 3 High Growth Stocks That Are Down Big - Are They Buys Now? (bqIchGcIAG4)
+    - Video already exists, skipping.
+  - Checking video: 3 Stocks I'm Buying As The Market Crashes (oD5dQTzOjlM)
+    - Video already exists, skipping.
+  - Checking video: How I pick stocks from start to finish - TD Investor Education Month Live Stream (8sGM465H-oc)
+    - Video already exists, skipping.
+Processing YouTube Channel: Dan Koe (UCWXYDYv5STLk-zoxMP2I1Lw)
+  - Fetching video list from YouTube...
+  - Video list fetched.
+  - Checking video: How To Use AI Better Than 99% Of People (This Changed My Life) (xgpLjLHB5sA)
+    - Video already exists, skipping.
+  - Checking video: Kortex: The $3 Million Dollar Mistake (vbrTv-4PsdA)
+    - Video already exists, skipping.
+  - Checking video: You don't hate work. You hate meaningless work. (mA0P-5_QvH8)
+    - Video already exists, skipping.
+Processing Podcast: Gooaye 股癌 (https://feeds.soundon.fm/podcasts/954689a5-3096-43a4-a80b-7810b219cef3.xml)
+  - Checking episode: EP614 | 🌻
+    - Episode already exists, skipping.
+  - Checking episode: EP613 | 🦔
+    - Episode already exists, skipping.
+  - Checking episode: EP612 | 🍒
+    - Episode already exists, skipping.
+Processing Podcast: 20 Minute Books (https://www.20minutebooks.com/rss/)
+  - Checking episode: The Souls of Black Folk - Book Summary
+    - New Episode found: The Souls of Black Folk - Book Summary
+    - Transcribing audio...
+    - Calling Deepgram for: https://dts.podtrac.com/redirect.mp3/www.20minutebooks.com/mp3/The%20Souls%20of%20Black%20Folk.mp3
+    - Transcript fetched (19561 chars).
+    - Generating summary...
+    - Summary generated.
+    - Saved to DB.
+    - Waiting 9.8 seconds before next episode...
+  - Checking episode: Maid - Book Summary
+    - New Episode found: Maid - Book Summary
+    - Transcribing audio...
+    - Calling Deepgram for: https://dts.podtrac.com/redirect.mp3/www.20minutebooks.com/mp3/Maid.mp3
+    - Transcript fetched (26143 chars).
+    - Generating summary...
+    - Summary generated.
+    - Saved to DB.
+    - Waiting 5.0 seconds before next episode...
+  - Checking episode: Smarter Not Harder - Book Summary
+    - New Episode found: Smarter Not Harder - Book Summary
+    - Transcribing audio...
+    - Calling Deepgram for: https://dts.podtrac.com/redirect.mp3/www.20minutebooks.com/mp3/Smarter%20Not%20Harder.mp3
+    - Transcript fetched (20506 chars).
+    - Generating summary...
+    - Summary generated.
+    - Saved to DB.
+    - Waiting 6.0 seconds before next episode...
+Worker Finished.
+Worker finished successfully.
+========================================
