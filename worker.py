@@ -123,7 +123,7 @@ def generate_summary(text, is_podcast=False):
             model="gpt-4o-mini", # Using gpt-4o-mini as requested for Podcast, keeping cost low
             messages=[
                 {"role": "system", "content": system_prompt},
-                {"role": "user", "content": f"內容如下：\n\n{text[:15000]}"} 
+                {"role": "user", "content": f"內容如下：\n\n{text[:100000]}"} 
             ]
         )
         return response.choices[0].message.content.strip()
@@ -222,7 +222,7 @@ def transcribe_audio(audio_url):
     
     try:
         print(f"    - Calling Deepgram for: {audio_url}")
-        response = requests.post(url, headers=headers, json=data, timeout=300) # 5 min timeout for long audio
+        response = requests.post(url, headers=headers, json=data, timeout=600) # 10 min timeout for long audio
         response.raise_for_status()
         result = response.json()
         
@@ -300,9 +300,9 @@ def process_podcast_channel(conn, podcast):
             print(f"    - Transcript fetched ({len(transcript)} chars).")
             
             # Truncate if too long
-            if len(transcript) > 100000:
+            if len(transcript) > 200000:
                 print("    - Transcript too long, truncating...")
-                transcript = transcript[:100000] + "...(truncated)"
+                transcript = transcript[:200000] + "...(truncated)"
             
             print("    - Generating summary...")
             summary = generate_summary(transcript, is_podcast=True)
