@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Change directory to the script's location to ensure relative paths work
+cd "$(dirname "$0")"
+
 # Activate environment if needed, or just use the direct path to python
 # Assuming dependencies are installed in the current environment or a known one.
 # Based on previous steps, we used /opt/miniconda3/bin/python
