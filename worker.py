@@ -173,7 +173,7 @@ def generate_summary(text, is_podcast=False):
 
     try:
         response = client.chat.completions.create(
-            model="gpt-4o", # Upgraded to gpt-4o for better quality
+            model="gpt-4.1", # Updated to gpt-4.1
             messages=[
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": f"內容如下：\n\n{text[:100000]}"} 
