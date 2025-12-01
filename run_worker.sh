@@ -24,17 +24,13 @@ cd "$(dirname "$0")"
 
 PYTHON_EXEC=""
 
-# Check if VIRTUAL_ENV is set (active virtualenv)
-if [ -n "$VIRTUAL_ENV" ]; then
-    PYTHON_EXEC="$VIRTUAL_ENV/bin/python"
-elif [ -f "./.venv/bin/python" ]; then
-    PYTHON_EXEC="./.venv/bin/python"
-elif [ -f "./venv/bin/python" ]; then
-    PYTHON_EXEC="./venv/bin/python"
-elif command -v python3 &> /dev/null; then
-    PYTHON_EXEC=$(command -v python3)
-elif command -v python &> /dev/null; then
-    PYTHON_EXEC=$(command -v python)
+# Hardcoded path for stability in cron environment
+PYTHON_EXEC="/Users/a01-0218-0512/.gemini/antigravity/scratch/youtube-rss-generator/.venv/bin/python"
+
+# Verify the executable exists
+if [ ! -f "$PYTHON_EXEC" ]; then
+    echo "Error: Python executable not found at $PYTHON_EXEC"
+    exit 1
 fi
 
 if [ -z "$PYTHON_EXEC" ]; then
