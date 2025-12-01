@@ -1,97 +1,149 @@
 # Personal YouTube RSS Generator
 
-This project allows you to generate personal RSS feeds for YouTube channels and Podcasts with AI-powered summaries. It consists of a Next.js web interface and a Python background worker.
+> **AI Context**: This project is a hybrid Next.js (Frontend/API) and Python (Worker) application designed to generate RSS feeds with AI summaries for YouTube channels and Podcasts.
 
-## Features
+## 🏗 Architecture Overview
 
--   **YouTube & Podcast Support**: Subscribe to both YouTube channels and Podcast RSS feeds.
--   **AI Summaries**: Automatically generates concise summaries for videos and episodes using OpenAI GPT-4o-mini.
--   **Guest Mode**: Try the app without signing in (limited to 1 channel).
--   **User Accounts**: Sign in with Google to manage unlimited subscriptions and sync across devices.
--   **Dark Mode**: Fully supported dark mode interface.
--   **RSS Feeds**: Provides standard RSS 2.0 feeds compatible with any RSS reader.
+-   **Frontend**: Next.js 14 (App Router), Tailwind CSS, Lucide React.
+-   **Backend**: Next.js API Routes (for UI interactions), Python Worker (for heavy lifting).
+-   **Database**: PostgreSQL (Supabase) accessed via Prisma (Next.js) and `pg8000` (Python).
+-   **AI**: OpenAI GPT-4o-mini for summarization, Deepgram for podcast transcription.
+-   **Authentication**: NextAuth.js (Google Provider).
 
-## Prerequisites
-
-Before you begin, ensure you have the following installed on your machine:
-
-1.  **Node.js** (v18 or later)
-2.  **Python** (v3.8 or later)
-3.  **PostgreSQL** (Running locally or accessible via URL)
-4.  **OpenAI API Key** (for generating summaries)
-5.  **Deepgram API Key** (for podcast audio transcription)
-
-## Installation
-
-1.  **Clone the repository:**
-    ```bash
-    git clone <your-repo-url>
-    cd youtube-rss-generator
-    ```
-
-2.  **Install Frontend Dependencies:**
-    ```bash
-    npm install
-    ```
-
-3.  **Install Backend Dependencies:**
-    ```bash
-    pip install -r requirements.txt
-    ```
-
-## Configuration
-
-1.  **Environment Variables:**
-    Copy the example environment file:
-    ```bash
-    cp .env.example .env
-    ```
-
-2.  **Edit `.env`:**
-    Open `.env` and fill in your details:
-    -   `DATABASE_URL`: Your PostgreSQL connection string.
-    -   `OPENAI_API_KEY`: Your OpenAI API key.
-    -   `DEEPGRAM_API_KEY`: Your Deepgram API key (required for podcasts).
-    -   `NEXTAUTH_URL`: The canonical URL of your site (e.g., `http://localhost:3000`).
-    -   `NEXTAUTH_SECRET`: A random string for session encryption.
-    -   `GOOGLE_CLIENT_ID` & `GOOGLE_CLIENT_SECRET`: For Google Sign-In.
-
-3.  **Setup Database:**
-    Run the Prisma migration to create the database schema:
-    ```bash
-    npx prisma migrate dev
-    ```
-
-## Running the Application
-
-### 1. Start the Web Interface
-This runs the Next.js frontend at [http://localhost:3000](http://localhost:3000).
-
-```bash
-npm run dev
+### Project Structure
+```
+youtube-rss-generator/
+├── app/                          # Next.js App Router (UI & API)
+├── components/                   # React components (ChannelManager, UserMenu, etc.)
+├── prisma/
+│   └── schema.prisma             # Database schema (PostgreSQL)
+├── worker.py                     # Python worker (fetch + summarize)
+├── run_worker.sh                 # Wrapper script for worker (env + logging)
+├── cron_log.txt                  # Detailed worker logs
+└── execution_status.log          # Simplified success/failure logs
 ```
 
-### 2. Start the Background Worker
-The worker fetches videos/episodes and generates summaries. It handles both YouTube channels and Podcasts.
+## 🚀 Quick Start
+
+### 1. Prerequisites
+-   Node.js (v18+)
+-   Python (v3.8+)
+-   PostgreSQL Database (Supabase recommended)
+-   OpenAI API Key
+-   Deepgram API Key (optional, for podcasts)
+
+### 2. Installation
+```bash
+# Clone
+git clone <repo-url>
+cd youtube-rss-generator
+
+# Frontend
+npm install
+
+# Backend
+pip install -r requirements.txt
+```
+
+### 3. Configuration (`.env`)
+Create a `.env` file with the following keys:
+
+```env
+# Database (Supabase Transaction Pooler - Port 6543)
+DATABASE_URL="postgresql://user:pass@host:6543/db?pgbouncer=true"
+
+# Direct Connection (Supabase Session Pooler - Port 5432 - For Migrations/Worker)
+DIRECT_URL="postgresql://user:pass@host:5432/db"
+
+# AI Services
+OPENAI_API_KEY="sk-..."
+DEEPGRAM_API_KEY="..."
+
+# Auth
+NEXTAUTH_URL="http://localhost:3000"
+NEXTAUTH_SECRET="<random-string>"
+GOOGLE_CLIENT_ID="..."
+GOOGLE_CLIENT_SECRET="..."
+
+# Admin
+ADMIN_EMAIL="your-email@gmail.com"
+NEXT_PUBLIC_ADMIN_EMAIL="your-email@gmail.com"
+```
+
+### 4. Database Setup
+```bash
+npx prisma migrate dev
+```
+
+## 🏃‍♂️ Running the Application
+
+### Frontend (Web UI)
+```bash
+npm run dev
+# Access at http://localhost:3000
+```
+
+### Background Worker (Python)
+The worker fetches new videos/episodes, downloads transcripts, and generates summaries.
 
 **Manual Run:**
 ```bash
-chmod +x run_worker.sh
 ./run_worker.sh
 ```
+*Note: The script automatically logs to `cron_log.txt` and `execution_status.log`.*
 
 **Automated Run (Cron):**
-To keep feeds updated, add this to your crontab (`crontab -e`):
 ```bash
-0 * * * * cd /path/to/youtube-rss-generator && ./run_worker.sh >> worker.log 2>&1
+# Run every day at 11:20 AM
+20 11 * * * /path/to/youtube-rss-generator/run_worker.sh
 ```
 
-## Usage
+## 🔄 Multi-Device Workflow
 
-See [USAGE.md](USAGE.md) for detailed usage instructions.
+This project is often developed on a **MacBook Pro** and deployed on a **Mac Mini** (or VPS).
 
-For a guide on managing code across multiple devices (e.g., MacBook Pro for dev, Mac Mini for worker), see [WORKFLOW.md](WORKFLOW.md).
+### Development (MacBook Pro)
+1.  Edit code.
+2.  Test locally (`npm run dev`, `./run_worker.sh`).
+3.  Push to GitHub:
+    ```bash
+    git push origin main
+    ```
 
-## Deployment
+### Deployment (Mac Mini / Server)
+The server acts as the worker runner.
+1.  **Pull latest code**:
+    ```bash
+    git pull origin main
+    ```
+2.  **Update dependencies** (if changed):
+    ```bash
+    npm install
+    pip install -r requirements.txt
+    npx prisma migrate dev
+    ```
+3.  **Cron Job**: Ensures `run_worker.sh` runs on schedule.
 
-This project is designed to be deployed on **Vercel** (frontend) with a separate worker process (e.g., on a VPS, Railway, or local server) for the Python script.
+### Auto-Update Strategy
+The `run_worker.sh` script has commented-out lines for `git pull`. It is **recommended to keep this disabled** and update manually to prevent unexpected breakages in the background process.
+
+## 🔑 Key Components & Logic
+
+### Frontend (Next.js)
+-   **`app/page.tsx`**: Main entry point. Handles auth state and renders `ChannelManager`.
+-   **`components/ChannelManager.tsx`**: UI for adding channels. Supports "Guest Mode" (localStorage) and "User Mode" (Database).
+-   **`lib/hooks/useGuestSync.ts`**: Automatically syncs local guest channels to the database upon login.
+
+### Backend (Python Worker)
+-   **`worker.py`**:
+    1.  Fetches latest 3 videos/episodes via `scrapetube` or `feedparser`.
+    2.  Checks DB for duplicates.
+    3.  Fetches transcripts via `youtube_transcript_api` or `Deepgram`.
+    4.  Generates summaries via OpenAI GPT-4o-mini.
+    5.  Saves to DB using `pg8000` (SSL verification disabled for compatibility).
+
+### Database Schema (`prisma/schema.prisma`)
+-   **`users`, `accounts`, `sessions`**: NextAuth.js tables.
+-   **`youtube_channels`, `youtube_videos`**: Content tables.
+-   **`youtube_subscriptions`**: Links users to channels.
+-   **`podcast_channels`, `podcast_episodes`**: Podcast support.

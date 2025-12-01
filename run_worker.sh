@@ -40,7 +40,26 @@ if [ -z "$PYTHON_EXEC" ]; then
     exit 1
 fi
 
-echo "Using Python: $PYTHON_EXEC"
-echo "Starting YouTube RSS Worker..."
-$PYTHON_EXEC worker.py
-echo "Worker finished."
+# Define log files
+LOG_FILE="cron_log.txt"
+STATUS_LOG="execution_status.log"
+
+{
+    echo "========================================"
+    echo "Run started at $(date)"
+    echo "Using Python: $PYTHON_EXEC"
+    echo "Starting YouTube RSS Worker..."
+    
+    $PYTHON_EXEC worker.py
+    EXIT_CODE=$?
+    
+    if [ $EXIT_CODE -eq 0 ]; then
+        echo "[$(date)] SUCCESS" >> "$STATUS_LOG"
+        echo "Worker finished successfully."
+    else
+        echo "[$(date)] FAILED (Exit Code: $EXIT_CODE)" >> "$STATUS_LOG"
+        echo "Worker failed with exit code $EXIT_CODE."
+    fi
+    
+    echo "========================================"
+} >> "$LOG_FILE" 2>&1

@@ -1,5 +1,6 @@
-import psycopg2
-from psycopg2.extras import RealDictCursor
+import pg8000.dbapi
+import ssl
+from urllib.parse import urlparse
 import os
 import time
 import random
@@ -16,7 +17,8 @@ from dateutil import parser as date_parser
 load_dotenv()
 
 # Configuration
-DATABASE_URL = os.getenv('DATABASE_URL')
+# Use DIRECT_URL for worker if available, otherwise DATABASE_URL
+DATABASE_URL = os.getenv('DIRECT_URL') or os.getenv('DATABASE_URL')
 OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
 DEEPGRAM_API_KEY = os.getenv('DEEPGRAM_API_KEY')
 
@@ -30,11 +32,30 @@ client = OpenAI(api_key=OPENAI_API_KEY) if OPENAI_API_KEY else None
 
 def get_db_connection():
     if not DATABASE_URL:
-        raise ValueError("DATABASE_URL environment variable is not set")
-    # Remove pgbouncer param for psycopg2
-    clean_url = DATABASE_URL.replace('?pgbouncer=true', '').replace('&pgbouncer=true', '')
-    conn = psycopg2.connect(clean_url, connect_timeout=30)
+        raise ValueError("DATABASE_URL/DIRECT_URL environment variable is not set")
+    
+    u = urlparse(DATABASE_URL)
+    
+    # Create SSL context that ignores verification errors (needed for some environments)
+    ssl_context = ssl.create_default_context()
+    ssl_context.check_hostname = False
+    ssl_context.verify_mode = ssl.CERT_NONE
+    
+    conn = pg8000.dbapi.connect(
+        user=u.username,
+        password=u.password,
+        host=u.hostname,
+        port=u.port,
+        database=u.path[1:],
+        ssl_context=ssl_context
+    )
     return conn
+
+def fetch_as_dict(cursor):
+    "Return all rows from a cursor as a list of dicts"
+    columns = [desc[0] for desc in cursor.description]
+    return [dict(zip(columns, row)) for row in cursor.fetchall()]
+
 
 # --- YouTube Logic ---
 
@@ -152,7 +173,7 @@ def process_youtube_channel(conn, channel):
                  print(f"    - Could not extract channel title from video: {e}")
         first_video = False
         
-        cursor = conn.cursor(cursor_factory=RealDictCursor)
+        cursor = conn.cursor()
         cursor.execute("SELECT id FROM youtube_videos WHERE youtube_video_id = %s", (video_id,))
         if cursor.fetchone():
             print(f"    - Video already exists, skipping.")
@@ -262,7 +283,7 @@ def process_podcast_channel(conn, podcast):
         print(f"  - Checking episode: {title}")
         
         # Check if exists
-        cursor = conn.cursor(cursor_factory=RealDictCursor)
+        cursor = conn.cursor()
         cursor.execute("SELECT id FROM podcast_episodes WHERE podcast_id = %s AND guid = %s", (podcast_id, guid))
         if cursor.fetchone():
             print(f"    - Episode already exists, skipping.")
@@ -319,15 +340,15 @@ def main():
     
     try:
         # 1. Process YouTube Channels
-        cursor = conn.cursor(cursor_factory=RealDictCursor)
+        cursor = conn.cursor()
         cursor.execute("SELECT * FROM youtube_channels")
-        channels = cursor.fetchall()
+        channels = fetch_as_dict(cursor)
         for channel in channels:
             process_youtube_channel(conn, channel)
             
         # 2. Process Podcast Channels
         cursor.execute("SELECT * FROM podcast_channels")
-        podcasts = cursor.fetchall()
+        podcasts = fetch_as_dict(cursor)
         for podcast in podcasts:
             process_podcast_channel(conn, podcast)
             

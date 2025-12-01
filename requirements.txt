@@ -6,3 +6,4 @@ python-dotenv
 feedparser
 requests
 python-dateutil
+pg8000
