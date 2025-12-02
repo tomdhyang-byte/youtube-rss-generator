@@ -25,7 +25,7 @@ cd "$(dirname "$0")"
 PYTHON_EXEC=""
 
 # Hardcoded path for stability in cron environment
-PYTHON_EXEC="/Users/a01-0218-0512/.gemini/antigravity/scratch/youtube-rss-generator/.venv/bin/python"
+PYTHON_EXEC="/usr/local/bin/python3"
 
 # Verify the executable exists
 if [ ! -f "$PYTHON_EXEC" ]; then
