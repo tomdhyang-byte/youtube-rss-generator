@@ -6,7 +6,7 @@ import time
 import random
 from datetime import datetime
 import scrapetube
-from youtube_transcript_api import YouTubeTranscriptApi
+
 from openai import OpenAI
 from dotenv import load_dotenv
 import feedparser
@@ -20,13 +20,18 @@ load_dotenv()
 # Use DIRECT_URL for worker if available, otherwise DATABASE_URL
 DATABASE_URL = os.getenv('DIRECT_URL') or os.getenv('DATABASE_URL')
 OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
+
 DEEPGRAM_API_KEY = os.getenv('DEEPGRAM_API_KEY')
+SUPADATA_API_KEY = os.getenv('SUPADATA_API_KEY')
 
 if not OPENAI_API_KEY:
     print("Warning: OPENAI_API_KEY not found in environment variables. Summaries will be mocked or skipped.")
 
 if not DEEPGRAM_API_KEY:
     print("Warning: DEEPGRAM_API_KEY not found in environment variables. Transcriptions will be skipped.")
+
+if not SUPADATA_API_KEY:
+    print("Warning: SUPADATA_API_KEY not found in environment variables. YouTube transcripts will fail.")
 
 client = OpenAI(api_key=OPENAI_API_KEY) if OPENAI_API_KEY else None
 
@@ -59,14 +64,40 @@ def fetch_as_dict(cursor):
 
 # --- YouTube Logic ---
 
-def fetch_youtube_transcript(video_id):
+def fetch_supadata_transcript(video_id):
+    if not SUPADATA_API_KEY:
+        print("  - Supadata API Key missing.")
+        return None
+
+    url = f"https://api.supadata.ai/v1/youtube/transcript?videoId={video_id}&text=true"
+    headers = {"x-api-key": SUPADATA_API_KEY}
+
     try:
-        api = YouTubeTranscriptApi()
-        transcript_list = api.fetch(video_id, languages=['zh-TW', 'zh-Hant', 'zh-Hans', 'zh', 'en'])
-        full_text = " ".join([t.text for t in transcript_list])
-        return full_text
+        response = requests.get(url, headers=headers, timeout=30)
+        response.raise_for_status()
+        data = response.json()
+        
+        # Supadata with text=true returns a JSON with 'content' field containing the text
+        # Or sometimes it returns the text directly if configured differently, but based on docs usually JSON
+        # Let's handle both just in case, or check the specific response format for text=true.
+        # Based on common API patterns, let's assume it returns JSON with content.
+        # If text=true is passed, the response might be just the text or a json with text.
+        # Let's try to parse as JSON first.
+        
+        if isinstance(data, dict) and 'content' in data:
+             return data['content']
+        elif isinstance(data, str):
+             return data
+        else:
+             # If it's a list of segments (if text=true wasn't respected or different endpoint)
+             # But we used text=true.
+             return str(data)
+
     except Exception as e:
-        print(f"  - No YouTube transcript found or error: {e}")
+        print(f"  - Supadata Error: {e}")
+        if hasattr(e, 'response') and e.response is not None:
+             print(f"    Status Code: {e.response.status_code}")
+             print(f"    Response: {e.response.text}")
         return None
 
 def generate_summary(text, is_podcast=False):
@@ -235,7 +266,8 @@ def process_youtube_channel(conn, channel):
         print(f"    - New Video found: {title}")
         
         print("    - Fetching transcript...")
-        transcript = fetch_youtube_transcript(video_id)
+        print("    - Fetching transcript from Supadata...")
+        transcript = fetch_supadata_transcript(video_id)
         summary = "No transcript available."
         
         if transcript:

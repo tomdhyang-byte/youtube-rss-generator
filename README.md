@@ -30,6 +30,7 @@ youtube-rss-generator/
 -   Python (v3.8+)
 -   PostgreSQL Database (Supabase recommended)
 -   OpenAI API Key
+-   Supadata API Key (for YouTube transcripts)
 -   Deepgram API Key (optional, for podcasts)
 
 ### 2. Installation
@@ -57,6 +58,7 @@ DIRECT_URL="postgresql://user:pass@host:5432/db"
 
 # AI Services
 OPENAI_API_KEY="sk-..."
+SUPADATA_API_KEY="..."
 DEEPGRAM_API_KEY="..."
 
 # Auth
@@ -138,7 +140,7 @@ The `run_worker.sh` script has commented-out lines for `git pull`. It is **recom
 -   **`worker.py`**:
     1.  Fetches latest 3 videos/episodes via `scrapetube` or `feedparser`.
     2.  Checks DB for duplicates.
-    3.  Fetches transcripts via `youtube_transcript_api` or `Deepgram`.
+    3.  Fetches transcripts via `Supadata API` (YouTube) or `Deepgram` (Podcasts).
     4.  Generates summaries via OpenAI GPT-4o-mini.
     5.  Saves to DB using `pg8000` (SSL verification disabled for compatibility).
 
