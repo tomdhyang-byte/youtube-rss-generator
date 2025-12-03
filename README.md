@@ -7,7 +7,7 @@
 -   **Frontend**: Next.js 14 (App Router), Tailwind CSS, Lucide React.
 -   **Backend**: Next.js API Routes (for UI interactions), Python Worker (for heavy lifting).
 -   **Database**: PostgreSQL (Supabase) accessed via Prisma (Next.js) and `pg8000` (Python).
--   **AI**: OpenAI GPT-4o-mini for summarization, Deepgram for podcast transcription.
+-   **AI**: OpenAI GPT-4.1 for summarization, Deepgram for podcast transcription.
 -   **Authentication**: NextAuth.js (Google Provider).
 
 ### Project Structure
@@ -141,7 +141,7 @@ The `run_worker.sh` script has commented-out lines for `git pull`. It is **recom
     1.  Fetches latest 3 videos/episodes via `scrapetube` or `feedparser`.
     2.  Checks DB for duplicates.
     3.  Fetches transcripts via `Supadata API` (YouTube) or `Deepgram` (Podcasts).
-    4.  Generates summaries via OpenAI GPT-4o-mini.
+    4.  Generates summaries via OpenAI GPT-4.1.
     5.  Saves to DB using `pg8000` (SSL verification disabled for compatibility).
 
 ### Database Schema (`prisma/schema.prisma`)
