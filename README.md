@@ -1,27 +1,95 @@
 # Personal YouTube RSS Generator
 
-> **AI Context**: This project is a hybrid Next.js (Frontend/API) and Python (Worker) application designed to generate RSS feeds with AI summaries for YouTube channels and Podcasts.
+> **AI Context**: This project is a hybrid Next.js (Frontend/API) and Python (Worker) application designed to generate RSS feeds with AI summaries for YouTube channels and Podcasts. The worker is modularized for maintainability.
 
 ## 🏗 Architecture Overview
 
 -   **Frontend**: Next.js 14 (App Router), Tailwind CSS, Lucide React.
 -   **Backend**: Next.js API Routes (for UI interactions), Python Worker (for heavy lifting).
 -   **Database**: PostgreSQL (Supabase) accessed via Prisma (Next.js) and `pg8000` (Python).
--   **AI**: OpenAI GPT-4.1 for summarization, Deepgram for podcast transcription.
+-   **AI**: OpenAI GPT-4.1 for summarization, Supadata for YouTube transcripts, Deepgram for podcast transcription.
 -   **Authentication**: NextAuth.js (Google Provider).
 
-### Project Structure
+---
+
+## 📁 Project Structure
+
 ```
 youtube-rss-generator/
-├── app/                          # Next.js App Router (UI & API)
-├── components/                   # React components (ChannelManager, UserMenu, etc.)
+├── app/                          # Next.js App Router
+│   ├── api/                      #   API Routes
+│   │   ├── channels/             #     YouTube channel CRUD
+│   │   ├── podcasts/             #     Podcast CRUD
+│   │   ├── subscriptions/        #     User subscriptions
+│   │   └── auth/                 #     NextAuth endpoints
+│   ├── feed/                     #   RSS feed routes
+│   ├── page.tsx                  #   Main UI entry point
+│   └── layout.tsx                #   Root layout
+│
+├── components/                   # React Components
+│   ├── ChannelManager.tsx        #   Main subscription manager
+│   ├── UserMenu.tsx              #   User dropdown
+│   ├── LoginModal.tsx            #   Login dialog
+│   └── ui/                       #   Shared UI components
+│
+├── lib/                          # Shared utilities
+│   ├── prisma.ts                 #   Prisma client singleton
+│   ├── auth.ts                   #   Auth configuration
+│   ├── types.ts                  #   TypeScript types
+│   └── hooks/                    #   Custom React hooks
+│       ├── useLocalStorage.ts    #     LocalStorage hook
+│       └── useGuestSync.ts       #     Guest → User sync
+│
 ├── prisma/
 │   └── schema.prisma             # Database schema (PostgreSQL)
-├── worker.py                     # Python worker (fetch + summarize)
-├── run_worker.sh                 # Wrapper script for worker (env + logging)
-├── cron_log.txt                  # Detailed worker logs
-└── execution_status.log          # Simplified success/failure logs
+│
+├── worker/                       # 🆕 Python Worker Package (Modularized)
+│   ├── __init__.py               #   Main entry (main function)
+│   ├── config.py                 #   Environment variables & validation
+│   ├── db.py                     #   Database connection (pg8000)
+│   ├── transcribe.py             #   Transcript APIs (Supadata, Deepgram)
+│   ├── summarize.py              #   OpenAI summarization + prompts
+│   ├── youtube.py                #   YouTube channel processing
+│   └── podcast.py                #   Podcast episode processing
+│
+├── worker.py                     # Worker entry point (imports worker/)
+├── run_worker.sh                 # Wrapper script (env + logging)
+├── requirements.txt              # Python dependencies
+└── package.json                  # Node.js dependencies
 ```
+
+---
+
+## 🐍 Worker Module Details
+
+The Python worker is organized into focused modules for maintainability:
+
+| Module | Responsibility |
+|--------|----------------|
+| `config.py` | Loads environment variables, validates required API keys |
+| `db.py` | PostgreSQL connection via `pg8000`, `fetch_as_dict()` utility |
+| `transcribe.py` | `fetch_supadata_transcript()` for YouTube, `transcribe_audio()` for podcasts |
+| `summarize.py` | OpenAI GPT-4.1 calls with YouTube/Podcast-specific prompts (lazy-loaded client) |
+| `youtube.py` | Fetches videos via `scrapetube`, checks duplicates, orchestrates transcript → summary |
+| `podcast.py` | Parses RSS via `feedparser`, orchestrates transcription → summary |
+| `__init__.py` | `main()` function that coordinates all channels with active subscriptions |
+
+### Worker Flow
+```
+main()
+  ├─ validate_config()          # Check env vars
+  ├─ get_db_connection()        # Connect to PostgreSQL
+  ├─ Query channels with subscriptions (JOIN youtube_subscriptions)
+  ├─ For each channel:
+  │   ├─ scrapetube.get_channel() → latest 3 videos
+  │   ├─ Skip if video exists in DB
+  │   ├─ fetch_supadata_transcript(video_id)
+  │   ├─ generate_summary(transcript)
+  │   └─ INSERT INTO youtube_videos
+  └─ Same flow for podcasts (feedparser → Deepgram → summary)
+```
+
+---
 
 ## 🚀 Quick Start
 
@@ -77,6 +145,8 @@ NEXT_PUBLIC_ADMIN_EMAIL="your-email@gmail.com"
 npx prisma migrate dev
 ```
 
+---
+
 ## 🏃‍♂️ Running the Application
 
 ### Frontend (Web UI)
@@ -91,14 +161,17 @@ The worker fetches new videos/episodes, downloads transcripts, and generates sum
 **Manual Run:**
 ```bash
 ./run_worker.sh
+# Or directly:
+python worker.py
 ```
-*Note: The script automatically logs to `cron_log.txt` and `execution_status.log`.*
 
 **Automated Run (Cron):**
 ```bash
-# Run every day at 11:20 AM
-20 11 * * * /path/to/youtube-rss-generator/run_worker.sh
+# Run every hour
+0 * * * * /path/to/youtube-rss-generator/run_worker.sh
 ```
+
+---
 
 ## 🔄 Multi-Device Workflow
 
@@ -126,8 +199,7 @@ The server acts as the worker runner.
     ```
 3.  **Cron Job**: Ensures `run_worker.sh` runs on schedule.
 
-### Auto-Update Strategy
-The `run_worker.sh` script has commented-out lines for `git pull`. It is **recommended to keep this disabled** and update manually to prevent unexpected breakages in the background process.
+---
 
 ## 🔑 Key Components & Logic
 
@@ -137,15 +209,51 @@ The `run_worker.sh` script has commented-out lines for `git pull`. It is **recom
 -   **`lib/hooks/useGuestSync.ts`**: Automatically syncs local guest channels to the database upon login.
 
 ### Backend (Python Worker)
--   **`worker.py`**:
-    1.  Fetches latest 3 videos/episodes via `scrapetube` or `feedparser`.
-    2.  Checks DB for duplicates.
-    3.  Fetches transcripts via `Supadata API` (YouTube) or `Deepgram` (Podcasts).
-    4.  Generates summaries via OpenAI GPT-4.1.
-    5.  Saves to DB using `pg8000` (SSL verification disabled for compatibility).
+-   **`worker/`**: Modular package (see Worker Module Details above).
+-   **Smart Filtering**: Only processes channels with active subscriptions (via `JOIN` queries) to avoid wasting API tokens on "zombie feeds".
 
 ### Database Schema (`prisma/schema.prisma`)
--   **`users`, `accounts`, `sessions`**: NextAuth.js tables.
--   **`youtube_channels`, `youtube_videos`**: Content tables.
--   **`youtube_subscriptions`**: Links users to channels.
--   **`podcast_channels`, `podcast_episodes`**: Podcast support.
+
+```
+┌─────────────────┐       ┌────────────────────────┐
+│     users       │       │   youtube_channels     │
+├─────────────────┤       ├────────────────────────┤
+│ id              │◄──┐   │ id                     │
+│ email           │   │   │ youtube_id             │
+│ ...             │   │   │ title                  │
+└─────────────────┘   │   └────────────────────────┘
+                      │              ▲
+                      │              │
+              ┌───────┴──────────────┴───────┐
+              │     youtube_subscriptions    │
+              ├──────────────────────────────┤
+              │ user_id (FK → users)         │
+              │ channel_id (FK → channels)   │
+              └──────────────────────────────┘
+
+Similar structure for podcasts:
+  podcast_channels ←── podcast_subscriptions ──→ users
+```
+
+**Key Tables:**
+-   `users`, `accounts`, `sessions`: NextAuth.js authentication
+-   `youtube_channels`, `youtube_videos`: YouTube content
+-   `youtube_subscriptions`: User ↔ Channel relationships
+-   `podcast_channels`, `podcast_episodes`, `podcast_subscriptions`: Podcast support
+
+---
+
+## 🤖 For AI Agents
+
+When working on this codebase:
+
+1. **Frontend changes**: Edit files in `app/` and `components/`
+2. **Worker logic changes**: Edit files in `worker/` package
+3. **Database changes**: Modify `prisma/schema.prisma`, then run `npx prisma migrate dev`
+4. **Testing worker**: Run `python worker.py` or `./run_worker.sh`
+5. **Log files**: Worker writes to `cron_log.txt` and `execution_status.log` (gitignored)
+
+### Important Patterns
+- Worker uses **lazy loading** for OpenAI client (in `summarize.py`) to speed up imports
+- All external API calls are in `transcribe.py` and `summarize.py`
+- Database queries only fetch channels with **active subscriptions** to save API costs
