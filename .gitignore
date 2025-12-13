@@ -42,3 +42,13 @@ yarn-error.log*
 next-env.d.ts
 
 /app/generated/prisma
+
+# Worker logs
+cron_log.txt
+execution_status.log
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
