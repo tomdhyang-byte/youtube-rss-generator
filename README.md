@@ -27,7 +27,13 @@ youtube-rss-generator/
 │   └── layout.tsx                #   Root layout
 │
 ├── components/                   # React Components
-│   ├── ChannelManager.tsx        #   Main subscription manager
+│   ├── ChannelManager/           #   🆕 Modularized subscription manager
+│   │   ├── index.tsx             #     Main component (tabs, state)
+│   │   ├── AddChannelForm.tsx    #     URL input form
+│   │   ├── ChannelCard.tsx       #     YouTube channel card
+│   │   ├── PodcastCard.tsx       #     Podcast card
+│   │   └── types.ts              #     TypeScript interfaces
+│   ├── ChannelManager.tsx        #   Re-export for backward compatibility
 │   ├── UserMenu.tsx              #   User dropdown
 │   ├── LoginModal.tsx            #   Login dialog
 │   └── ui/                       #   Shared UI components
@@ -88,6 +94,25 @@ main()
   │   └─ INSERT INTO youtube_videos
   └─ Same flow for podcasts (feedparser → Deepgram → summary)
 ```
+
+---
+
+## 🎨 ChannelManager Component Details
+
+The React frontend's main component is also modularized:
+
+| Component | Responsibility |
+|-----------|----------------|
+| `index.tsx` | Main component: tabs, form state, API calls, optimistic updates |
+| `AddChannelForm.tsx` | Reusable form for YouTube/Podcast URL input with validation |
+| `ChannelCard.tsx` | Displays YouTube channel with unsubscribe, copy RSS, external link buttons |
+| `PodcastCard.tsx` | Displays Podcast with same action buttons |
+| `types.ts` | Shared TypeScript interfaces (`YoutubeChannel`, `PodcastChannel`, etc.) |
+
+### Key Features
+- **Guest Mode**: Non-authenticated users can add 1 channel (stored in localStorage)
+- **Optimistic UI**: Deletions happen immediately, then sync with backend
+- **Backward Compatible**: `ChannelManager.tsx` re-exports for existing imports
 
 ---
 
