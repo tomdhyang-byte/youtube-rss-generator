@@ -41,6 +41,10 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+# logs
+cron_log.txt
+execution_status.log
+
 /app/generated/prisma
 
 # Worker logs
