@@ -1,6 +1,6 @@
 # Personal YouTube RSS Generator
 
-> **AI Context**: This project is a hybrid Next.js (Frontend/API) and Python (Worker) application designed to generate RSS feeds with AI summaries for YouTube channels and Podcasts. The worker is modularized for maintainability.
+> **AI Context**: This project is a hybrid Next.js (Frontend/API) and Python (Worker) application designed to generate RSS feeds with AI summaries for YouTube channels and Podcasts. It also includes a **Web Reader** for reading summaries directly on the website.
 
 ## 🏗 Architecture Overview
 
@@ -9,6 +9,44 @@
 -   **Database**: PostgreSQL (Supabase) accessed via Prisma (Next.js) and `pg8000` (Python).
 -   **AI**: OpenAI GPT-4.1 for summarization, Supadata for YouTube transcripts, Deepgram for podcast transcription.
 -   **Authentication**: NextAuth.js (Google Provider).
+
+---
+
+## 🌐 Web Reader Feature (NEW)
+
+The application now includes a web-based feed reader for consuming AI summaries directly on the website.
+
+### Pages
+
+| Route | Description |
+|-------|-------------|
+| `/` | Landing Page - "Try it Free" CTA for unauthenticated users |
+| `/feed` | Feed Timeline - View all subscribed content with filters (All/YouTube/Podcasts) |
+| `/subscriptions` | Subscription Management - Add/remove channels and podcasts |
+| `/video/[id]` | Video Summary Page - AI summary with embedded YouTube player |
+| `/episode/[id]` | Episode Summary Page - AI summary with audio player |
+
+### Components
+
+| Component | Description |
+|-----------|-------------|
+| `TopNav.tsx` | Global navigation with Logo, Feed/Subscriptions tabs, Quota Badge, UserMenu |
+| `FeedCard.tsx` | Content card for feed timeline (thumbnail, title, source, summary preview) |
+
+### User Flow
+
+```
+Landing (/) ──[Try it Free]──> Google Login ──> Feed (/feed)
+                                                   │
+                                    ┌──────────────┴──────────────┐
+                                    ▼                             ▼
+                             Empty State                    Has Content
+                             (Add forms)                    (Timeline)
+                                    │                             │
+                                    └──────[Subscriptions tab]────┘
+                                                   ▼
+                                          Subscriptions (/subscriptions)
+```
 
 ---
 
@@ -21,27 +59,33 @@ youtube-rss-generator/
 │   │   ├── channels/             #     YouTube channel CRUD
 │   │   ├── podcasts/             #     Podcast CRUD
 │   │   ├── subscriptions/        #     User subscriptions
+│   │   ├── feed/                 #     🆕 Feed timeline API
 │   │   └── auth/                 #     NextAuth endpoints
-│   ├── feed/                     #   RSS feed routes
-│   ├── video/[videoId]/          #   🆕 YouTube video summary pages
-│   ├── episode/[episodeId]/      #   🆕 Podcast episode summary pages
-│   ├── page.tsx                  #   Main UI entry point
+│   ├── feed/                     #   🆕 Web Reader Feed page + RSS routes
+│   │   ├── page.tsx              #     Feed timeline UI
+│   │   ├── [channelId]/          #     YouTube RSS feed endpoint
+│   │   └── podcast/[podcastId]/  #     Podcast RSS feed endpoint
+│   ├── subscriptions/            #   🆕 Subscription management page
+│   ├── video/[videoId]/          #   YouTube video summary pages
+│   ├── episode/[episodeId]/      #   Podcast episode summary pages
+│   ├── page.tsx                  #   🆕 Landing page
 │   └── layout.tsx                #   Root layout
 │
 ├── components/                   # React Components
-│   ├── ChannelManager/           #   🆕 Modularized subscription manager
+│   ├── TopNav.tsx                #   🆕 Global navigation bar
+│   ├── FeedCard.tsx              #   🆕 Feed item card
+│   ├── ChannelManager/           #   Subscription manager (used in /subscriptions)
 │   │   ├── index.tsx             #     Main component (tabs, state)
 │   │   ├── AddChannelForm.tsx    #     URL input form
 │   │   ├── ChannelCard.tsx       #     YouTube channel card
 │   │   ├── PodcastCard.tsx       #     Podcast card
 │   │   └── types.ts              #     TypeScript interfaces
-│   ├── ChannelManager.tsx        #   Re-export for backward compatibility
-│   ├── UserMenu.tsx              #   User dropdown
+│   ├── UserMenu.tsx              #   User dropdown (Switch Account, Sign Out)
 │   ├── LoginModal.tsx            #   Login dialog
 │   └── ui/                       #   Shared UI components
 │
 ├── lib/                          # Shared utilities
-│   ├── prisma.ts                 #   Prisma client singleton
+│   ├── prisma.ts                 #   Prisma client (configured for PgBouncer)
 │   ├── auth.ts                   #   Auth configuration
 │   ├── types.ts                  #   TypeScript types
 │   └── hooks/                    #   Custom React hooks
@@ -51,7 +95,7 @@ youtube-rss-generator/
 ├── prisma/
 │   └── schema.prisma             # Database schema (PostgreSQL)
 │
-├── worker/                       # 🆕 Python Worker Package (Modularized)
+├── worker/                       # Python Worker Package (Modularized)
 │   ├── __init__.py               #   Main entry (main function)
 │   ├── config.py                 #   Environment variables & validation
 │   ├── db.py                     #   Database connection (pg8000)

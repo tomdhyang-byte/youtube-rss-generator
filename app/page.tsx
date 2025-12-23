@@ -1,152 +1,114 @@
 "use client";
 
-import { useSession } from "next-auth/react";
+import { useSession, signIn } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import ChannelManager from '@/components/ChannelManager';
-import { UserMenu } from '@/components/UserMenu';
-import { SyncConflictModal } from '@/components/SyncConflictModal';
-import { useLocalStorage } from '@/lib/hooks/useLocalStorage';
-import { useGuestSync } from '@/lib/hooks/useGuestSync';
-import { GuestChannel } from '@/lib/types';
-import { Loader2 } from "lucide-react";
+import { Loader2, Play, Podcast, Rss } from "lucide-react";
 
-export default function Home() {
-  const { data: session, status } = useSession();
-  const [subscriptions, setSubscriptions] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
+export default function LandingPage() {
+  const { status } = useSession();
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
 
-  // Guest mode state
-  const [localChannels] = useLocalStorage<GuestChannel[]>('guest_channels', []);
-
-  // Optimistic UI state
-  const [optimisticChannels, setOptimisticChannels] = useState<GuestChannel[] | null>(null);
-
-  const fetchSubscriptions = async (optimisticData?: GuestChannel[] | any) => {
-    // Handle optimistic update for new channel (single object)
-    if (optimisticData && !Array.isArray(optimisticData)) {
-      const newChannel = optimisticData;
-      setSubscriptions((prev: any) => {
-        if (!prev) return prev;
-        return {
-          ...prev,
-          youtube: [
-            ...prev.youtube,
-            { channel: newChannel }
-          ]
-        };
-      });
-      // Continue to fetch real data in background
-    }
-
-    // Handle optimistic update for Guest Mode (array)
-    else if (optimisticData) {
-      setOptimisticChannels(optimisticData);
-      // Don't return here, we still want to fetch real data in background if needed
-      // But for now, just showing optimistic data is enough
-    }
-
-    try {
-      const res = await fetch('/api/subscriptions');
-      const data = await res.json();
-      setSubscriptions(data);
-      // Clear optimistic state once real data arrives
-      if (!optimisticData) {
-        setOptimisticChannels(null);
-      }
-    } catch (error) {
-      console.error("Failed to fetch subscriptions:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Guest sync hook
-  const { conflictModalOpen, setConflictModalOpen, handleDiscard } = useGuestSync({
-    session,
-    localChannels,
-    onSyncComplete: fetchSubscriptions,
-  });
-
+  // Redirect authenticated users to feed
   useEffect(() => {
     if (status === "authenticated") {
-      // If we have local channels, let useGuestSync handle the initial fetch/update
-      // to prevent race conditions that clear optimistic state
-      if (localChannels.length > 0) {
-        console.log("Skipping initial fetch in useEffect - waiting for guest sync");
-      } else {
-        fetchSubscriptions();
-      }
-    } else if (status === "unauthenticated") {
-      setLoading(false);
+      router.push("/feed");
     }
-  }, [status]);
+  }, [status, router]);
+
+  const handleTryIt = async () => {
+    setIsLoading(true);
+    await signIn("google", { callbackUrl: "/feed" });
+  };
+
+  // Show loading while checking session or redirecting
+  if (status === "loading" || status === "authenticated") {
+    return (
+      <main className="min-h-screen flex items-center justify-center bg-background">
+        <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+      </main>
+    );
+  }
 
   return (
-    <main className="min-h-screen dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8 transition-colors duration-300">
-      <SyncConflictModal
-        isOpen={conflictModalOpen}
-        onDiscard={handleDiscard}
-        onManage={() => setConflictModalOpen(false)}
-      />
-      <div className="w-full h-16 flex items-center justify-end px-4 mb-8">
-        {subscriptions?.quota && (
-          subscriptions.quota.isAdmin ? (
-            <div className="mr-4 px-3 py-1 rounded-full text-xs border bg-purple-600 text-white border-purple-500 font-bold">
-              Admin ∞
-            </div>
-          ) : (
-            <div className={`mr-4 px-3 py-1 rounded-full text-xs border ${subscriptions.quota.current >= (subscriptions.quota.limit || 1)
-              ? 'text-red-400 bg-red-900/20 border-red-900/50'
-              : 'text-slate-400 border-slate-700'
-              }`}>
-              Usage: {subscriptions.quota.current}/{subscriptions.quota.limit || 1}
-            </div>
-          )
-        )}
-        <UserMenu />
-      </div>
-
-      <div className="max-w-3xl mx-auto">
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">
-            YouTube RSS Generator
+    <main className="min-h-screen bg-gradient-to-b from-background to-accent/20">
+      {/* Hero Section */}
+      <div className="max-w-4xl mx-auto px-4 pt-24 pb-16">
+        <div className="text-center space-y-6">
+          {/* Logo */}
+          <h1 className="text-5xl md:text-6xl font-bold">
+            <span className="bg-gradient-to-r from-red-500 via-orange-500 to-yellow-500 bg-clip-text text-transparent">
+              TubeReader
+            </span>
           </h1>
-          <p className="text-gray-600 dark:text-gray-400">
-            Turn YouTube videos into readable AI summaries & RSS feeds.
+
+          {/* Tagline */}
+          <p className="text-xl md:text-2xl text-muted-foreground max-w-2xl mx-auto">
+            AI-Powered YouTube & Podcast Summaries
           </p>
+
+          <p className="text-lg text-muted-foreground/80">
+            Subscribe to your favorite channels, read AI summaries in one place.
+          </p>
+
+          {/* CTA Button */}
+          <div className="pt-8">
+            <button
+              onClick={handleTryIt}
+              disabled={isLoading}
+              className="inline-flex items-center justify-center gap-2 px-8 py-4 text-lg font-semibold rounded-full bg-gradient-to-r from-red-500 to-orange-500 text-white hover:from-red-600 hover:to-orange-600 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  Signing in...
+                </>
+              ) : (
+                "Try it Free"
+              )}
+            </button>
+            <p className="mt-3 text-sm text-muted-foreground">
+              Sign in with Google
+            </p>
+          </div>
         </div>
 
-        {status === "loading" || loading ? (
-          <div className="flex flex-col items-center justify-center py-20">
-            <Loader2 className="w-12 h-12 animate-spin text-blue-600 dark:text-blue-400 mb-4" />
-            <p className="text-gray-600 dark:text-gray-400">Loading...</p>
-          </div>
-        ) : status === "unauthenticated" ? (
-          <ChannelManager
-            initialChannels={[]}
-            initialPodcasts={[]}
-            quota={undefined}
-            onRefresh={() => { }}
+        {/* Features */}
+        <div className="mt-24 grid md:grid-cols-3 gap-8">
+          <FeatureCard
+            icon={<Play className="w-8 h-8" />}
+            title="YouTube Channels"
+            description="Subscribe and get AI-generated summaries for every video"
           />
-        ) : (
-          (subscriptions || optimisticChannels) && (
-            <ChannelManager
-              initialChannels={
-                optimisticChannels
-                  ? optimisticChannels
-                  : subscriptions?.youtube.map((sub: any) => sub.channel) || []
-              }
-              initialPodcasts={
-                optimisticChannels
-                  ? []
-                  : subscriptions?.podcasts.map((sub: any) => sub.podcast) || []
-              }
-              quota={subscriptions?.quota}
-              onRefresh={fetchSubscriptions}
-            />
-          )
-        )}
+          <FeatureCard
+            icon={<Podcast className="w-8 h-8" />}
+            title="Podcasts"
+            description="Episodes transcribed and summarized automatically"
+          />
+          <FeatureCard
+            icon={<Rss className="w-8 h-8" />}
+            title="RSS Export"
+            description="Use with Readwise, Feedly, or any RSS reader"
+          />
+        </div>
       </div>
     </main>
+  );
+}
+
+function FeatureCard({ icon, title, description }: {
+  icon: React.ReactNode;
+  title: string;
+  description: string;
+}) {
+  return (
+    <div className="p-6 rounded-2xl bg-card border border-border/50 hover:border-border transition-colors">
+      <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-red-500/10 to-orange-500/10 flex items-center justify-center text-orange-500 mb-4">
+        {icon}
+      </div>
+      <h3 className="text-lg font-semibold mb-2">{title}</h3>
+      <p className="text-muted-foreground text-sm">{description}</p>
+    </div>
   );
 }

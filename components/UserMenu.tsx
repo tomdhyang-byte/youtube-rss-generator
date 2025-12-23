@@ -70,11 +70,12 @@ export function UserMenu() {
                         <div className="py-1">
                             {/* Switch Account */}
                             <button
-                                onClick={() => {
+                                onClick={async () => {
                                     setIsOpen(false);
-                                    // Sign out and redirect directly to Google sign-in with account selector
-                                    const googleAuthUrl = `/api/auth/signin/google`;
-                                    signOut({ callbackUrl: googleAuthUrl });
+                                    // Sign out first, then redirect to sign in with Google account picker
+                                    await signOut({ redirect: false });
+                                    // Use signIn with prompt to force account selection
+                                    signIn('google', undefined, { prompt: 'select_account' });
                                 }}
                                 className="flex w-full items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors"
                             >

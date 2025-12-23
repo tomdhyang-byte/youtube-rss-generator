@@ -1,0 +1,91 @@
+import Link from 'next/link';
+import Image from 'next/image';
+import { Play, Podcast } from 'lucide-react';
+
+interface FeedCardProps {
+    type: 'video' | 'episode';
+    id: string;
+    title: string;
+    source: string;
+    summary: string;
+    publishedAt: string;
+    thumbnail: string | null;
+}
+
+export function FeedCard({ type, id, title, source, summary, publishedAt, thumbnail }: FeedCardProps) {
+    const href = type === 'video' ? `/video/${id}` : `/episode/${id}`;
+    const formattedDate = formatRelativeDate(publishedAt);
+
+    // Truncate summary for preview
+    const summaryPreview = stripHtml(summary).slice(0, 200) + (summary.length > 200 ? '...' : '');
+
+    // Use next/image for YouTube (whitelisted), regular img for podcasts (any domain)
+    const isYouTubeThumbnail = thumbnail?.includes('i.ytimg.com');
+
+    return (
+        <Link href={href} className="block group">
+            <article className="flex gap-4 p-4 rounded-xl border border-border/50 bg-card hover:border-border hover:bg-accent/30 transition-colors">
+                {/* Thumbnail */}
+                <div className="flex-shrink-0 w-32 h-20 md:w-40 md:h-24 rounded-lg overflow-hidden bg-muted relative">
+                    {thumbnail ? (
+                        isYouTubeThumbnail ? (
+                            <Image
+                                src={thumbnail}
+                                alt={title}
+                                fill
+                                className="object-cover"
+                                sizes="(max-width: 768px) 128px, 160px"
+                            />
+                        ) : (
+                            /* eslint-disable-next-line @next/next/no-img-element */
+                            <img
+                                src={thumbnail}
+                                alt={title}
+                                className="w-full h-full object-cover"
+                            />
+                        )
+                    ) : (
+                        <div className="w-full h-full flex items-center justify-center text-muted-foreground">
+                            {type === 'video' ? <Play className="w-8 h-8" /> : <Podcast className="w-8 h-8" />}
+                        </div>
+                    )}
+                    {/* Type badge */}
+                    <div className={`absolute top-1 left-1 px-1.5 py-0.5 text-xs font-medium rounded ${type === 'video' ? 'bg-red-500/90 text-white' : 'bg-purple-500/90 text-white'
+                        }`}>
+                        {type === 'video' ? 'YouTube' : 'Podcast'}
+                    </div>
+                </div>
+
+                {/* Content */}
+                <div className="flex-1 min-w-0">
+                    <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors line-clamp-2">
+                        {title}
+                    </h3>
+                    <p className="text-sm text-muted-foreground mt-1">
+                        {source} • {formattedDate}
+                    </p>
+                    <p className="text-sm text-muted-foreground/80 mt-2 line-clamp-2 hidden md:block">
+                        {summaryPreview}
+                    </p>
+                </div>
+            </article>
+        </Link>
+    );
+}
+
+function formatRelativeDate(dateString: string): string {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+    if (diffDays === 0) return 'Today';
+    if (diffDays === 1) return 'Yesterday';
+    if (diffDays < 7) return `${diffDays}d ago`;
+    if (diffDays < 30) return `${Math.floor(diffDays / 7)}w ago`;
+    return date.toLocaleDateString('zh-TW');
+}
+
+function stripHtml(html: string): string {
+    return html.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').trim();
+}

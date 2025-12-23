@@ -25,12 +25,12 @@ export function AddChannelForm({
     const buttonText = isYouTube ? "Add Channel" : "Add Podcast";
 
     const focusColor = isYouTube
-        ? "focus:border-blue-500 focus:shadow-[0_0_0_4px_rgba(59,130,246,0.5)]"
-        : "focus:border-purple-500 focus:shadow-[0_0_0_4px_rgba(168,85,247,0.5)]";
+        ? "focus:border-orange-500 focus:shadow-[0_0_0_4px_rgba(249,115,22,0.3)]"
+        : "focus:border-orange-500 focus:shadow-[0_0_0_4px_rgba(249,115,22,0.3)]";
 
     const buttonColor = isYouTube
-        ? "bg-blue-600 hover:bg-blue-700"
-        : "bg-purple-600 hover:bg-purple-700";
+        ? "bg-orange-500 hover:bg-orange-600"
+        : "bg-orange-500 hover:bg-orange-600";
 
     const Icon = isYouTube ? Plus : Mic;
 

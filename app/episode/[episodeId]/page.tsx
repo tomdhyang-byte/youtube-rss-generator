@@ -66,12 +66,14 @@ export default async function EpisodeSummaryPage({ params }: PageProps) {
                     </h2>
                     {episode.summary ? (
                         <div
-                            className="prose prose-invert max-w-none
-                                prose-headings:text-foreground
-                                prose-p:text-foreground/90
-                                prose-li:text-foreground/90
-                                prose-strong:text-foreground
-                                prose-a:text-primary"
+                            className="prose prose-invert prose-lg max-w-none
+                                prose-headings:text-foreground prose-headings:mt-6 prose-headings:mb-3
+                                prose-p:text-foreground/90 prose-p:leading-relaxed prose-p:mb-4
+                                prose-li:text-foreground/90 prose-li:leading-relaxed prose-li:my-2
+                                prose-strong:text-foreground prose-strong:text-orange-400
+                                prose-a:text-primary
+                                [&>p]:my-4
+                                [&_br]:block [&_br]:my-2"
                             dangerouslySetInnerHTML={{ __html: episode.summary }}
                         />
                     ) : (

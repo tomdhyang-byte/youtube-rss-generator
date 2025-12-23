@@ -272,16 +272,16 @@ export default function ChannelManager({
 
             <div className="space-y-8">
                 <Tabs defaultValue="youtube" className="w-full">
-                    <TabsList className="grid w-full grid-cols-2 mb-8 bg-slate-800/50 rounded-lg p-1 h-auto">
+                    <TabsList className="grid w-full grid-cols-2 mb-8 bg-orange-950/30 rounded-lg p-1 h-auto">
                         <TabsTrigger
                             value="youtube"
-                            className="data-[state=active]:bg-slate-700 data-[state=active]:text-white text-slate-400 hover:text-slate-200 transition-colors py-2"
+                            className="data-[state=active]:bg-orange-600 data-[state=active]:text-white text-orange-200/70 hover:text-orange-100 transition-colors py-2"
                         >
                             YouTube Channels
                         </TabsTrigger>
                         <TabsTrigger
                             value="podcast"
-                            className="data-[state=active]:bg-slate-700 data-[state=active]:text-white text-slate-400 hover:text-slate-200 transition-colors py-2"
+                            className="data-[state=active]:bg-orange-600 data-[state=active]:text-white text-orange-200/70 hover:text-orange-100 transition-colors py-2"
                         >
                             Podcasts
                         </TabsTrigger>

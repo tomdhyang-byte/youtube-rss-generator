@@ -76,6 +76,12 @@
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
   --radius: 0.625rem;
+  
+  /* Brand Colors - Orange Theme */
+  --brand-500: #f97316;
+  --brand-600: #ea580c;
+  --brand-gradient: linear-gradient(to right, #ef4444, #f97316);
+  --brand-gradient-hover: linear-gradient(to right, #dc2626, #ea580c);
 }
 
 @layer base {
