@@ -53,11 +53,8 @@ export async function GET(
                 url: `${origin}/episode/${episode.id}`,
                 guid: episode.guid,
                 date: episode.published_at,
-                // Keep enclosure for podcast apps that need audio
-                enclosure: {
-                    url: episode.audio_url,
-                    type: 'audio/mpeg',
-                },
+                // Note: enclosure removed to fix Readwise Reader HTML stripping issue
+                // Audio is still accessible via the episode page
                 custom_elements: [
                     { 'content:encoded': summaryContent },
                 ],
