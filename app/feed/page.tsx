@@ -5,38 +5,30 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { useQueryClient } from "@tanstack/react-query";
+import { useFeed, fetchFeed } from "@/lib/hooks/useFeed";
+import { fetchSubscriptions } from "@/lib/hooks/useSubscriptions";
 import { TopNav } from "@/components/TopNav";
 import { FeedCard } from "@/components/FeedCard";
 import { AddChannelForm } from "@/components/ChannelManager/AddChannelForm";
 import { ArticleModal } from "@/components/ArticleModal";
 import { useReadStatus } from "@/lib/hooks/useReadStatus";
 import { cn } from "@/lib/utils";
+import { FeedItem } from "@/lib/types";
 
-interface FeedItem {
-    type: 'video' | 'episode';
-    id: string;
-    title: string;
-    source: string;
-    sourceId: string;
-    summary: string;
-    publishedAt: string;
-    thumbnail: string | null;
-    youtubeVideoId?: string;
-    audioUrl?: string;
-    siteUrl?: string | null;
-}
+
 
 type FilterType = 'all' | 'youtube' | 'podcast';
 
 export default function FeedPage() {
     const { status } = useSession();
     const router = useRouter();
-    const [items, setItems] = useState<FeedItem[]>([]);
-    const [loading, setLoading] = useState(true);
+    const queryClient = useQueryClient();
     const [filter, setFilter] = useState<FilterType>('all');
+    const { data, isLoading: loading } = useFeed(filter);
+    const items = data?.items || [];
     const { isRead, markAsRead } = useReadStatus();
 
-    // Article Modal state
     // Article Modal state
     const [selectedArticle, setSelectedArticle] = useState<FeedItem | null>(null);
 
@@ -47,36 +39,33 @@ export default function FeedPage() {
         }
     }, [status, router]);
 
-    // Fetch feed
-    const fetchFeed = async (filterType: FilterType = filter) => {
-        setLoading(true);
-        try {
-            const res = await fetch(`/api/feed?filter=${filterType}`);
-            if (res.ok) {
-                const data = await res.json();
-                setItems(data.items || []);
-            }
-        } catch (error) {
-            console.error("Failed to fetch feed:", error);
-        } finally {
-            setLoading(false);
-        }
-    };
-
+    // Prefetch all feeds on mount to mask DB latency
     useEffect(() => {
         if (status === "authenticated") {
-            fetchFeed();
+            (['all', 'youtube', 'podcast'] as FilterType[]).forEach(filter => {
+                queryClient.prefetchQuery({
+                    queryKey: ['feed', filter],
+                    queryFn: () => fetchFeed(filter),
+                    staleTime: 5 * 60 * 1000 // 5 minutes
+                });
+            });
+
+            // Prefetch subscriptions
+            queryClient.prefetchQuery({
+                queryKey: ['subscriptions'],
+                queryFn: fetchSubscriptions,
+                staleTime: 5 * 60 * 1000
+            });
         }
-    }, [status]);
+    }, [status, queryClient]);
 
     const handleFilterChange = (newFilter: FilterType) => {
         setFilter(newFilter);
-        fetchFeed(newFilter);
     };
 
     const handleChannelAdded = () => {
-        // Refresh feed after adding
-        fetchFeed();
+        // Invalidate feed query to trigger refetch
+        queryClient.invalidateQueries({ queryKey: ['feed'] });
     };
 
     if (status === "loading") {

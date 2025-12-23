@@ -4,14 +4,14 @@ import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
+import { useSubscriptions } from "@/lib/hooks/useSubscriptions";
 import { TopNav } from "@/components/TopNav";
 import ChannelManager from "@/components/ChannelManager";
 
 export default function SubscriptionsPage() {
-    const { data: session, status } = useSession();
+    const { status } = useSession();
     const router = useRouter();
-    const [subscriptions, setSubscriptions] = useState<any>(null);
-    const [loading, setLoading] = useState(true);
+    const { data: subscriptions, isLoading: loading, refetch } = useSubscriptions();
 
     // Redirect unauthenticated users
     useEffect(() => {
@@ -19,26 +19,6 @@ export default function SubscriptionsPage() {
             router.push("/");
         }
     }, [status, router]);
-
-    const fetchSubscriptions = async () => {
-        try {
-            const res = await fetch('/api/subscriptions');
-            if (res.ok) {
-                const data = await res.json();
-                setSubscriptions(data);
-            }
-        } catch (error) {
-            console.error("Failed to fetch subscriptions:", error);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    useEffect(() => {
-        if (status === "authenticated") {
-            fetchSubscriptions();
-        }
-    }, [status]);
 
     if (status === "loading") {
         return (
@@ -65,10 +45,13 @@ export default function SubscriptionsPage() {
                     </div>
                 ) : subscriptions ? (
                     <ChannelManager
-                        initialChannels={subscriptions.youtube?.map((sub: any) => sub.channel) || []}
-                        initialPodcasts={subscriptions.podcasts?.map((sub: any) => sub.podcast) || []}
+                        initialChannels={subscriptions.youtube?.map(sub => sub.channel) || []}
+                        initialPodcasts={subscriptions.podcasts?.map(sub => ({
+                            ...sub.podcast,
+                            last_updated: new Date(sub.podcast.last_updated)
+                        })) || []}
                         quota={subscriptions.quota}
-                        onRefresh={fetchSubscriptions}
+                        onRefresh={refetch}
                     />
                 ) : null}
             </main>

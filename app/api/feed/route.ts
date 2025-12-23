@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getSession } from '@/lib/auth';
+import { FeedItem } from '@/lib/types';
 
 export async function GET(request: Request) {
     // 1. Authentication Check
@@ -92,16 +93,4 @@ export async function GET(request: Request) {
     }
 }
 
-interface FeedItem {
-    type: 'video' | 'episode';
-    id: string;
-    title: string;
-    source: string;
-    sourceId: string;
-    summary: string;
-    publishedAt: string;
-    thumbnail: string | null;
-    youtubeVideoId?: string;
-    audioUrl?: string;
-    siteUrl?: string | null;
-}
+

@@ -2,24 +2,13 @@
 
 import { useEffect } from 'react';
 import { X, ExternalLink } from 'lucide-react';
-import { cn } from '@/lib/utils';
-
-export interface ArticleData {
-    type: 'video' | 'episode';
-    id: string;
-    title: string;
-    source: string;
-    publishedAt: string;
-    summary: string;
-    youtubeVideoId?: string;
-    audioUrl?: string;
-    siteUrl?: string | null;
-}
+import { cn, getSourceColor, getSourceLabel } from '@/lib/utils';
+import { FeedItem } from '@/lib/types';
 
 interface ArticleModalProps {
     isOpen: boolean;
     onClose: () => void;
-    article: ArticleData;
+    article: FeedItem;
 }
 
 export function ArticleModal({ isOpen, onClose, article }: ArticleModalProps) {
@@ -59,9 +48,9 @@ export function ArticleModal({ isOpen, onClose, article }: ArticleModalProps) {
                     <div className="flex items-center gap-3">
                         <span className={cn(
                             "px-2 py-0.5 text-xs font-medium rounded",
-                            article.type === 'video' ? 'bg-red-500/90 text-white' : 'bg-purple-500/90 text-white'
+                            getSourceColor(article.type)
                         )}>
-                            {article.type === 'video' ? 'YouTube' : 'Podcast'}
+                            {getSourceLabel(article.type)}
                         </span>
                         <span className="text-sm text-muted-foreground">
                             {article.source}
