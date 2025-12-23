@@ -8,6 +8,8 @@ import { toast } from "sonner";
 import { TopNav } from "@/components/TopNav";
 import { FeedCard } from "@/components/FeedCard";
 import { AddChannelForm } from "@/components/ChannelManager/AddChannelForm";
+import { ArticleModal } from "@/components/ArticleModal";
+import { useReadStatus } from "@/lib/hooks/useReadStatus";
 import { cn } from "@/lib/utils";
 
 interface FeedItem {
@@ -19,6 +21,9 @@ interface FeedItem {
     summary: string;
     publishedAt: string;
     thumbnail: string | null;
+    youtubeVideoId?: string;
+    audioUrl?: string;
+    siteUrl?: string | null;
 }
 
 type FilterType = 'all' | 'youtube' | 'podcast';
@@ -29,6 +34,11 @@ export default function FeedPage() {
     const [items, setItems] = useState<FeedItem[]>([]);
     const [loading, setLoading] = useState(true);
     const [filter, setFilter] = useState<FilterType>('all');
+    const { isRead, markAsRead } = useReadStatus();
+
+    // Article Modal state
+    // Article Modal state
+    const [selectedArticle, setSelectedArticle] = useState<FeedItem | null>(null);
 
     // Redirect unauthenticated users
     useEffect(() => {
@@ -135,11 +145,25 @@ export default function FeedPage() {
                             <FeedCard
                                 key={`${item.type}-${item.id}`}
                                 {...item}
+                                isRead={isRead(item.type, item.id)}
+                                onRead={() => {
+                                    markAsRead(item.type, item.id);
+                                    setSelectedArticle(item);
+                                }}
                             />
                         ))}
                     </div>
                 )}
             </main>
+
+            {/* Article Modal */}
+            {selectedArticle && (
+                <ArticleModal
+                    isOpen={!!selectedArticle}
+                    onClose={() => setSelectedArticle(null)}
+                    article={selectedArticle}
+                />
+            )}
         </div>
     );
 }

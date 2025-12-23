@@ -44,6 +44,7 @@ export async function GET(request: Request) {
                 summary: video.summary,
                 publishedAt: video.published_at.toISOString(),
                 thumbnail: `https://i.ytimg.com/vi/${video.youtube_video_id}/mqdefault.jpg`,
+                youtubeVideoId: video.youtube_video_id,
             })));
         }
 
@@ -59,7 +60,7 @@ export async function GET(request: Request) {
                 },
                 include: {
                     podcast: {
-                        select: { title: true, image_url: true, id: true }
+                        select: { title: true, image_url: true, id: true, site_url: true }
                     }
                 },
                 orderBy: { published_at: 'desc' },
@@ -75,6 +76,8 @@ export async function GET(request: Request) {
                 summary: episode.summary || '',
                 publishedAt: episode.published_at.toISOString(),
                 thumbnail: episode.podcast.image_url || null,
+                audioUrl: episode.audio_url,
+                siteUrl: episode.podcast.site_url,
             })));
         }
 
@@ -98,4 +101,7 @@ interface FeedItem {
     summary: string;
     publishedAt: string;
     thumbnail: string | null;
+    youtubeVideoId?: string;
+    audioUrl?: string;
+    siteUrl?: string | null;
 }

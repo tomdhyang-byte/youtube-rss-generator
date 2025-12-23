@@ -1,6 +1,6 @@
-import Link from 'next/link';
 import Image from 'next/image';
 import { Play, Podcast } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface FeedCardProps {
     type: 'video' | 'episode';
@@ -10,10 +10,11 @@ interface FeedCardProps {
     summary: string;
     publishedAt: string;
     thumbnail: string | null;
+    isRead?: boolean;
+    onRead?: () => void;
 }
 
-export function FeedCard({ type, id, title, source, summary, publishedAt, thumbnail }: FeedCardProps) {
-    const href = type === 'video' ? `/video/${id}` : `/episode/${id}`;
+export function FeedCard({ type, id, title, source, summary, publishedAt, thumbnail, isRead = false, onRead }: FeedCardProps) {
     const formattedDate = formatRelativeDate(publishedAt);
 
     // Truncate summary for preview
@@ -22,9 +23,21 @@ export function FeedCard({ type, id, title, source, summary, publishedAt, thumbn
     // Use next/image for YouTube (whitelisted), regular img for podcasts (any domain)
     const isYouTubeThumbnail = thumbnail?.includes('i.ytimg.com');
 
+    const handleClick = () => {
+        onRead?.();
+    };
+
     return (
-        <Link href={href} className="block group">
-            <article className="flex gap-4 p-4 rounded-xl border border-border/50 bg-card hover:border-border hover:bg-accent/30 transition-colors">
+        <div
+            onClick={handleClick}
+            className="block group cursor-pointer"
+        >
+            <article className={cn(
+                "flex gap-4 p-4 rounded-xl border transition-all relative",
+                isRead
+                    ? "border-border/30 bg-card/50 opacity-60 hover:opacity-80"
+                    : "border-border/50 bg-card border-l-4 border-l-orange-500 hover:border-border hover:bg-accent/30"
+            )}>
                 {/* Thumbnail */}
                 <div className="flex-shrink-0 w-32 h-20 md:w-40 md:h-24 rounded-lg overflow-hidden bg-muted relative">
                     {thumbnail ? (
@@ -58,7 +71,12 @@ export function FeedCard({ type, id, title, source, summary, publishedAt, thumbn
 
                 {/* Content */}
                 <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors line-clamp-2">
+                    <h3 className={cn(
+                        "font-semibold transition-colors line-clamp-2",
+                        isRead
+                            ? "text-muted-foreground group-hover:text-foreground"
+                            : "text-foreground group-hover:text-primary"
+                    )}>
                         {title}
                     </h3>
                     <p className="text-sm text-muted-foreground mt-1">
@@ -69,7 +87,7 @@ export function FeedCard({ type, id, title, source, summary, publishedAt, thumbn
                     </p>
                 </div>
             </article>
-        </Link>
+        </div>
     );
 }
 

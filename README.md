@@ -43,10 +43,23 @@ Landing (/) ──[Try it Free]──> Google Login ──> Feed (/feed)
                              Empty State                    Has Content
                              (Add forms)                    (Timeline)
                                     │                             │
+                                    │                       [Click Card] (Modal)
+                                    │                             │
                                     └──────[Subscriptions tab]────┘
                                                    ▼
                                           Subscriptions (/subscriptions)
 ```
+
+### Key Improvements (v2)
+
+#### 1. Instant Article Modal
+- **Zero-Latency Opening**: Feeds are pre-loaded with all necessary data (video IDs, audio URLs). Clicking an item opens the modal instantly (0ms) without fetching additional data.
+- **Context Preservation**: Reading happens in an overlay, preserving the scroll position of the feed list.
+
+#### 2. Read Status Tracking
+- **Visual Distinction**: Unread items have a distinct orange left border and full opacity. Read items fade to 60% opacity.
+- **Local Persistence**: Read status is stored locally (`localStorage`) for privacy and speed.
+- **Auto-Mark**: Items are automatically marked as read when clicked.
 
 ---
 
@@ -59,9 +72,10 @@ youtube-rss-generator/
 │   │   ├── channels/             #     YouTube channel CRUD
 │   │   ├── podcasts/             #     Podcast CRUD
 │   │   ├── subscriptions/        #     User subscriptions
-│   │   ├── feed/                 #     🆕 Feed timeline API
+│   │   ├── feed/                 #     Feed timeline API
+│   │   ├── article/              #     🆕 Article content API (Modal)
 │   │   └── auth/                 #     NextAuth endpoints
-│   ├── feed/                     #   🆕 Web Reader Feed page + RSS routes
+│   ├── feed/                     #   Web Reader Feed page + RSS routes
 │   │   ├── page.tsx              #     Feed timeline UI
 │   │   ├── [channelId]/          #     YouTube RSS feed endpoint
 │   │   └── podcast/[podcastId]/  #     Podcast RSS feed endpoint
