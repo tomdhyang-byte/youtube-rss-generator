@@ -23,6 +23,8 @@ youtube-rss-generator/
 │   │   ├── subscriptions/        #     User subscriptions
 │   │   └── auth/                 #     NextAuth endpoints
 │   ├── feed/                     #   RSS feed routes
+│   ├── video/[videoId]/          #   🆕 YouTube video summary pages
+│   ├── episode/[episodeId]/      #   🆕 Podcast episode summary pages
 │   ├── page.tsx                  #   Main UI entry point
 │   └── layout.tsx                #   Root layout
 │
@@ -113,6 +115,36 @@ The React frontend's main component is also modularized:
 - **Guest Mode**: Non-authenticated users can add 1 channel (stored in localStorage)
 - **Optimistic UI**: Deletions happen immediately, then sync with backend
 - **Backward Compatible**: `ChannelManager.tsx` re-exports for existing imports
+
+---
+
+## 📡 RSS Feed Behavior
+
+RSS feeds are designed for maximum compatibility with various RSS readers, including Readwise Reader.
+
+### Summary Pages
+
+Each video/episode has a dedicated summary page that displays the AI-generated summary with embedded media:
+
+| Type | URL Pattern | Content |
+|------|-------------|---------|
+| YouTube | `/video/[videoId]` | AI summary + embedded YouTube player |
+| Podcast | `/episode/[episodeId]` | AI summary + audio player |
+
+### Feed Structure
+
+RSS `<link>` elements point to our summary pages (not the original source) to ensure readers display our AI summaries:
+
+```xml
+<!-- YouTube -->
+<link>https://your-domain.vercel.app/video/R7i9KdVTFR4</link>
+
+<!-- Podcast (keeps <enclosure> for podcast apps) -->
+<link>https://your-domain.vercel.app/episode/18</link>
+<enclosure url="https://original-podcast.mp3" type="audio/mpeg"/>
+```
+
+This prevents readers like Readwise Reader from fetching content directly from YouTube/Podcast sources.
 
 ---
 
