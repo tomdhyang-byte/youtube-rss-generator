@@ -50,14 +50,23 @@ export async function GET(
             });
         }
 
+        const origin = new URL(request.url).origin;
+
         channel.videos.forEach((video: any) => {
+            const summaryContent = video.summary || 'No summary available.';
+
             feed.item({
                 title: video.title,
-                description: video.summary, // The AI summary
-                url: `https://www.youtube.com/watch?v=${video.youtube_video_id}`,
+                description: summaryContent,
+                // Link to our summary page instead of YouTube
+                // This prevents RSS readers from fetching content from YouTube
+                url: `${origin}/video/${video.youtube_video_id}`,
                 guid: video.youtube_video_id,
                 date: video.published_at,
                 author: channel.title,
+                custom_elements: [
+                    { 'content:encoded': summaryContent },
+                ],
             });
         });
 

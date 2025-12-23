@@ -40,19 +40,26 @@ export async function GET(
             pubDate: podcast.last_updated,
         });
 
+        const origin = new URL(request.url).origin;
+
         podcast.episodes.forEach((episode) => {
+            const summaryContent = episode.summary || 'No summary available.';
+
             feed.item({
                 title: episode.title,
-                description: episode.summary || 'No summary available.', // Use AI Summary
-                url: episode.audio_url, // Link to audio
+                description: summaryContent,
+                // Link to our summary page instead of audio URL
+                // This prevents RSS readers from fetching content from the original source
+                url: `${origin}/episode/${episode.id}`,
                 guid: episode.guid,
                 date: episode.published_at,
+                // Keep enclosure for podcast apps that need audio
                 enclosure: {
                     url: episode.audio_url,
-                    type: 'audio/mpeg', // Default assumption, or could try to detect
+                    type: 'audio/mpeg',
                 },
                 custom_elements: [
-                    { 'content:encoded': episode.summary || 'No summary available.' }, // For readers that support full content
+                    { 'content:encoded': summaryContent },
                 ],
             });
         });
