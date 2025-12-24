@@ -18,6 +18,12 @@ DEEPGRAM_API_KEY = os.getenv('DEEPGRAM_API_KEY')
 SUPADATA_API_KEY = os.getenv('SUPADATA_API_KEY')
 
 
+# Worker Configuration
+POLL_INTERVAL = 10         # Seconds between queue checks
+MAINTENANCE_INTERVAL = 3600 # 1 Hour between full scans
+STUCK_TASK_THRESHOLD = 1800 # 30 Minutes before resetting stuck tasks
+
+
 def validate_config():
     """
     Validate configuration and print warnings for missing keys.
