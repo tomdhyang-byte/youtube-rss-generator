@@ -5,6 +5,15 @@ import Parser from 'rss-parser';
 
 const parser = new Parser();
 
+/**
+ * Strip HTML tags from a string
+ * Used to clean RSS feed descriptions that may contain HTML markup
+ */
+function stripHtml(html: string): string {
+    if (!html) return '';
+    return html.replace(/<[^>]*>/g, '').trim();
+}
+
 export async function POST(request: Request) {
     console.log('[API] POST /api/podcasts called');
 
@@ -56,7 +65,7 @@ export async function POST(request: Request) {
         try {
             const feed = await parser.parseURL(feedUrl);
             title = feed.title || '';
-            description = feed.description || '';
+            description = stripHtml(feed.description || '');
             siteUrl = feed.link || '';
             imageUrl = feed.image?.url || '';
         } catch (error) {

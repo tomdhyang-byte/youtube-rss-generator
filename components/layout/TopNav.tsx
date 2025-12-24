@@ -3,34 +3,14 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useSession } from 'next-auth/react';
-import { useState, useEffect } from 'react';
 import { UserMenu } from './UserMenu';
 import { cn } from '@/lib/utils';
-
-interface Quota {
-    current: number;
-    limit: number;
-    isAdmin: boolean;
-}
+import { useQuota } from '@/components/providers/QuotaProvider';
 
 export function TopNav() {
     const pathname = usePathname();
     const { status } = useSession();
-    const [quota, setQuota] = useState<Quota | null>(null);
-
-    // Fetch quota when authenticated
-    useEffect(() => {
-        if (status === 'authenticated') {
-            fetch('/api/subscriptions')
-                .then(res => res.json())
-                .then(data => {
-                    if (data.quota) {
-                        setQuota(data.quota);
-                    }
-                })
-                .catch(err => console.error('Failed to fetch quota:', err));
-        }
-    }, [status]);
+    const { quota, isLoading } = useQuota();
 
     const navItems = [
         { href: '/feed', label: 'Feed' },
@@ -66,21 +46,28 @@ export function TopNav() {
                 </nav>
 
                 {/* Quota Badge */}
-                {quota && (
-                    quota.isAdmin ? (
-                        <div className="mr-3 px-3 py-1 rounded-full text-xs border bg-purple-600 text-white border-purple-500 font-bold">
-                            Admin ∞
+                {status === 'authenticated' && (
+                    isLoading ? (
+                        // Loading placeholder - prevents flicker
+                        <div className="mr-3 px-3 py-1 rounded-full text-xs border bg-gray-800 border-gray-700 min-w-[80px] text-center">
+                            <span className="opacity-50 animate-pulse">• • •</span>
                         </div>
-                    ) : (
-                        <div className={cn(
-                            "mr-3 px-3 py-1 rounded-full text-xs border font-medium",
-                            quota.current >= quota.limit
-                                ? "text-red-400 bg-red-900/20 border-red-900/50"
-                                : "text-green-400 bg-green-900/20 border-green-900/50"
-                        )}>
-                            Free • {quota.limit - quota.current} left
-                        </div>
-                    )
+                    ) : quota ? (
+                        quota.isAdmin ? (
+                            <div className="mr-3 px-3 py-1 rounded-full text-xs border bg-purple-600 text-white border-purple-500 font-bold">
+                                Admin ∞
+                            </div>
+                        ) : (
+                            <div className={cn(
+                                "mr-3 px-3 py-1 rounded-full text-xs border font-medium",
+                                quota.current >= quota.limit
+                                    ? "text-red-400 bg-red-900/20 border-red-900/50"
+                                    : "text-green-400 bg-green-900/20 border-green-900/50"
+                            )}>
+                                Free • {quota.limit - quota.current} left
+                            </div>
+                        )
+                    ) : null
                 )}
 
                 {/* User Menu */}
@@ -89,4 +76,3 @@ export function TopNav() {
         </header>
     );
 }
-

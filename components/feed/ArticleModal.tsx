@@ -24,7 +24,7 @@ export function ArticleModal({ isOpen, onClose, article }: ArticleModalProps) {
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
             <DialogContent
-                className="max-w-4xl max-h-[90vh] p-0 flex flex-col overflow-hidden"
+                className="max-w-6xl max-h-[90vh] p-0 flex flex-col overflow-hidden"
                 showCloseButton={false}
             >
                 {/* Header */}
@@ -60,7 +60,7 @@ export function ArticleModal({ isOpen, onClose, article }: ArticleModalProps) {
 
                         {/* Media Player */}
                         {article.type === 'video' && article.youtubeVideoId && (
-                            <div className="aspect-video rounded-xl overflow-hidden bg-card max-w-2xl mx-auto w-full">
+                            <div className="aspect-video rounded-xl overflow-hidden bg-card w-full">
                                 <iframe
                                     className="w-full h-full"
                                     src={`https://www.youtube.com/embed/${article.youtubeVideoId}`}

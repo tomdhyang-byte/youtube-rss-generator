@@ -8,6 +8,7 @@ import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { LoginModal } from "@/components/auth/LoginModal";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { GuestChannel } from "@/lib/types";
+import { useQuota } from "@/components/providers/QuotaProvider";
 
 // Import sub-components
 import { AddChannelForm } from './AddChannelForm';
@@ -31,6 +32,7 @@ export default function ChannelManager({
     onRefresh
 }: ChannelManagerProps) {
     const { data: session } = useSession();
+    const { refreshQuota } = useQuota();
 
     // Form state
     const [youtubeUrl, setYoutubeUrl] = useState('');
@@ -180,6 +182,9 @@ export default function ChannelManager({
 
             // 3. Trigger refresh (fetching real data)
             onRefresh?.(data.channel);
+
+            // 4. Refresh global quota state
+            refreshQuota();
         } catch (err: any) {
             // Revert optimistic
             setOptimisticChannels(prev => prev.filter(c => c.id !== optimisticId));
@@ -239,6 +244,9 @@ export default function ChannelManager({
 
             setOptimisticPodcasts(prev => prev.filter(p => p.id !== optimisticId));
             onRefresh?.();
+
+            // Refresh global quota state
+            refreshQuota();
         } catch (err: any) {
             setOptimisticPodcasts(prev => prev.filter(p => p.id !== optimisticId));
             setError(err.message);
@@ -290,6 +298,9 @@ export default function ChannelManager({
             }
 
             onRefresh?.();
+
+            // Refresh global quota state
+            refreshQuota();
         } catch (err: any) {
             // Revert optimistic update on failure
             setOptimisticDeletedIds(prev => prev.filter(id => id !== targetId));
