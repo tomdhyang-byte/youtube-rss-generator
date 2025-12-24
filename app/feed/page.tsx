@@ -7,11 +7,12 @@ import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 import { useFeed, fetchFeed } from "@/lib/hooks/useFeed";
-import { fetchSubscriptions } from "@/lib/hooks/useSubscriptions";
+import { useSubscriptions, fetchSubscriptions } from "@/lib/hooks/useSubscriptions";
 import { TopNav } from "@/components/TopNav";
 import { FeedCard } from "@/components/FeedCard";
 import { AddChannelForm } from "@/components/ChannelManager/AddChannelForm";
 import { ArticleModal } from "@/components/ArticleModal";
+import { FeedProcessingState } from "@/components/FeedProcessingState";
 import { useReadStatus } from "@/lib/hooks/useReadStatus";
 import { cn } from "@/lib/utils";
 import { FeedItem } from "@/lib/types";
@@ -25,9 +26,13 @@ export default function FeedPage() {
     const router = useRouter();
     const queryClient = useQueryClient();
     const [filter, setFilter] = useState<FilterType>('all');
-    const { data, isLoading: loading } = useFeed(filter);
+    const { data, isLoading: loading, refetch: refetchFeed } = useFeed(filter);
+    const { data: subData } = useSubscriptions();
     const items = data?.items || [];
     const { isRead, markAsRead } = useReadStatus();
+
+    // Optimistic UI state
+    const [optimisticAdding, setOptimisticAdding] = useState(false);
 
     // Article Modal state
     const [selectedArticle, setSelectedArticle] = useState<FeedItem | null>(null);
@@ -66,6 +71,13 @@ export default function FeedPage() {
     const handleChannelAdded = () => {
         // Invalidate feed query to trigger refetch
         queryClient.invalidateQueries({ queryKey: ['feed'] });
+        queryClient.invalidateQueries({ queryKey: ['subscriptions'] });
+        // We keep optimisticAdding true for a moment or let the new data take over
+        // But since we want to show ProcessingState, leaving it true until data arrives is fine?
+        // Actually, if data arrives and items are empty, isProcessing will be true via hasSubscriptions logic.
+        // So we can turn off optimistic flag safely after a delay or just let it be.
+        // Let's reset it to allow normal logic to take over.
+        setTimeout(() => setOptimisticAdding(false), 2000);
     };
 
     if (status === "loading") {
@@ -80,10 +92,19 @@ export default function FeedPage() {
         return null; // Will redirect
     }
 
-    // Distinguish between "no subscriptions at all" vs "filter has no results"
+    // Distinguish between states
     const isEmpty = !loading && items.length === 0;
-    const isFilteredEmpty = isEmpty && filter !== 'all';
-    const isCompletelyEmpty = isEmpty && filter === 'all';
+    const hasSubscriptions = (subData?.youtube?.length || 0) + (subData?.podcasts?.length || 0) > 0;
+
+    // 1. Completely Empty (No Subs) -> Show EmptyState
+    // 2. Processing (Has Subs OR Optimistic Add, but No Feed) -> Show ProcessingState
+    // 3. Filter Empty (Has Sub, No Feed for this filter) -> Show FilteredEmptyState
+
+    const isProcessing = (isEmpty && hasSubscriptions && filter === 'all') || optimisticAdding;
+    const isFilteredEmpty = isEmpty && !isProcessing && filter !== 'all';
+    const isNoSubs = isEmpty && !hasSubscriptions && filter === 'all' && !optimisticAdding;
+
+    const showFilters = !isNoSubs && !isProcessing;
 
     return (
         <div className="min-h-screen bg-background">
@@ -91,7 +112,7 @@ export default function FeedPage() {
 
             <main className="max-w-3xl mx-auto px-4 py-8">
                 {/* Header with filters - always show if not completely empty */}
-                {!isCompletelyEmpty && (
+                {showFilters && (
                     <div className="flex items-center justify-between mb-6">
                         <h1 className="text-2xl font-bold">Your Feed</h1>
                         <div className="flex gap-1 bg-muted rounded-lg p-1">
@@ -114,9 +135,15 @@ export default function FeedPage() {
                 )}
 
                 {/* Content */}
-                {isCompletelyEmpty ? (
+                {isNoSubs ? (
                     // No subscriptions at all - show Add forms
-                    <EmptyState onChannelAdded={handleChannelAdded} />
+                    <EmptyState
+                        onChannelAdded={handleChannelAdded}
+                        onOptimisticAdd={() => setOptimisticAdding(true)}
+                    />
+                ) : isProcessing ? (
+                    // Has subscriptions but no feed yet - show Processing
+                    <FeedProcessingState onCheckAgain={() => refetchFeed()} />
                 ) : isFilteredEmpty ? (
                     // Filter has no results - show simple message with link to All
                     <FilteredEmptyState
@@ -180,7 +207,7 @@ function FilteredEmptyState({ filterName, onShowAll }: { filterName: string; onS
     );
 }
 
-function EmptyState({ onChannelAdded }: { onChannelAdded: () => void }) {
+function EmptyState({ onChannelAdded, onOptimisticAdd }: { onChannelAdded: () => void; onOptimisticAdd: () => void }) {
     const [youtubeUrl, setYoutubeUrl] = useState('');
     const [podcastUrl, setPodcastUrl] = useState('');
     const [youtubeLoading, setYoutubeLoading] = useState(false);
@@ -190,7 +217,10 @@ function EmptyState({ onChannelAdded }: { onChannelAdded: () => void }) {
         e.preventDefault();
         if (!youtubeUrl.trim()) return;
 
+        // Optimistic Update: Immediately show processing state
+        onOptimisticAdd();
         setYoutubeLoading(true);
+
         try {
             const res = await fetch('/api/channels', {
                 method: 'POST',
@@ -200,15 +230,23 @@ function EmptyState({ onChannelAdded }: { onChannelAdded: () => void }) {
             const data = await res.json();
             if (res.ok) {
                 setYoutubeUrl('');
-                toast.success('YouTube channel added!');
-                toast.info("AI summaries will appear after the worker processes new videos.");
+                // toast.success('YouTube channel added!');
+                // Enhanced UX: No toast needed as UI switches to "Processing" immediately
                 onChannelAdded();
             } else {
                 toast.error(data.error || 'Failed to add channel');
+                // Note: We don't have a way to "revert" the optimisticAdd in parent nicely without passing another prop
+                // But typically if it fails, the parent will just stay on Processing until we reload or we can rely on window reload
+                // For now, let's keep it simple. If it fails, the user is stuck on Processing? 
+                // No, the parent optimisticAdding is just state.
+                // We should probably allow reverting. But for "Optimistic", we assume success.
+                // If simple failure, maybe reload page?
+                window.location.reload();
             }
         } catch (error) {
             console.error('Failed to add channel:', error);
             toast.error('Failed to add channel');
+            window.location.reload();
         } finally {
             setYoutubeLoading(false);
         }
@@ -218,7 +256,10 @@ function EmptyState({ onChannelAdded }: { onChannelAdded: () => void }) {
         e.preventDefault();
         if (!podcastUrl.trim()) return;
 
+        // Optimistic Update
+        onOptimisticAdd();
         setPodcastLoading(true);
+
         try {
             const res = await fetch('/api/podcasts', {
                 method: 'POST',
@@ -228,15 +269,17 @@ function EmptyState({ onChannelAdded }: { onChannelAdded: () => void }) {
             const data = await res.json();
             if (res.ok) {
                 setPodcastUrl('');
-                toast.success('Podcast added!');
-                toast.info("AI summaries will appear after the worker processes new episodes.");
+                // toast.success('Podcast added!'); 
+                // Enhanced UX: No toast needed as UI switches to "Processing" immediately
                 onChannelAdded();
             } else {
                 toast.error(data.error || 'Failed to add podcast');
+                window.location.reload();
             }
         } catch (error) {
             console.error('Failed to add podcast:', error);
             toast.error('Failed to add podcast');
+            window.location.reload();
         } finally {
             setPodcastLoading(false);
         }

@@ -50,11 +50,29 @@ export default function ChannelManager({
     // Optimistic UI state for deletions
     const [optimisticDeletedIds, setOptimisticDeletedIds] = useState<number[]>([]);
 
+    // Optimistic UI state for additions
+    const [optimisticChannels, setOptimisticChannels] = useState<YoutubeChannel[]>([]);
+    const [optimisticPodcasts, setOptimisticPodcasts] = useState<any[]>([]); // Using any for podcast for simplicity or correct type if available
+
+    // Recently added items (Bridging state to prevent flicker)
+    // Used to keep the card visible after optimistic removal but before re-fetch validation
+    const [recentlyAddedChannels, setRecentlyAddedChannels] = useState<YoutubeChannel[]>([]);
+    const [recentlyAddedPodcasts, setRecentlyAddedPodcasts] = useState<any[]>([]);
+
+
     // Determine which channels to display
-    const displayChannels = (session ? initialChannels : localChannels)
+    const realChannels = session ? initialChannels : localChannels;
+    // Memoized deduping: recently added items that are NOT yet in realChannels
+    const uniqueRecentChannels = recentlyAddedChannels.filter(
+        recent => !realChannels.some(real => real.id === recent.id)
+    );
+    const displayChannels = [...optimisticChannels, ...uniqueRecentChannels, ...realChannels]
         .filter(channel => !optimisticDeletedIds.includes(channel.id));
 
-    const displayPodcasts = initialPodcasts
+    const uniqueRecentPodcasts = recentlyAddedPodcasts.filter(
+        recent => !initialPodcasts.some(real => real.id === recent.id)
+    );
+    const displayPodcasts = [...optimisticPodcasts, ...uniqueRecentPodcasts, ...initialPodcasts]
         .filter(podcast => !optimisticDeletedIds.includes(podcast.id));
 
     // Check if user can add more channels
@@ -80,9 +98,9 @@ export default function ChannelManager({
 
         // Guest mode: Fetch real channel info via backend proxy
         if (!session) {
+            // ... existing guest mode logic ...
             try {
                 toast.info('Fetching channel information...');
-
                 const response = await fetch('/api/channel-info', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -95,8 +113,6 @@ export default function ChannelManager({
                 }
 
                 const { youtube_id, title, description } = await response.json();
-
-                // Generate negative ID for guest channel
                 const mockId = -(Date.now());
                 const mockChannel: GuestChannel = {
                     id: mockId,
@@ -116,7 +132,6 @@ export default function ChannelManager({
                 setLocalChannels([...localChannels, mockChannel]);
                 setYoutubeUrl('');
                 toast.success('Channel added! Sign in to save permanently.');
-                toast.info('You can add 1 free channel. Sign in to add more.');
             } catch (err: any) {
                 setError(err.message);
                 toast.error(err.message);
@@ -126,7 +141,20 @@ export default function ChannelManager({
             return;
         }
 
-        // Authenticated mode: Normal API call
+        // Authenticated mode: Optimistic Update
+        const optimisticId = -Date.now();
+        const optimisticChannel: YoutubeChannel = {
+            id: optimisticId,
+            youtube_id: 'pending-' + optimisticId,
+            title: 'Adding Channel...',
+            description: 'Please wait while we fetch channel details.',
+            rss_url: '',
+            last_updated: new Date().toISOString(),
+        };
+
+        setOptimisticChannels(prev => [optimisticChannel, ...prev]);
+        setYoutubeUrl('');
+
         try {
             const res = await fetch('/api/channels', {
                 method: 'POST',
@@ -139,13 +167,23 @@ export default function ChannelManager({
                 throw new Error(data.error || 'Failed to add channel');
             }
 
-            setYoutubeUrl('');
             toast.success('YouTube channel added successfully!');
-            toast.info("Don't Panic. If the feed is empty, wait for 5 mins and retry.");
+            // toast.info("Don't Panic. If the feed is empty, wait for 5 mins and retry.");
 
             const data = await res.json();
+
+            // Success! Transition from Optimistic -> Recently Added -> Real (eventually)
+            // 1. Add to recently added (keeps it visible)
+            setRecentlyAddedChannels(prev => [data.channel, ...prev]);
+
+            // 2. Remove optimistic channel
+            setOptimisticChannels(prev => prev.filter(c => c.id !== optimisticId));
+
+            // 3. Trigger refresh (fetching real data)
             onRefresh?.(data.channel);
         } catch (err: any) {
+            // Revert optimistic
+            setOptimisticChannels(prev => prev.filter(c => c.id !== optimisticId));
             setError(err.message);
             toast.error(err.message);
         } finally {
@@ -163,6 +201,21 @@ export default function ChannelManager({
         setLoading(true);
         setError('');
 
+        const optimisticId = -Date.now();
+        // Optimistic Podcast Item
+        const optimisticPodcast = {
+            id: optimisticId,
+            feed_url: 'pending',
+            title: 'Adding Podcast...',
+            description: 'Fetching podcast details...',
+            site_url: '',
+            image_url: null,
+            last_updated: new Date(),
+        };
+
+        setOptimisticPodcasts(prev => [optimisticPodcast, ...prev]);
+        setPodcastUrl('');
+
         try {
             const res = await fetch('/api/podcasts', {
                 method: 'POST',
@@ -175,11 +228,20 @@ export default function ChannelManager({
                 throw new Error(data.error || 'Failed to add podcast');
             }
 
-            setPodcastUrl('');
             toast.success('Podcast added successfully!');
-            toast.info("Don't Panic. If the feed is empty, wait. The AI backend is working on the backlog.");
+            // toast.info("Don't Panic. If the feed is empty, wait. The AI backend is working on the backlog.");
+
+            const data = await res.json();
+
+            // Bridging state: Add to recently added to prevent flicker
+            if (data.podcast) {
+                setRecentlyAddedPodcasts(prev => [data.podcast, ...prev]);
+            }
+
+            setOptimisticPodcasts(prev => prev.filter(p => p.id !== optimisticId));
             onRefresh?.();
         } catch (err: any) {
+            setOptimisticPodcasts(prev => prev.filter(p => p.id !== optimisticId));
             setError(err.message);
             toast.error(err.message);
         } finally {

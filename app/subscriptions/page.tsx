@@ -4,6 +4,7 @@ import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
 import { useSubscriptions } from "@/lib/hooks/useSubscriptions";
 import { TopNav } from "@/components/TopNav";
 import ChannelManager from "@/components/ChannelManager";
@@ -11,6 +12,7 @@ import ChannelManager from "@/components/ChannelManager";
 export default function SubscriptionsPage() {
     const { status } = useSession();
     const router = useRouter();
+    const queryClient = useQueryClient();
     const { data: subscriptions, isLoading: loading, refetch } = useSubscriptions();
 
     // Redirect unauthenticated users
@@ -51,7 +53,10 @@ export default function SubscriptionsPage() {
                             last_updated: new Date(sub.podcast.last_updated)
                         })) || []}
                         quota={subscriptions.quota}
-                        onRefresh={refetch}
+                        onRefresh={() => {
+                            refetch();
+                            queryClient.resetQueries({ queryKey: ['feed'] });
+                        }}
                     />
                 ) : null}
             </main>
