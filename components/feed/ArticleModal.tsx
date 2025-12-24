@@ -24,7 +24,7 @@ export function ArticleModal({ isOpen, onClose, article }: ArticleModalProps) {
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
             <DialogContent
-                className="max-w-6xl max-h-[90vh] p-0 flex flex-col overflow-hidden"
+                className="max-w-6xl sm:max-w-6xl max-h-[90vh] p-0 flex flex-col overflow-hidden"
                 showCloseButton={false}
             >
                 {/* Header */}

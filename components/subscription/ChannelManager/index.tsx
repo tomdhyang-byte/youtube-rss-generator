@@ -28,11 +28,10 @@ import { ChannelManagerProps, YoutubeChannel } from './types';
 export default function ChannelManager({
     initialChannels,
     initialPodcasts,
-    quota,
     onRefresh
 }: ChannelManagerProps) {
     const { data: session } = useSession();
-    const { refreshQuota } = useQuota();
+    const { quota, refreshQuota } = useQuota();
 
     // Form state
     const [youtubeUrl, setYoutubeUrl] = useState('');

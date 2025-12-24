@@ -11,6 +11,17 @@ import feedparser
 from .transcribe import transcribe_audio
 from .summarize import generate_summary
 
+import re
+
+def strip_html(text: str) -> str:
+    """
+    Strip HTML tags from a string.
+    Used to clean RSS feed descriptions that may contain HTML markup.
+    """
+    if not text:
+        return ''
+    return re.sub(r'<[^>]*>', '', text).strip()
+
 
 def process_podcast_channel(conn, podcast: dict) -> None:
     """
@@ -38,7 +49,7 @@ def process_podcast_channel(conn, podcast: dict) -> None:
     # Update podcast metadata if missing
     if not podcast['title'] and feed.feed.get('title'):
         new_title = feed.feed.get('title')
-        new_desc = feed.feed.get('description', '')
+        new_desc = strip_html(feed.feed.get('description', ''))
         new_site = feed.feed.get('link', '')
         new_image = feed.feed.get('image', {}).get('href', '')
         

@@ -5,7 +5,7 @@ import { useSession } from 'next-auth/react';
 
 export interface Quota {
     current: number;
-    limit: number;
+    limit: number | null;
     isAdmin: boolean;
 }
 

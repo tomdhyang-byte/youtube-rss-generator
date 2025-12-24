@@ -52,7 +52,6 @@ export default function SubscriptionsPage() {
                             ...sub.podcast,
                             last_updated: new Date(sub.podcast.last_updated)
                         })) || []}
-                        quota={subscriptions.quota}
                         onRefresh={() => {
                             refetch();
                             queryClient.resetQueries({ queryKey: ['feed'] });

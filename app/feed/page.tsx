@@ -16,8 +16,6 @@ import { cn } from "@/lib/utils";
 import { FeedItem } from "@/lib/types";
 import { Button } from "@/components/ui/Button";
 
-
-
 type FilterType = 'all' | 'youtube' | 'podcast';
 
 export default function FeedPage() {

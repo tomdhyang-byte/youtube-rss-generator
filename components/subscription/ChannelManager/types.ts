@@ -28,12 +28,7 @@ export interface PodcastChannel {
 export interface ChannelManagerProps {
     initialChannels: YoutubeChannel[];
     initialPodcasts: PodcastChannel[];
-    quota?: {
-        current: number;
-        limit: number | null;
-        isAdmin: boolean;
-    };
-    onRefresh?: (newChannel?: any) => void;
+    onRefresh?: (newChannel?: YoutubeChannel | PodcastChannel) => void;
 }
 
 // Props for AddChannelForm component
