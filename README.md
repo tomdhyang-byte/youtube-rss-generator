@@ -1,3 +1,12 @@
+<!--
+AI MAINTENANCE GUIDE:
+This README serves as a hybrid "Operational Manual" for the Vibe Coder (User) and "context source" for AI.
+WHEN UPDATING THIS FILE:
+1. UI Component Cheat Sheet: MUST be updated whenever a new reusable UI component is created. Provide copy-paste friendly examples.
+2. Quick Actions: Keep this list concise. Only add high-frequency commands.
+3. Tech Stack: Keep strict version numbers (e.g. Next.js 16) to help AI generate compatible code.
+-->
+
 # TubeReader - AI-Powered YouTube & Podcast Reader
 
 > **Concept**: Stop watching 20-minute videos just to find one insight. TubeReader turns YouTube channels and Podcasts into a readable, high-signal news feed using AI.
@@ -31,6 +40,53 @@ By subscribing to channels here instead of on YouTube:
 
 ---
 
+## 🧩 UI Component Cheat Sheet
+
+Use these pre-built components to maintain UI consistency.
+
+### Button
+```tsx
+import { Button } from "@/components/ui/Button";
+
+// Variants: primary (orange), secondary (blue), ghost, danger, outline
+<Button variant="primary" size="md" onClick={handleClick} loading={isLoading}>
+  Confirm Action
+</Button>
+```
+
+### IconButton
+```tsx
+import { IconButton } from "@/components/ui/IconButton";
+import { Trash2 } from "lucide-react";
+
+// Variants: default, danger, warning, muted
+<IconButton variant="danger" aria-label="Delete" onClick={handleDelete}>
+  <Trash2 className="w-5 h-5" />
+</IconButton>
+```
+
+### Input
+```tsx
+import { Input } from "@/components/ui/Input";
+
+<Input 
+  label="Email" 
+  placeholder="Enter email..." 
+  error={errorMessage} // Shows red border + error text
+  fullWidth 
+/>
+```
+
+### Badge
+```tsx
+import { Badge } from "@/components/ui/Badge";
+
+// Variants: default, success, warning, danger, info, youtube, podcast
+<Badge variant="youtube">YouTube</Badge>
+```
+
+---
+
 ## 🚀 Getting Started
 
 ### 1. Visit the App
@@ -49,6 +105,7 @@ The AI will process the latest videos (usually takes ~5 mins for a new channel).
 This project is open-source and built with modern web technologies.
 
 -   **Frontend**: Next.js 16, React Query, Tailwind CSS
+-   **UI Components**: Custom component library (Button, IconButton, Input, Badge) + Shadcn
 -   **Backend**: Python Worker, OpenAI, Supabase (PostgreSQL)
 
 👉 **[Read the Architecture Documentation](ARCHITECTURE.md)** for a deep dive into the code structure, database schema, and data flow.
@@ -57,8 +114,8 @@ This project is open-source and built with modern web technologies.
 
 ```bash
 # 1. Install Dependencies
-# 1. Install Dependencies
 npm install
+
 # Backend dependencies
 cd backend
 pip install -r requirements.txt

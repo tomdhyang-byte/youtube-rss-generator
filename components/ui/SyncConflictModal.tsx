@@ -9,6 +9,7 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog';
+import { Button } from './Button';
 
 interface SyncConflictModalProps {
     isOpen: boolean;
@@ -32,18 +33,22 @@ export function SyncConflictModal({ isOpen, onDiscard, onManage }: SyncConflictM
                     </DialogDescription>
                 </DialogHeader>
                 <DialogFooter className="flex-col sm:flex-row gap-2 pt-4">
-                    <button
+                    <Button
+                        variant="outline"
                         onClick={onDiscard}
-                        className="w-full sm:w-auto px-6 py-2 border border-red-300 dark:border-red-700 text-red-600 dark:text-red-400 rounded-lg font-medium hover:bg-red-50 dark:hover:bg-red-950 transition-colors"
+                        fullWidth
+                        className="sm:w-auto border-red-300 dark:border-red-700 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950"
                     >
                         Discard Guest Data
-                    </button>
-                    <button
+                    </Button>
+                    <Button
+                        variant="secondary"
                         onClick={onManage}
-                        className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition-colors"
+                        fullWidth
+                        className="sm:w-auto"
                     >
                         Manage Subscriptions
-                    </button>
+                    </Button>
                 </DialogFooter>
             </DialogContent>
         </Dialog>

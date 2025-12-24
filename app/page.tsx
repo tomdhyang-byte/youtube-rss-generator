@@ -4,6 +4,7 @@ import { useSession, signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Loader2, Play, Podcast, Rss } from "lucide-react";
+import { Button } from "@/components/ui/Button";
 
 export default function LandingPage() {
   const { status } = useSession();
@@ -45,7 +46,7 @@ export default function LandingPage() {
 
           {/* Tagline */}
           <p className="text-xl md:text-2xl text-muted-foreground max-w-2xl mx-auto">
-            AI-Powered YouTube & Podcast Summaries
+            AI-Powered YouTube &amp; Podcast Summaries
           </p>
 
           <p className="text-lg text-muted-foreground/80">
@@ -54,20 +55,15 @@ export default function LandingPage() {
 
           {/* CTA Button */}
           <div className="pt-8">
-            <button
+            <Button
+              variant="primary"
+              size="lg"
+              loading={isLoading}
               onClick={handleTryIt}
-              disabled={isLoading}
-              className="inline-flex items-center justify-center gap-2 px-8 py-4 text-lg font-semibold rounded-full bg-gradient-to-r from-red-500 to-orange-500 text-white hover:from-red-600 hover:to-orange-600 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-8 py-4 text-lg rounded-full bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300"
             >
-              {isLoading ? (
-                <>
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                  Signing in...
-                </>
-              ) : (
-                "Try it Free"
-              )}
-            </button>
+              {isLoading ? "Signing in..." : "Try it Free"}
+            </Button>
             <p className="mt-3 text-sm text-muted-foreground">
               Sign in with Google
             </p>

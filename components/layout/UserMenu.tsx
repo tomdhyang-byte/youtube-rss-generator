@@ -2,7 +2,8 @@
 
 import { signIn, signOut, useSession } from 'next-auth/react';
 import { useState, useRef, useEffect } from 'react';
-import { LogIn, LogOut, Loader2, ChevronDown, RefreshCw } from 'lucide-react';
+import { LogIn, LogOut, ChevronDown, RefreshCw } from 'lucide-react';
+import { Button } from '@/components/ui/Button';
 
 export function UserMenu() {
     const { data: session, status } = useSession();
@@ -25,13 +26,9 @@ export function UserMenu() {
 
     if (status === 'loading') {
         return (
-            <button
-                disabled
-                className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-400 dark:text-gray-500 bg-gray-100 dark:bg-gray-800 rounded-lg cursor-not-allowed"
-            >
-                <Loader2 className="w-4 h-4 animate-spin" />
+            <Button variant="ghost" disabled loading>
                 Loading...
-            </button>
+            </Button>
         );
     }
 
@@ -72,9 +69,7 @@ export function UserMenu() {
                             <button
                                 onClick={async () => {
                                     setIsOpen(false);
-                                    // Sign out first, then redirect to sign in with Google account picker
                                     await signOut({ redirect: false });
-                                    // Use signIn with prompt to force account selection
                                     signIn('google', undefined, { prompt: 'select_account' });
                                 }}
                                 className="flex w-full items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors"
@@ -106,13 +101,14 @@ export function UserMenu() {
 
     // Not signed in - show sign in button
     return (
-        <button
+        <Button
+            variant="secondary"
+            size="lg"
             onClick={() => signIn('google')}
-            className="flex items-center gap-2 px-3 py-2 md:px-6 md:py-3 text-sm font-medium text-gray-300 hover:text-white hover:bg-white/10 md:text-white md:bg-blue-600 md:hover:bg-blue-700 rounded-lg transition-colors md:shadow-lg md:hover:shadow-xl"
+            leftIcon={<LogIn className="w-5 h-5" />}
+            className="hidden md:inline-flex"
         >
-            <LogIn className="w-5 h-5" />
-            <span className="hidden md:inline">Sign in with Google</span>
-            <span className="md:hidden">Sign in</span>
-        </button>
+            Sign in with Google
+        </Button>
     );
 }

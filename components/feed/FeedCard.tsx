@@ -1,6 +1,7 @@
 import Image from 'next/image';
 import { Play, Podcast } from 'lucide-react';
-import { cn, getSourceColor, getSourceLabel } from '@/lib/utils';
+import { cn, getSourceLabel } from '@/lib/utils';
+import { Badge } from '@/components/ui/Badge';
 
 interface FeedCardProps {
     type: 'video' | 'episode';
@@ -63,12 +64,12 @@ export function FeedCard({ type, id, title, source, summary, publishedAt, thumbn
                         </div>
                     )}
                     {/* Type badge */}
-                    <div className={cn(
-                        "absolute top-1 left-1 px-1.5 py-0.5 text-xs font-medium rounded",
-                        getSourceColor(type)
-                    )}>
+                    <Badge
+                        variant={type === 'video' ? 'youtube' : 'podcast'}
+                        className="absolute top-1 left-1"
+                    >
                         {getSourceLabel(type)}
-                    </div>
+                    </Badge>
                 </div>
 
                 {/* Content */}

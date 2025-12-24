@@ -1,20 +1,17 @@
 "use client";
 
 import { signIn, signOut, useSession } from "next-auth/react";
-import { LogIn, LogOut, Loader2 } from "lucide-react";
+import { LogIn, LogOut } from "lucide-react";
+import { Button } from "@/components/ui/Button";
 
 export function AuthButton() {
     const { data: session, status } = useSession();
 
     if (status === "loading") {
         return (
-            <button
-                disabled
-                className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-400 dark:text-gray-500 bg-gray-100 dark:bg-gray-800 rounded-lg cursor-not-allowed"
-            >
-                <Loader2 className="w-4 h-4 animate-spin" />
+            <Button variant="ghost" disabled loading>
                 Loading...
-            </button>
+            </Button>
         );
     }
 
@@ -40,31 +37,32 @@ export function AuthButton() {
                         )}
                     </div>
                 </div>
-                <button
+                <Button
+                    variant="ghost"
                     onClick={() => signIn("google", { prompt: "select_account" })}
-                    className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+                    leftIcon={<LogIn className="w-4 h-4" />}
                 >
-                    <LogIn className="w-4 h-4" />
                     <span className="hidden sm:inline">Switch Account</span>
-                </button>
-                <button
+                </Button>
+                <Button
+                    variant="ghost"
                     onClick={() => signOut()}
-                    className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+                    leftIcon={<LogOut className="w-4 h-4" />}
                 >
-                    <LogOut className="w-4 h-4" />
                     <span className="hidden sm:inline">Sign Out</span>
-                </button>
+                </Button>
             </div>
         );
     }
 
     return (
-        <button
+        <Button
+            variant="secondary"
+            size="lg"
             onClick={() => signIn("google")}
-            className="flex items-center gap-2 px-6 py-3 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors shadow-lg hover:shadow-xl"
+            leftIcon={<LogIn className="w-5 h-5" />}
         >
-            <LogIn className="w-5 h-5" />
             Sign in with Google
-        </button>
+        </Button>
     );
 }

@@ -11,8 +11,7 @@ import { GuestChannel } from "@/lib/types";
 
 // Import sub-components
 import { AddChannelForm } from './AddChannelForm';
-import { ChannelCard } from './ChannelCard';
-import { PodcastCard } from './PodcastCard';
+import { SubscriptionCard } from './SubscriptionCard';
 import { ChannelManagerProps, YoutubeChannel } from './types';
 
 /**
@@ -363,11 +362,16 @@ export default function ChannelManager({
 
                         <div className="flex flex-col items-center gap-4 w-full">
                             {displayChannels.map((channel) => (
-                                <ChannelCard
+                                <SubscriptionCard
                                     key={channel.id}
-                                    channel={channel as YoutubeChannel}
-                                    onUnsubscribe={handleUnsubscribe}
-                                    onCopyRss={copyRssLink}
+                                    type="youtube"
+                                    id={channel.id}
+                                    title={channel.title}
+                                    description={channel.description}
+                                    lastUpdated={channel.last_updated}
+                                    externalUrl={`https://youtube.com/channel/${channel.youtube_id}`}
+                                    onUnsubscribe={() => handleUnsubscribe(channel.id, 'youtube', channel.title)}
+                                    onCopyRss={() => copyRssLink(channel.id, 'youtube')}
                                     onLoginRequired={() => setLoginModalOpen(true)}
                                     isAuthenticated={!!session}
                                     loading={loading}
@@ -396,11 +400,16 @@ export default function ChannelManager({
 
                         <div className="flex flex-col items-center gap-4 w-full">
                             {displayPodcasts.map((podcast) => (
-                                <PodcastCard
+                                <SubscriptionCard
                                     key={podcast.id}
-                                    podcast={podcast}
-                                    onUnsubscribe={handleUnsubscribe}
-                                    onCopyRss={copyRssLink}
+                                    type="podcast"
+                                    id={podcast.id}
+                                    title={podcast.title || 'Untitled Podcast'}
+                                    description={podcast.description}
+                                    lastUpdated={podcast.last_updated}
+                                    externalUrl={podcast.site_url}
+                                    onUnsubscribe={() => handleUnsubscribe(podcast.id, 'podcast', podcast.title || 'this podcast')}
+                                    onCopyRss={() => copyRssLink(podcast.id, 'podcast')}
                                     loading={loading}
                                 />
                             ))}

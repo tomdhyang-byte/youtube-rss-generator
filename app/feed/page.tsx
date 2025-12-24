@@ -16,6 +16,7 @@ import { FeedProcessingState } from "@/components/feed/FeedProcessingState";
 import { useReadStatus } from "@/hooks/useReadStatus";
 import { cn } from "@/lib/utils";
 import { FeedItem } from "@/lib/types";
+import { Button } from "@/components/ui/Button";
 
 
 
@@ -117,18 +118,20 @@ export default function FeedPage() {
                         <h1 className="text-2xl font-bold">Your Feed</h1>
                         <div className="flex gap-1 bg-muted rounded-lg p-1">
                             {(['all', 'youtube', 'podcast'] as FilterType[]).map((f) => (
-                                <button
+                                <Button
                                     key={f}
+                                    variant="ghost"
+                                    size="sm"
                                     onClick={() => handleFilterChange(f)}
                                     className={cn(
-                                        "px-3 py-1.5 text-sm font-medium rounded-md transition-colors capitalize",
+                                        "capitalize",
                                         filter === f
                                             ? "bg-background text-foreground shadow-sm"
                                             : "text-muted-foreground hover:text-foreground"
                                     )}
                                 >
                                     {f === 'all' ? 'All' : f === 'youtube' ? 'YouTube' : 'Podcasts'}
-                                </button>
+                                </Button>
                             ))}
                         </div>
                     </div>
@@ -197,12 +200,12 @@ function FilteredEmptyState({ filterName, onShowAll }: { filterName: string; onS
             <p className="text-muted-foreground mb-6">
                 You don&apos;t have any {filterName} subscriptions yet.
             </p>
-            <button
+            <Button
+                variant="primary"
                 onClick={onShowAll}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-orange-500 text-white font-medium hover:bg-orange-600 transition-colors"
             >
                 View All Content
-            </button>
+            </Button>
         </div>
     );
 }
@@ -316,13 +319,16 @@ function EmptyState({ onChannelAdded, onOptimisticAdd }: { onChannelAdded: () =>
                         placeholder="Paste YouTube URL..."
                         className="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm mb-3"
                     />
-                    <button
+                    <Button
                         type="submit"
-                        disabled={youtubeLoading || !youtubeUrl.trim()}
-                        className="w-full px-4 py-2 rounded-lg bg-orange-500 text-white font-medium text-sm hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                        variant="primary"
+                        size="sm"
+                        fullWidth
+                        loading={youtubeLoading}
+                        disabled={!youtubeUrl.trim()}
                     >
                         {youtubeLoading ? 'Adding...' : 'Add Channel'}
-                    </button>
+                    </Button>
                 </form>
 
                 {/* Podcast */}
@@ -340,13 +346,16 @@ function EmptyState({ onChannelAdded, onOptimisticAdd }: { onChannelAdded: () =>
                         placeholder="Paste Podcast RSS URL..."
                         className="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm mb-3"
                     />
-                    <button
+                    <Button
                         type="submit"
-                        disabled={podcastLoading || !podcastUrl.trim()}
-                        className="w-full px-4 py-2 rounded-lg bg-orange-500 text-white font-medium text-sm hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                        variant="primary"
+                        size="sm"
+                        fullWidth
+                        loading={podcastLoading}
+                        disabled={!podcastUrl.trim()}
                     >
                         {podcastLoading ? 'Adding...' : 'Add Podcast'}
-                    </button>
+                    </Button>
                 </form>
             </div>
         </div>

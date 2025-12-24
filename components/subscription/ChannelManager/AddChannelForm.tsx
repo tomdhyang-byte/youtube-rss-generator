@@ -1,7 +1,9 @@
 'use client';
 
-import { Plus, Loader2, Mic } from 'lucide-react';
+import { Plus, Mic } from 'lucide-react';
 import { AddChannelFormProps } from './types';
+import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
 
 /**
  * AddChannelForm Component
@@ -23,43 +25,35 @@ export function AddChannelForm({
         : "Paste Apple Podcast Link or RSS URL";
 
     const buttonText = isYouTube ? "Add Channel" : "Add Podcast";
-
-    const focusColor = isYouTube
-        ? "focus:border-orange-500 focus:shadow-[0_0_0_4px_rgba(249,115,22,0.3)]"
-        : "focus:border-orange-500 focus:shadow-[0_0_0_4px_rgba(249,115,22,0.3)]";
-
-    const buttonColor = isYouTube
-        ? "bg-orange-500 hover:bg-orange-600"
-        : "bg-orange-500 hover:bg-orange-600";
-
     const Icon = isYouTube ? Plus : Mic;
 
     return (
         <div className="mb-8">
-            <form onSubmit={onSubmit} className="flex flex-col gap-3 sm:flex-row sm:gap-4">
-                <input
+            <form onSubmit={onSubmit} className="flex flex-col gap-3 sm:flex-row sm:gap-4 sm:items-start">
+                <Input
                     type="text"
                     value={value}
                     onChange={(e) => onChange(e.target.value)}
                     placeholder={placeholder}
-                    className={`w-full px-4 h-12 border border-slate-600 rounded-lg ${focusColor} outline-none transition-all text-white bg-slate-800 placeholder:text-gray-400`}
                     disabled={loading}
+                    error={error}
+                    inputSize="lg"
+                    fullWidth
+                    className="bg-slate-800 border-slate-600 text-white"
                 />
-                <button
+                <Button
                     type="submit"
-                    disabled={loading || !canAddMore}
-                    className={`w-full sm:w-auto ${buttonColor} text-white px-6 h-12 rounded-lg font-medium flex items-center justify-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap`}
+                    variant="primary"
+                    size="lg"
+                    loading={loading}
+                    disabled={!canAddMore}
+                    leftIcon={!loading ? <Icon className="w-5 h-5" /> : undefined}
+                    className="w-full sm:w-auto h-12 whitespace-nowrap"
                     title={!canAddMore ? 'Quota reached - please unsubscribe from another to add' : ''}
                 >
-                    {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Icon className="w-5 h-5" />}
                     {buttonText}
-                </button>
+                </Button>
             </form>
-            {error && (
-                <p className="mt-3 text-red-500 text-sm flex items-center gap-1">
-                    ⚠️ {error}
-                </p>
-            )}
         </div>
     );
 }
