@@ -57,8 +57,12 @@ This project is open-source and built with modern web technologies.
 
 ```bash
 # 1. Install Dependencies
+# 1. Install Dependencies
 npm install
+# Backend dependencies
+cd backend
 pip install -r requirements.txt
+cd ..
 
 # 2. Setup Env
 cp .env.example .env
@@ -68,6 +72,8 @@ cp .env.example .env
 npm run dev
 
 # 4. Run Worker (in separate terminal)
+# Note: Ensure you are in the root directory
+cd backend
 ./run_worker.sh
 ```
 

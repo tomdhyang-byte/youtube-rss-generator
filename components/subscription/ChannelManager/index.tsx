@@ -4,9 +4,9 @@ import { useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { toast } from 'sonner';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ConfirmDialog } from "@/components/ConfirmDialog";
-import { LoginModal } from "@/components/LoginModal";
-import { useLocalStorage } from "@/lib/hooks/useLocalStorage";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import { LoginModal } from "@/components/auth/LoginModal";
+import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { GuestChannel } from "@/lib/types";
 
 // Import sub-components

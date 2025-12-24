@@ -57,28 +57,43 @@ graph TD
 
 ```
 youtube-rss-generator/
-├── app/                          # Next.js App Router
-│   ├── api/                      #   API Endpoints
-│   ├── feed/page.tsx             #   Feed UI
-│   ├── subscriptions/page.tsx    #   Subscriptions UI
-│   └── page.tsx                  #   Landing Page
+├── app/                          # Next.js 應用程式路由
+│   ├── api/                      # API 端點
+│   ├── episode/[episodeId]/      # Podcast 摘要頁面
+│   ├── video/[videoId]/          # 影片摘要頁面
+│   ├── feed/page.tsx             # 閱讀動態頁面
+│   ├── subscriptions/page.tsx    # 訂閱管理頁面
+│   └── page.tsx                  # 首頁
 │
-├── components/                   # React Components
-│   ├── ChannelManager/           #   Subscription management
-│   ├── FeedCard.tsx              #   Feed item card
-│   └── TopNav.tsx                #   Navigation bar
+├── components/                   # React 元件
+│   ├── ui/                       # 基礎元件 (Shadcn + 通用)
+│   ├── layout/                   # 導覽結構 (TopNav, UserMenu)
+│   ├── auth/                     # 認證相關 (AuthButton, LoginModal)
+│   ├── feed/                     # 閱讀功能 (FeedCard, ArticleModal)
+│   ├── subscription/             # 訂閱管理 (ChannelManager)
+│   └── providers/                # 設定提供者 (QueryProvider, SessionProvider)
 │
-├── lib/                          # Shared Utilities
-│   ├── hooks/                    #   Custom React Hooks
-│   └── prisma.ts                 #   DB Client
+├── lib/                          # 共用工具
+│   └── prisma.ts                 # 資料庫客戶端
 │
-├── worker/                       # Python Worker
-│   ├── youtube.py                #   YT fetching
-│   ├── podcast.py                #   Podcast fetching
-│   └── summarize.py              #   AI summarization
+├── hooks/                        # 自定義 React Hooks
+│   ├── useFeed.ts                # 動態內容抓取
+│   ├── useSubscriptions.ts       # 訂閱清單
+│   ├── useReadStatus.ts          # 已讀狀態追蹤
+│   ├── useLocalStorage.ts        # 瀏覽器儲存
+│   └── useGuestSync.ts           # 訪客資料同步
 │
-├── prisma/schema.prisma          # Database Schema
-└── run_worker.sh                 # Worker startup script
+├── backend/                      # Python Worker (後端)
+│   ├── worker/                   # Worker 套件
+│   │   ├── youtube.py            # YouTube 擷取
+│   │   ├── podcast.py            # Podcast 擷取
+│   │   └── summarize.py          # AI 摘要
+│   ├── run_worker.sh             # 啟動腳本
+│   ├── worker.py                 # 程式入口
+│   └── requirements.txt          # Python 依賴套件
+│
+├── prisma/schema.prisma          # 資料庫架構定義
+└── README.md                     # 專案說明文件
 ```
 
 ---
@@ -131,6 +146,7 @@ User visits /feed → React Query calls GET /api/feed → API returns items → 
 npm install && npm run dev
 
 # Worker
+cd backend
 pip install -r requirements.txt
 ./run_worker.sh
 ```
@@ -155,5 +171,6 @@ This project uses a **split deployment** strategy:
 ### Worker Cron Setup (on Mac Mini)
 ```bash
 # Example crontab entry (run every hour)
-0 * * * * /path/to/youtube-rss-generator/run_worker.sh >> /path/to/cron_log.txt 2>&1
+# Example crontab entry (run every hour)
+0 * * * * /path/to/youtube-rss-generator/backend/run_worker.sh >> /path/to/cron_log.txt 2>&1
 ```

@@ -5,9 +5,9 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
-import { useSubscriptions } from "@/lib/hooks/useSubscriptions";
-import { TopNav } from "@/components/TopNav";
-import ChannelManager from "@/components/ChannelManager";
+import { useSubscriptions } from "@/hooks/useSubscriptions";
+import { TopNav } from "@/components/layout/TopNav";
+import ChannelManager from "@/components/subscription/ChannelManager";
 
 export default function SubscriptionsPage() {
     const { status } = useSession();
