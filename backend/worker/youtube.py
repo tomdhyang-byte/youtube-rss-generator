@@ -26,12 +26,10 @@ def process_youtube_channel(conn, channel: dict) -> None:
     print(f"Processing YouTube Channel: {channel_title} ({youtube_id})")
     
     print("  - Fetching video list from YouTube...")
-    try:
-        videos = scrapetube.get_channel(channel_id=youtube_id, limit=3)
-        print("  - Video list fetched.")
-    except Exception as e:
-        print(f"  - Error fetching videos: {e}")
-        return
+    print("  - Fetching video list from YouTube...")
+    # NOTE: We propagate exceptions here so main daemon knows if it failed
+    videos = scrapetube.get_channel(channel_id=youtube_id, limit=3)
+    print("  - Video list fetched.")
 
     first_video = True
     for video in videos:

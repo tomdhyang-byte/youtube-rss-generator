@@ -114,6 +114,7 @@ youtube-rss-generator/
 │
 ├── backend/                      # Python Worker (The "Brain")
 │   ├── worker/                   # Core Logic Modules
+│   │   ├── config.py             # *NEW* Configuration & Constants
 │   │   ├── daemon.py             # *NEW* Real-time Polling Engine
 │   │   ├── summarize.py          # AI Prompts & Logic
 │   │   └── youtube.py            # YouTube API Handling

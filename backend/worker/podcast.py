@@ -38,13 +38,11 @@ def process_podcast_channel(conn, podcast: dict) -> None:
     print(f"Processing Podcast: {podcast_title} ({feed_url})")
     
     # Fetch and parse RSS feed
-    try:
-        response = requests.get(feed_url, headers={'User-Agent': 'Mozilla/5.0'}, timeout=30)
-        response.raise_for_status()
-        feed = feedparser.parse(response.content)
-    except Exception as e:
-        print(f"  - Error parsing RSS: {e}")
-        return
+    # Fetch and parse RSS feed
+    # NOTE: We propagate exceptions here so main daemon knows if it failed
+    response = requests.get(feed_url, headers={'User-Agent': 'Mozilla/5.0'}, timeout=30)
+    response.raise_for_status()
+    feed = feedparser.parse(response.content)
 
     # Update podcast metadata if missing
     if not podcast['title'] and feed.feed.get('title'):
