@@ -196,6 +196,37 @@ export async function POST(request: Request) {
             }
         });
 
+        // 9. Trigger Background Worker
+        try {
+            // Check if there's already a pending/processing job for this channel
+            const existingJob = await prisma.processingQueue.findFirst({
+                where: {
+                    entityId: channel.id,
+                    type: 'YOUTUBE',
+                    status: {
+                        in: ['PENDING', 'PROCESSING']
+                    }
+                }
+            });
+
+            if (!existingJob) {
+                console.log(`[API] Triggering worker for YouTube Channel ${channel.id}`);
+                await prisma.processingQueue.create({
+                    data: {
+                        type: 'YOUTUBE',
+                        entityId: channel.id,
+                        status: 'PENDING',
+                        priority: 10 // High priority for new user request
+                    }
+                });
+            } else {
+                console.log(`[API] Worker job already exists for Channel ${channel.id}`);
+            }
+        } catch (queueError) {
+            console.error('[API] Failed to trigger worker:', queueError);
+            // Don't fail the request just because the background job trigger failed
+        }
+
         console.log('[API] Subscription created successfully');
 
         return NextResponse.json({

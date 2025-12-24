@@ -138,7 +138,35 @@ model PodcastEpisode {
   @@unique([podcast_id, guid])
   @@map("podcast_episodes")
 }
+// --- Real-time Worker Queue ---
 
+enum QueueStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+  SKIPPED
+}
+
+enum QueueType {
+  YOUTUBE
+  PODCAST
+}
+
+model ProcessingQueue {
+  id           Int         @id @default(autoincrement())
+  type         QueueType
+  entityId     Int         // Channel ID (YouTube or Podcast)
+  status       QueueStatus @default(PENDING)
+  priority     Int         @default(0)
+  errorMessage String?
+  attempts     Int         @default(0)
+  
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  @@index([status, createdAt]) // Optimize polling query
+}
 model PodcastSubscription {
   id        Int            @id @default(autoincrement())
   userId    String         @map("user_id")

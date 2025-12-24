@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# Change directory to the script's location to ensure relative paths work
-cd "$(dirname "$0")"
+# Change directory to the PROJECT ROOT
+cd "$(dirname "$0")/.."
 
 # Activate environment if needed, or just use the direct path to python
 # Assuming dependencies are installed in the current environment or a known one.
@@ -49,7 +49,10 @@ STATUS_LOG="execution_status.log"
     echo "Using Python: $PYTHON_EXEC"
     echo "Starting YouTube RSS Worker..."
     
-    $PYTHON_EXEC worker.py
+    # Launch the Daemon Module
+    # Note: We use -m to run it as a module to handle relative imports correctly
+    echo "Starting Daemon..."
+    $PYTHON_EXEC -m backend.worker.daemon
     EXIT_CODE=$?
     
     if [ $EXIT_CODE -eq 0 ]; then

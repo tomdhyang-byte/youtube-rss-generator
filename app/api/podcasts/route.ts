@@ -144,6 +144,37 @@ export async function POST(request: Request) {
             }
         });
 
+        // 8. Trigger Background Worker
+        try {
+            // Check if there's already a pending/processing job for this podcast
+            const existingJob = await prisma.processingQueue.findFirst({
+                where: {
+                    entityId: podcast.id,
+                    type: 'PODCAST',
+                    status: {
+                        in: ['PENDING', 'PROCESSING']
+                    }
+                }
+            });
+
+            if (!existingJob) {
+                console.log(`[API] Triggering worker for Podcast ${podcast.id}`);
+                await prisma.processingQueue.create({
+                    data: {
+                        type: 'PODCAST',
+                        entityId: podcast.id,
+                        status: 'PENDING',
+                        priority: 10 // High priority for new user request
+                    }
+                });
+            } else {
+                console.log(`[API] Worker job already exists for Podcast ${podcast.id}`);
+            }
+        } catch (queueError) {
+            console.error('[API] Failed to trigger worker:', queueError);
+            // Don't fail the request just because the background job trigger failed
+        }
+
         console.log('[API] Podcast subscription created successfully');
 
         return NextResponse.json({

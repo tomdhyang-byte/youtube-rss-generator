@@ -130,8 +130,8 @@ npm run dev
 
 # 4. Run Worker (in separate terminal)
 # Note: Ensure you are in the root directory
-cd backend
-./run_worker.sh
+npm run worker
+# (Or manually: ./backend/run_worker.sh)
 ```
 
 ---

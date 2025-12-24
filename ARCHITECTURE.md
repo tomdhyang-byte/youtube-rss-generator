@@ -21,7 +21,8 @@ graph TD
     User[User Browser] <-->|Next.js App| Frontend
     Frontend <-->|Read/Write| DB[(Supabase PG)]
     
-    Worker[Python Worker] -->|Fetch RSS/API| YouTube[YouTube/Podcast]
+    Worker[Python Daemon] -->|Poll| DB[(Queue)]
+    Worker -->|Fetch RSS/API| YouTube[YouTube/Podcast]
     Worker -->|Summarize| OpenAI[OpenAI GPT-4]
     Worker -->|Write Content| DB
 ```
@@ -49,7 +50,8 @@ Use this guide to quickly find the file you need to change based on your intent.
 | **AI Summary Prompts** | `backend/worker/summarize.py` |
 | **YouTube Fetch Logic** | `backend/worker/youtube.py` |
 | **Podcast Fetch Logic** | `backend/worker/podcast.py` |
-| **Main Worker Loop** | `backend/worker.py` |
+| **Worker Daemon** | `backend/worker/daemon.py` (New Entry Point) |
+| **Main Worker Loop** | `backend/worker.py` (Legacy/Routine) |
 | **Database Schema** | `prisma/schema.prisma` |
 
 ---
@@ -58,16 +60,16 @@ Use this guide to quickly find the file you need to change based on your intent.
 
 Understanding how a video becomes a summary:
 
-1.  **User Adds Channel**: URL sent to `/api/channels` -> Saved to DB.
-2.  **Worker Runs**:
-    *   Checks DB for all channels.
-    *   Fetches latest video list from YouTube/RSS.
-    *   If video is new (not in DB) -> Download transcript.
-3.  **AI Processing**:
-    *   Worker sends transcript to OpenAI.
-    *   Receives structured summary.
-4.  **Save**: Summary saved to `Video` table in DB.
-5.  **Display**: User refreshes `/feed`, frontend fetches from `Video` table.
+1.  **User Adds Channel**:
+    *   URL sent to `/api/channels`.
+    *   Channel saved to DB.
+    *   **New**: A `ProcessingQueue` job is created (Status: PENDING).
+2.  **Worker Runs (Real-time)**:
+    *   Daemon polls DB every 10s.
+    *   Picks up the job -> Fetches content -> Summarizes.
+3.  **Display**:
+    *   User sees "Processing" state initially.
+    *   Once worker finishes, feed auto-updates (on refresh).
 
 ---
 
@@ -112,9 +114,11 @@ youtube-rss-generator/
 │
 ├── backend/                      # Python Worker (The "Brain")
 │   ├── worker/                   # Core Logic Modules
+│   │   ├── daemon.py             # *NEW* Real-time Polling Engine
 │   │   ├── summarize.py          # AI Prompts & Logic
 │   │   └── youtube.py            # YouTube API Handling
-│   ├── worker.py                 # Main Entry Point
+│   ├── worker.py                 # (Legacy) Full Scan Routine
+│   ├── run_worker.sh             # Launch Script
 │   └── requirements.txt          # Python Dependencies
 │
 └── prisma/schema.prisma          # Database Schema Definition
@@ -128,3 +132,4 @@ youtube-rss-generator/
 *   **Video**: An individual episode or video. Contains the `summary` and `transcript`.
 *   **Subscription**: Link between a `User` and a `Channel`.
 *   **UserVideo**: Tracks read status (`is_read`) for each user/video pair.
+*   **ProcessingQueue**: *NEW* Tracks background jobs for real-time processing.
