@@ -15,8 +15,12 @@ export async function GET(request: Request) {
     const userEmail = session.user.email;
 
     try {
-        // 2. Fetch user's subscriptions
-        const [youtubeSubscriptions, podcastSubscriptions] = await Promise.all([
+        // 2. Fetch user's feedToken and subscriptions
+        const [user, youtubeSubscriptions, podcastSubscriptions] = await Promise.all([
+            prisma.user.findUnique({
+                where: { id: userId },
+                select: { feedToken: true },
+            }),
             prisma.youtubeSubscription.findMany({
                 where: { userId },
                 include: {
@@ -49,6 +53,7 @@ export async function GET(request: Request) {
             youtube: youtubeSubscriptions,
             podcasts: podcastSubscriptions,
             quota,
+            feedToken: user?.feedToken,
         });
 
     } catch (error) {

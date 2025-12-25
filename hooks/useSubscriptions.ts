@@ -1,9 +1,30 @@
 import { useQuery } from '@tanstack/react-query';
 import { Channel, PodcastChannel } from '@/lib/types';
 
+// Summary style type matching Prisma enum
+type SummaryStyle = 'DEFAULT' | 'INVESTMENT' | 'TECH_DEEP_DIVE' | 'QUICK_DIGEST';
+
+interface YoutubeSubscription {
+    id: number;
+    userId: string;
+    channelId: number;
+    summaryStyle: SummaryStyle;
+    createdAt: string;
+    channel: Channel;
+}
+
+interface PodcastSubscription {
+    id: number;
+    userId: string;
+    podcastId: number;
+    summaryStyle: SummaryStyle;
+    createdAt: string;
+    podcast: PodcastChannel;
+}
+
 interface SubscriptionData {
-    youtube: { channel: Channel }[];
-    podcasts: { podcast: PodcastChannel }[];
+    youtube: YoutubeSubscription[];
+    podcasts: PodcastSubscription[];
     quota: {
         current: number;
         limit: number | null;

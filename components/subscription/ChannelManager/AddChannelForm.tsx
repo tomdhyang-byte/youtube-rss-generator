@@ -39,7 +39,7 @@ export function AddChannelForm({
                     error={error}
                     inputSize="lg"
                     fullWidth
-                    className="bg-slate-800 border-slate-600 text-white"
+                    className="bg-secondary/50 border-input text-foreground placeholder:text-muted-foreground focus:bg-background"
                 />
                 <Button
                     type="submit"

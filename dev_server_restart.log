@@ -1,0 +1,172 @@
+
+> youtube-rss-generator@0.1.0 dev
+> next dev
+
+   ▲ Next.js 16.0.10 (Turbopack)
+   - Local:         http://localhost:3000
+   - Network:       http://192.168.1.131:3000
+   - Environments: .env
+
+ ✓ Starting...
+ ⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+ ✓ Ready in 2.1s
+ ○ Compiling /subscriptions ...
+ GET /subscriptions 200 in 4.6s (compile: 4.0s, proxy.ts: 206ms, render: 434ms)
+ ○ Compiling /api/subscriptions ...
+[API] GET /api/subscriptions called
+ GET /api/subscriptions 200 in 8.1s (compile: 3.8s, proxy.ts: 12ms, render: 4.2s)
+ GET /api/auth/session 200 in 8.5s (compile: 8.4s, render: 129ms)
+[API] GET /api/subscriptions called
+ GET /api/subscriptions 200 in 847ms (compile: 8ms, proxy.ts: 18ms, render: 821ms)
+[API] GET /api/subscriptions called
+ GET /api/subscriptions 200 in 1601ms (compile: 38ms, proxy.ts: 505ms, render: 1057ms)
+ GET /subscriptions 200 in 288ms (compile: 19ms, proxy.ts: 30ms, render: 239ms)
+[API] GET /api/subscriptions called
+ GET /api/auth/session 200 in 42ms (compile: 19ms, render: 23ms)
+ GET /api/subscriptions 200 in 1032ms (compile: 25ms, proxy.ts: 10ms, render: 997ms)
+[API] GET /api/subscriptions called
+ GET /api/subscriptions 200 in 822ms (compile: 9ms, proxy.ts: 10ms, render: 803ms)
+ GET / 200 in 3.3s (compile: 3.1s, render: 187ms)
+ GET /api/auth/session 200 in 23ms (compile: 9ms, render: 14ms)
+[API] GET /api/subscriptions called
+ GET /api/subscriptions 200 in 1003ms (compile: 4ms, proxy.ts: 15ms, render: 983ms)
+ GET /feed 200 in 2.1s (compile: 1994ms, proxy.ts: 18ms, render: 127ms)
+[API] GET /api/subscriptions called
+ GET /api/subscriptions 200 in 1436ms (compile: 154ms, proxy.ts: 180ms, render: 1103ms)
+ GET /api/feed?filter=podcast 200 in 3.3s (compile: 1902ms, proxy.ts: 204ms, render: 1158ms)
+ GET /api/feed?filter=youtube 200 in 3.3s (compile: 1936ms, proxy.ts: 166ms, render: 1178ms)
+ GET /api/feed?filter=all 200 in 4.4s (compile: 1920ms, proxy.ts: 209ms, render: 2.3s)
+ GET /subscriptions 200 in 73ms (compile: 16ms, proxy.ts: 14ms, render: 43ms)
+ GET /feed 200 in 58ms (compile: 9ms, proxy.ts: 17ms, render: 33ms)
+ GET /subscriptions 200 in 110ms (compile: 5ms, proxy.ts: 6ms, render: 99ms)
+ GET /api/auth/csrf 200 in 27ms (compile: 11ms, render: 15ms)
+ POST /api/auth/signout 200 in 20ms (compile: 4ms, render: 16ms)
+ GET /api/auth/session 200 in 23ms (compile: 3ms, render: 20ms)
+ GET /api/auth/providers 200 in 29ms (compile: 4ms, render: 25ms)
+ GET / 200 in 94ms (compile: 10ms, render: 84ms)
+ GET /api/auth/csrf 200 in 22ms (compile: 9ms, render: 13ms)
+(node:25216) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+ POST /api/auth/signin/google?prompt=select_account 200 in 147ms (compile: 5ms, render: 142ms)
+ GET /api/auth/callback/google?state=_glWKdVIj1Qeev_6TvCzNgTzWHFH4uW6T0oSGasWwoQ&code=4%2F0ATX87lPlxFEtS_JualGLZ9YFfdexQqm8yg4SeGtdfKf42Duf_MwfyarUPw0766hTZ0kNtg&scope=email+profile+https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.email+https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.profile+openid&authuser=0&prompt=none 200 in 594ms (compile: 19ms, render: 574ms)
+ GET /api/auth/callback/google?state=_glWKdVIj1Qeev_6TvCzNgTzWHFH4uW6T0oSGasWwoQ&code=4%2F0ATX87lPyAyethhVmyGrWoda9dE0_BxNlQ75sQD6Z56Zbt0jd0lrp_gVF6si9gCo6kKjPEA&scope=email+profile+openid+https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.email+https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.profile&authuser=0&prompt=none 302 in 2.6s (compile: 20ms, render: 2.6s)
+ GET /api/auth/error?error=OAuthAccountNotLinked 302 in 28ms (compile: 11ms, render: 17ms)
+ GET /api/auth/signin?error=OAuthAccountNotLinked 302 in 15ms (compile: 3ms, render: 11ms)
+ GET /?callbackUrl=http%3A%2F%2Flocalhost%3A3000%2Fsubscriptions&error=OAuthAccountNotLinked 200 in 333ms (compile: 5ms, render: 328ms)
+ GET /api/auth/session 200 in 34ms (compile: 13ms, render: 20ms)
+ GET /api/auth/providers 200 in 37ms (compile: 20ms, render: 17ms)
+ GET /api/auth/csrf 200 in 28ms (compile: 11ms, render: 16ms)
+ POST /api/auth/signin/google 200 in 74ms (compile: 6ms, render: 68ms)
+ GET /api/auth/callback/google?state=lF-i0O-OC2041DWwfL-JgXJSsi6ffygm-OnCc4RS44M&code=4%2F0ATX87lM9fDb5S_DRAWEigqg1VGYk6Quc357CzaJ_BznX1m9-2qqDOZXNN4xfDl1vklcefA&scope=email+profile+https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.profile+https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.email+openid&authuser=0&prompt=consent 302 in 2.3s (compile: 6ms, render: 2.3s)
+ GET /feed 200 in 259ms (compile: 9ms, proxy.ts: 7ms, render: 243ms)
+[API] GET /api/subscriptions called
+ GET /api/auth/session 200 in 26ms (compile: 16ms, render: 9ms)
+ GET /api/subscriptions 200 in 1993ms (compile: 17ms, proxy.ts: 12ms, render: 1964ms)
+[API] GET /api/subscriptions called
+ GET /api/feed?filter=youtube 200 in 2.0s (compile: 17ms, proxy.ts: 14ms, render: 2.0s)
+ GET /api/feed?filter=podcast 200 in 2.1s (compile: 21ms, proxy.ts: 12ms, render: 2.0s)
+ GET /api/feed?filter=all 200 in 2.4s (compile: 9ms, proxy.ts: 13ms, render: 2.3s)
+ GET /api/subscriptions 200 in 784ms (compile: 4ms, proxy.ts: 6ms, render: 775ms)
+ GET /subscriptions 200 in 46ms (compile: 6ms, proxy.ts: 5ms, render: 36ms)
+ GET /api/auth/session 200 in 22ms (compile: 11ms, render: 11ms)
+[API] POST /api/channels called
+[API] Received URL: https://www.youtube.com/@NateBJones
+[API] Fetching page to resolve ID...
+[API] Found ID in og:url: UC0C-17n9iuUQPylguM1d-lQ
+[API] Admin user detected - skipping quota check
+[API] Fetching metadata for UC0C-17n9iuUQPylguM1d-lQ...
+[API] Metadata resolved: AI News &amp; Strategy Daily | Nate B Jones
+[API] Saving to DB...
+[API] Triggering worker for YouTube Channel 1
+[API] Subscription created successfully
+ POST /api/channels 200 in 6.9s (compile: 1331ms, proxy.ts: 16ms, render: 5.6s)
+[API] GET /api/subscriptions called
+ GET /api/subscriptions 200 in 1321ms (compile: 6ms, proxy.ts: 13ms, render: 1302ms)
+[API] GET /api/subscriptions called
+ GET /api/subscriptions 200 in 1115ms (compile: 9ms, proxy.ts: 14ms, render: 1092ms)
+ GET /feed/1 200 in 3.4s (compile: 2.3s, render: 1096ms)
+ GET /api/auth/session 200 in 60ms (compile: 14ms, render: 46ms)
+ GET /api/auth/session 200 in 79ms (compile: 46ms, render: 33ms)
+ GET /feed 200 in 79ms (compile: 30ms, proxy.ts: 16ms, render: 33ms)
+ GET /api/feed?filter=podcast 200 in 1230ms (compile: 7ms, proxy.ts: 14ms, render: 1209ms)
+ GET /api/feed?filter=youtube 200 in 2.0s (compile: 17ms, proxy.ts: 14ms, render: 1990ms)
+ GET /api/feed?filter=all 200 in 3.3s (compile: 13ms, proxy.ts: 11ms, render: 3.2s)
+ GET /subscriptions 200 in 117ms (compile: 21ms, proxy.ts: 9ms, render: 86ms)
+ GET /feed 200 in 51ms (compile: 9ms, proxy.ts: 4ms, render: 38ms)
+ GET /subscriptions 200 in 46ms (compile: 7ms, proxy.ts: 14ms, render: 25ms)
+ GET /feed 200 in 34ms (compile: 6ms, proxy.ts: 5ms, render: 23ms)
+ GET /subscriptions 200 in 35ms (compile: 9ms, proxy.ts: 5ms, render: 21ms)
+ GET /api/auth/session 200 in 38ms (compile: 24ms, render: 14ms)
+ GET /api/auth/session 200 in 68ms (compile: 30ms, render: 38ms)
+ GET /api/auth/session 200 in 75ms (compile: 42ms, render: 33ms)
+ GET /feed 200 in 64ms (compile: 10ms, proxy.ts: 17ms, render: 38ms)
+[API] GET /api/subscriptions called
+ GET /api/feed?filter=youtube 200 in 2.3s (compile: 60ms, proxy.ts: 109ms, render: 2.1s)
+ GET /api/subscriptions 200 in 2.3s (compile: 78ms, proxy.ts: 58ms, render: 2.2s)
+ GET /api/feed?filter=podcast 200 in 2.4s (compile: 56ms, proxy.ts: 105ms, render: 2.3s)
+ GET /api/feed?filter=all 200 in 3.4s (compile: 111ms, proxy.ts: 16ms, render: 3.3s)
+ ✓ Compiled in 654ms
+ ✓ Compiled in 680ms
+ ✓ Compiled in 275ms
+ ✓ Compiled in 86ms
+ GET /api/auth/session 200 in 416ms (compile: 194ms, render: 222ms)
+ GET /subscriptions 200 in 685ms (compile: 412ms, proxy.ts: 63ms, render: 210ms)
+[API] GET /api/subscriptions called
+ GET /api/subscriptions 200 in 2.2s (compile: 24ms, proxy.ts: 17ms, render: 2.2s)
+[API] DELETE /api/channels called
+[API] Unsubscribing user cmjkzaoff0000sbggd4au73eh from channel 1
+[API] Subscription removed successfully
+ DELETE /api/channels 200 in 899ms (compile: 18ms, proxy.ts: 19ms, render: 862ms)
+[API] GET /api/subscriptions called
+ GET /api/subscriptions 200 in 802ms (compile: 3ms, proxy.ts: 7ms, render: 793ms)
+[API] GET /api/subscriptions called
+ GET /api/subscriptions 200 in 784ms (compile: 4ms, proxy.ts: 6ms, render: 775ms)
+ GET /api/auth/session 200 in 165ms (compile: 63ms, render: 101ms)
+ GET /api/auth/session 200 in 33ms (compile: 10ms, render: 23ms)
+ GET /api/auth/session 200 in 95ms (compile: 45ms, render: 51ms)
+ GET /subscriptions 200 in 426ms (compile: 21ms, proxy.ts: 23ms, render: 382ms)
+[API] GET /api/subscriptions called
+ GET /api/auth/session 200 in 33ms (compile: 15ms, render: 19ms)
+ GET /api/subscriptions 200 in 2.5s (compile: 9ms, proxy.ts: 15ms, render: 2.5s)
+[API] GET /api/subscriptions called
+ GET /api/subscriptions 200 in 819ms (compile: 5ms, proxy.ts: 6ms, render: 808ms)
+ GET /api/auth/session 200 in 55ms (compile: 29ms, render: 27ms)
+[API] POST /api/channels called
+[API] Received URL: https://www.youtube.com/@NateBJones
+[API] Fetching page to resolve ID...
+[API] Found ID in og:url: UC0C-17n9iuUQPylguM1d-lQ
+[API] Admin user detected - skipping quota check
+[API] Fetching metadata for UC0C-17n9iuUQPylguM1d-lQ...
+[API] Metadata resolved: AI News &amp; Strategy Daily | Nate B Jones
+[API] Saving to DB...
+[API] Worker job already exists for Channel 1
+[API] Subscription created successfully
+ POST /api/channels 200 in 5.8s (compile: 25ms, proxy.ts: 16ms, render: 5.8s)
+[API] GET /api/subscriptions called
+ GET /api/subscriptions 200 in 1088ms (compile: 5ms, proxy.ts: 5ms, render: 1078ms)
+[API] GET /api/subscriptions called
+ GET /api/subscriptions 200 in 1095ms (compile: 3ms, proxy.ts: 3ms, render: 1089ms)
+ GET /feed/1 200 in 1322ms (compile: 231ms, render: 1090ms)
+ GET /api/auth/session 200 in 25ms (compile: 12ms, render: 13ms)
+[API] DELETE /api/channels called
+[API] Unsubscribing user cmjkzaoff0000sbggd4au73eh from channel 1
+[API] Subscription removed successfully
+ DELETE /api/channels 200 in 945ms (compile: 3ms, proxy.ts: 6ms, render: 937ms)
+[API] GET /api/subscriptions called
+ GET /api/subscriptions 200 in 783ms (compile: 5ms, proxy.ts: 7ms, render: 771ms)
+[API] GET /api/subscriptions called
+ GET /api/subscriptions 200 in 812ms (compile: 3ms, proxy.ts: 5ms, render: 804ms)
+ GET /api/auth/session 200 in 25ms (compile: 11ms, render: 14ms)
+ GET /api/auth/session 200 in 16ms (compile: 8ms, render: 8ms)
+ GET /subscriptions 200 in 65ms (compile: 8ms, proxy.ts: 5ms, render: 52ms)
+[API] GET /api/subscriptions called
+ GET /api/auth/session 200 in 29ms (compile: 20ms, render: 9ms)
+ GET /api/subscriptions 200 in 959ms (compile: 12ms, proxy.ts: 14ms, render: 934ms)
+[API] GET /api/subscriptions called
+ GET /api/subscriptions 200 in 785ms (compile: 5ms, proxy.ts: 6ms, render: 773ms)
+ GET /api/auth/session 200 in 23ms (compile: 10ms, render: 13ms)
+ GET /api/auth/session 200 in 390ms (compile: 148ms, render: 243ms)
+ GET /api/auth/session 200 in 40ms (compile: 10ms, render: 30ms)
+ GET /api/auth/session 200 in 25ms (compile: 9ms, render: 16ms)
+ GET /api/auth/session 200 in 17ms (compile: 8ms, render: 9ms)
+ GET /api/auth/session 200 in 31ms (compile: 6ms, render: 25ms)

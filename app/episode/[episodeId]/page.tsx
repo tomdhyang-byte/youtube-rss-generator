@@ -13,15 +13,22 @@ export default async function EpisodeSummaryPage({ params }: PageProps) {
         notFound();
     }
 
-    // Find the episode by id
+    // Find the episode by id, including summaries
     const episode = await prisma.podcastEpisode.findUnique({
         where: { id },
-        include: { podcast: true },
+        include: {
+            podcast: true,
+            summaries: true, // Include all summaries
+        },
     });
 
     if (!episode) {
         notFound();
     }
+
+    // Get the first available summary (prefer DEFAULT)
+    const summary = episode.summaries.find(s => s.style === 'DEFAULT')
+        || episode.summaries[0];
 
     return (
         <main className="min-h-screen bg-background text-foreground">
@@ -64,7 +71,7 @@ export default async function EpisodeSummaryPage({ params }: PageProps) {
                         <span>🤖</span>
                         <span>AI 摘要</span>
                     </h2>
-                    {episode.summary ? (
+                    {summary ? (
                         <div
                             className="prose prose-invert prose-lg max-w-none
                                 prose-headings:text-foreground prose-headings:mt-6 prose-headings:mb-3
@@ -74,7 +81,7 @@ export default async function EpisodeSummaryPage({ params }: PageProps) {
                                 prose-a:text-primary
                                 [&>p]:my-4
                                 [&_br]:block [&_br]:my-2"
-                            dangerouslySetInnerHTML={{ __html: episode.summary }}
+                            dangerouslySetInnerHTML={{ __html: summary.content }}
                         />
                     ) : (
                         <p className="text-muted-foreground">

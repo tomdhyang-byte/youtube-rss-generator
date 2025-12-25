@@ -48,10 +48,13 @@ model User {
   email                String?                @unique
   emailVerified        DateTime?              @map("email_verified")
   image                String?
+  feedToken            String?                @unique @default(cuid()) @map("feed_token")
   accounts             Account[]
   sessions             Session[]
   youtubeSubscriptions YoutubeSubscription[]
   podcastSubscriptions PodcastSubscription[]
+  userVideoStyles      UserVideoStyle[]
+  userEpisodeStyles    UserEpisodeStyle[]
 
   @@map("users")
 }
@@ -63,6 +66,17 @@ model VerificationToken {
 
   @@unique([identifier, token])
   @@map("verification_tokens")
+}
+
+// ============================================
+// Summary Style (Shared Enum)
+// ============================================
+
+enum SummaryStyle {
+  DEFAULT
+  INVESTMENT
+  TECH_DEEP_DIVE
+  QUICK_DIGEST
 }
 
 // ============================================
@@ -83,26 +97,55 @@ model YoutubeChannel {
 }
 
 model YoutubeVideo {
-  id               Int            @id @default(autoincrement())
-  youtube_video_id String         @unique
+  id               Int              @id @default(autoincrement())
+  youtube_video_id String           @unique
   channel_id       Int
-  channel          YoutubeChannel @relation(fields: [channel_id], references: [id])
+  channel          YoutubeChannel   @relation(fields: [channel_id], references: [id])
   title            String
-  summary          String
+  transcript       String?          @db.Text
   published_at     DateTime
+  summaries        VideoSummary[]
+  userStyles       UserVideoStyle[]
 
   @@map("youtube_videos")
 }
 
+model VideoSummary {
+  id        Int          @id @default(autoincrement())
+  videoId   Int          @map("video_id")
+  video     YoutubeVideo @relation(fields: [videoId], references: [id], onDelete: Cascade)
+  style     SummaryStyle @default(DEFAULT)
+  content   String       @db.Text
+  createdAt DateTime     @default(now()) @map("created_at")
+
+  @@unique([videoId, style])
+  @@map("video_summaries")
+}
+
+model UserVideoStyle {
+  id      Int          @id @default(autoincrement())
+  userId  String       @map("user_id")
+  videoId Int          @map("video_id")
+  style   SummaryStyle
+  user    User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  video   YoutubeVideo @relation(fields: [videoId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, videoId])
+  @@index([userId])
+  @@map("user_video_styles")
+}
+
 model YoutubeSubscription {
-  id         Int            @id @default(autoincrement())
-  userId     String         @map("user_id")
-  channelId  Int            @map("channel_id")
-  createdAt  DateTime       @default(now()) @map("created_at")
-  user       User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  channel    YoutubeChannel @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  id           Int            @id @default(autoincrement())
+  userId       String         @map("user_id")
+  channelId    Int            @map("channel_id")
+  summaryStyle SummaryStyle   @default(DEFAULT) @map("summary_style")
+  createdAt    DateTime       @default(now()) @map("created_at")
+  user         User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  channel      YoutubeChannel @relation(fields: [channelId], references: [id], onDelete: Cascade)
 
   @@unique([userId, channelId])
+  @@index([channelId, summaryStyle])
   @@map("youtube_subscriptions")
 }
 
@@ -125,20 +168,63 @@ model PodcastChannel {
 }
 
 model PodcastEpisode {
-  id           Int            @id @default(autoincrement())
+  id           Int                @id @default(autoincrement())
   podcast_id   Int
-  podcast      PodcastChannel @relation(fields: [podcast_id], references: [id])
+  podcast      PodcastChannel     @relation(fields: [podcast_id], references: [id])
   guid         String
   title        String
   audio_url    String
-  transcript   String?        @db.Text
-  summary      String?        @db.Text
+  transcript   String?            @db.Text
   published_at DateTime
+  summaries    EpisodeSummary[]
+  userStyles   UserEpisodeStyle[]
 
   @@unique([podcast_id, guid])
   @@map("podcast_episodes")
 }
-// --- Real-time Worker Queue ---
+
+model EpisodeSummary {
+  id        Int            @id @default(autoincrement())
+  episodeId Int            @map("episode_id")
+  episode   PodcastEpisode @relation(fields: [episodeId], references: [id], onDelete: Cascade)
+  style     SummaryStyle   @default(DEFAULT)
+  content   String         @db.Text
+  createdAt DateTime       @default(now()) @map("created_at")
+
+  @@unique([episodeId, style])
+  @@map("episode_summaries")
+}
+
+model UserEpisodeStyle {
+  id        Int            @id @default(autoincrement())
+  userId    String         @map("user_id")
+  episodeId Int            @map("episode_id")
+  style     SummaryStyle
+  user      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  episode   PodcastEpisode @relation(fields: [episodeId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, episodeId])
+  @@index([userId])
+  @@map("user_episode_styles")
+}
+
+model PodcastSubscription {
+  id           Int            @id @default(autoincrement())
+  userId       String         @map("user_id")
+  podcastId    Int            @map("podcast_id")
+  summaryStyle SummaryStyle   @default(DEFAULT) @map("summary_style")
+  createdAt    DateTime       @default(now()) @map("created_at")
+  user         User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  podcast      PodcastChannel @relation(fields: [podcastId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, podcastId])
+  @@index([podcastId, summaryStyle])
+  @@map("podcast_subscriptions")
+}
+
+// ============================================
+// Real-time Worker Queue
+// ============================================
 
 enum QueueStatus {
   PENDING
@@ -156,26 +242,15 @@ enum QueueType {
 model ProcessingQueue {
   id           Int         @id @default(autoincrement())
   type         QueueType
-  entityId     Int         // Channel ID (YouTube or Podcast)
+  entityId     Int
   status       QueueStatus @default(PENDING)
   priority     Int         @default(0)
   errorMessage String?
   attempts     Int         @default(0)
-  
-  createdAt    DateTime    @default(now())
-  updatedAt    DateTime    @updatedAt
 
-  @@index([status, createdAt]) // Optimize polling query
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status, createdAt])
+  @@map("processing_queue")
 }
-model PodcastSubscription {
-  id        Int            @id @default(autoincrement())
-  userId    String         @map("user_id")
-  podcastId Int            @map("podcast_id")
-  createdAt DateTime       @default(now()) @map("created_at")
-  user      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  podcast   PodcastChannel @relation(fields: [podcastId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, podcastId])
-  @@map("podcast_subscriptions")
-}
-

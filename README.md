@@ -38,6 +38,14 @@ By subscribing to channels here instead of on YouTube:
 -   **Smart Transcription**: Uses specialized APIs to get accurate text from videos and audio.
 -   **Contextual Summaries**: Uses GPT-4o to generate structured summaries that capture the *insight*, not just the transcript.
 
+### 4. Summary Styles (NEW)
+-   **Choose Your Style**: Select from 4 AI summary styles per subscription:
+    -   📝 **Default**: Balanced, comprehensive summaries
+    -   💰 **Investment**: Focus on financial insights and market implications
+    -   🔬 **Tech Deep Dive**: Technical details and implementation specifics
+    -   ⚡ **Quick Digest**: Ultra-concise bullet points
+-   **Forward-Looking**: Style changes only affect *future* content, preserving RSS feed stability.
+
 ---
 
 ## 🧩 UI Component Cheat Sheet
@@ -83,6 +91,17 @@ import { Badge } from "@/components/ui/Badge";
 
 // Variants: default, success, warning, danger, info, youtube, podcast
 <Badge variant="youtube">YouTube</Badge>
+```
+
+### StyleSelector
+```tsx
+import { StyleSelector, SummaryStyle } from "@/components/ui/StyleSelector";
+
+// For subscription-level style selection
+<StyleSelector
+  value={currentStyle}
+  onChange={(style: SummaryStyle) => handleStyleChange(style)}
+/>
 ```
 
 ---
@@ -140,12 +159,13 @@ npm run worker
 
 In addition to the Web Reader, you can also consume content via RSS feeds in any reader app (e.g., Readwise Reader, Reeder).
 
-| Type | URL Pattern |
-|------|-------------|
-| YouTube Channel | `/feed/[channelDbId]` |
-| Podcast | `/feed/podcast/[podcastDbId]` |
+| Type | URL Pattern | Description |
+|------|-------------|-------------|
+| **Personalized Feed** | `/feed/user/[feedToken]` | Your unified feed with locked summary styles |
+| YouTube Channel | `/feed/[channelDbId]` | Per-channel feed (DEFAULT style) |
+| Podcast | `/feed/podcast/[podcastDbId]` | Per-podcast feed (DEFAULT style) |
 
-RSS links point to our AI summary pages, so your reader will display the summary, not the original video.
+> **Note**: The personalized feed uses your `feedToken` (found in your account) and respects the summary style you chose at the time each video/episode was processed.
 
 ---
 

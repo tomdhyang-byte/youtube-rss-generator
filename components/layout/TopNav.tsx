@@ -60,11 +60,11 @@ export function TopNav() {
                         ) : (
                             <div className={cn(
                                 "mr-3 px-3 py-1 rounded-full text-xs border font-medium",
-                                quota.current >= quota.limit
+                                quota.limit !== null && quota.current >= quota.limit
                                     ? "text-red-400 bg-red-900/20 border-red-900/50"
                                     : "text-green-400 bg-green-900/20 border-green-900/50"
                             )}>
-                                Free • {quota.limit - quota.current} left
+                                Free • {(quota.limit ?? 0) - quota.current} left
                             </div>
                         )
                     ) : null

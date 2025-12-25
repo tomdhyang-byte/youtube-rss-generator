@@ -8,15 +8,22 @@ interface PageProps {
 export default async function VideoSummaryPage({ params }: PageProps) {
     const { videoId } = await params;
 
-    // Find the video by youtube_video_id
+    // Find the video by youtube_video_id, including summaries
     const video = await prisma.youtubeVideo.findUnique({
         where: { youtube_video_id: videoId },
-        include: { channel: true },
+        include: {
+            channel: true,
+            summaries: true,
+        },
     });
 
     if (!video) {
         notFound();
     }
+
+    // Get the first available summary (prefer DEFAULT)
+    const summary = video.summaries.find(s => s.style === 'DEFAULT')
+        || video.summaries[0];
 
     return (
         <main className="min-h-screen bg-background text-foreground">
@@ -48,17 +55,23 @@ export default async function VideoSummaryPage({ params }: PageProps) {
                         <span>🤖</span>
                         <span>AI 摘要</span>
                     </h2>
-                    <div
-                        className="prose prose-invert prose-lg max-w-none
-                            prose-headings:text-foreground prose-headings:mt-6 prose-headings:mb-3
-                            prose-p:text-foreground/90 prose-p:leading-relaxed prose-p:mb-4
-                            prose-li:text-foreground/90 prose-li:leading-relaxed prose-li:my-2
-                            prose-strong:text-foreground prose-strong:text-orange-400
-                            prose-a:text-primary
-                            [&>p]:my-4
-                            [&_br]:block [&_br]:my-2"
-                        dangerouslySetInnerHTML={{ __html: video.summary }}
-                    />
+                    {summary ? (
+                        <div
+                            className="prose prose-invert prose-lg max-w-none
+                                prose-headings:text-foreground prose-headings:mt-6 prose-headings:mb-3
+                                prose-p:text-foreground/90 prose-p:leading-relaxed prose-p:mb-4
+                                prose-li:text-foreground/90 prose-li:leading-relaxed prose-li:my-2
+                                prose-strong:text-foreground prose-strong:text-orange-400
+                                prose-a:text-primary
+                                [&>p]:my-4
+                                [&_br]:block [&_br]:my-2"
+                            dangerouslySetInnerHTML={{ __html: summary.content }}
+                        />
+                    ) : (
+                        <p className="text-muted-foreground">
+                            此影片尚未生成摘要，請稍後再試。
+                        </p>
+                    )}
                 </section>
 
                 {/* Footer */}

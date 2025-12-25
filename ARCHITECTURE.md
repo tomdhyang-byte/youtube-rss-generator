@@ -42,6 +42,7 @@ Use this guide to quickly find the file you need to change based on your intent.
 | **Colors / Theme** | `app/globals.css` |
 | **Button Styles** | `components/ui/Button.tsx` |
 | **Card Design** | `components/subscription/ChannelManager/SubscriptionCard.tsx` |
+| **Summary Style Selector** | `components/ui/StyleSelector.tsx` |
 | **Article Modal** | `components/feed/ArticleModal.tsx` |
 
 ### Backend (AI & Data)
@@ -53,6 +54,8 @@ Use this guide to quickly find the file you need to change based on your intent.
 | **Worker Daemon** | `backend/worker/daemon.py` (New Entry Point) |
 | **Main Worker Loop** | `backend/worker.py` (Legacy/Routine) |
 | **Database Schema** | `prisma/schema.prisma` |
+| **Style Update API** | `app/api/subscriptions/style/route.ts` |
+| **Personalized RSS Feed** | `app/feed/user/[token]/route.ts` |
 
 ---
 
@@ -129,8 +132,26 @@ youtube-rss-generator/
 
 ## 🗄 Database Schema (Key Concepts)
 
-*   **Channel**: A YouTube channel or Podcast feed.
-*   **Video**: An individual episode or video. Contains the `summary` and `transcript`.
-*   **Subscription**: Link between a `User` and a `Channel`.
-*   **UserVideo**: Tracks read status (`is_read`) for each user/video pair.
-*   **ProcessingQueue**: *NEW* Tracks background jobs for real-time processing.
+### Core Tables
+*   **Channel**: A YouTube channel (`youtube_channels`) or Podcast feed (`podcast_channels`).
+*   **Video/Episode**: Individual content items with `transcript`.
+*   **Subscription**: Link between `User` and `Channel`, includes `summaryStyle` preference.
+*   **ProcessingQueue**: Tracks background jobs for real-time processing.
+
+### Summary Style Tables (Design B)
+*   **VideoSummary / EpisodeSummary**: Stores summaries per content, per style. One video can have up to 4 summaries (one per style).
+*   **UserVideoStyle / UserEpisodeStyle**: **Locks** the style for each user at processing time. Ensures RSS feed stability - style changes only affect future content.
+*   **User.feedToken**: Unique token for personalized RSS feed (`/feed/user/[token]`).
+
+### Design B: "Locked Styles"
+```mermaid
+sequenceDiagram
+    User->>Subscription: Set style = INVESTMENT
+    Worker->>Video: New video detected
+    Worker->>VideoSummary: Generate INVESTMENT summary
+    Worker->>UserVideoStyle: Lock (userId, videoId, INVESTMENT)
+    User->>Subscription: Change style to TECH_DEEP_DIVE
+    Note over UserVideoStyle: Old videos still show INVESTMENT
+    Worker->>Video: Next new video
+    Worker->>VideoSummary: Generate TECH_DEEP_DIVE summary
+```

@@ -14,6 +14,7 @@ import { useQuota } from "@/components/providers/QuotaProvider";
 import { AddChannelForm } from './AddChannelForm';
 import { SubscriptionCard } from './SubscriptionCard';
 import { ChannelManagerProps, YoutubeChannel } from './types';
+import { SummaryStyle } from '@/components/ui/StyleSelector';
 
 /**
  * ChannelManager Component
@@ -322,6 +323,26 @@ export default function ChannelManager({
         toast.success('RSS Link copied to clipboard!');
     };
 
+    const handleStyleChange = async (subscriptionId: number, type: 'youtube' | 'podcast', newStyle: SummaryStyle) => {
+        try {
+            const res = await fetch('/api/subscriptions/style', {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ subscriptionId, type, newStyle }),
+            });
+
+            if (!res.ok) {
+                const data = await res.json().catch(() => ({}));
+                throw new Error(data.error || 'Failed to update style');
+            }
+
+            toast.success('摘要風格已更新！新設定將從下一部新影片開始生效。');
+            onRefresh?.();
+        } catch (err: any) {
+            toast.error(err.message || 'Failed to update style');
+        }
+    };
+
     // --- Render ---
 
     return (
@@ -380,8 +401,10 @@ export default function ChannelManager({
                                     description={channel.description}
                                     lastUpdated={channel.last_updated}
                                     externalUrl={`https://youtube.com/channel/${channel.youtube_id}`}
+                                    summaryStyle={(channel as any).summaryStyle || 'DEFAULT'}
                                     onUnsubscribe={() => handleUnsubscribe(channel.id, 'youtube', channel.title)}
                                     onCopyRss={() => copyRssLink(channel.id, 'youtube')}
+                                    onStyleChange={session ? (style) => handleStyleChange((channel as any).subscriptionId || channel.id, 'youtube', style) : undefined}
                                     onLoginRequired={() => setLoginModalOpen(true)}
                                     isAuthenticated={!!session}
                                     loading={loading}
@@ -418,8 +441,10 @@ export default function ChannelManager({
                                     description={podcast.description}
                                     lastUpdated={podcast.last_updated}
                                     externalUrl={podcast.site_url}
+                                    summaryStyle={(podcast as any).summaryStyle || 'DEFAULT'}
                                     onUnsubscribe={() => handleUnsubscribe(podcast.id, 'podcast', podcast.title || 'this podcast')}
                                     onCopyRss={() => copyRssLink(podcast.id, 'podcast')}
+                                    onStyleChange={session ? (style) => handleStyleChange((podcast as any).subscriptionId || podcast.id, 'podcast', style) : undefined}
                                     loading={loading}
                                 />
                             ))}

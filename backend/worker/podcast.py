@@ -1,17 +1,21 @@
 """
 Podcast Processing Module
-Handles fetching and processing podcast episodes.
+Handles fetching and processing podcast episodes with style-based summaries.
+
+Design B Implementation:
+- Demand-driven: Only generate summaries for styles that subscribers have selected
+- Locked style: Record each user's style at the time of episode processing
 """
 import time
 import random
 from datetime import datetime
 import requests
 import feedparser
+import re
 
 from .transcribe import transcribe_audio
 from .summarize import generate_summary
 
-import re
 
 def strip_html(text: str) -> str:
     """
@@ -25,7 +29,7 @@ def strip_html(text: str) -> str:
 
 def process_podcast_channel(conn, podcast: dict) -> None:
     """
-    Process a podcast channel: fetch new episodes, transcribe, generate summaries.
+    Process a podcast channel: fetch new episodes, transcribe, generate style-based summaries.
     
     Args:
         conn: Database connection
@@ -37,7 +41,25 @@ def process_podcast_channel(conn, podcast: dict) -> None:
     
     print(f"Processing Podcast: {podcast_title} ({feed_url})")
     
-    # Fetch and parse RSS feed
+    # 1. Query all subscribers and their current styles
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT user_id, summary_style 
+        FROM podcast_subscriptions 
+        WHERE podcast_id = %s
+    """, (podcast_id,))
+    subscribers = cursor.fetchall()
+    
+    if not subscribers:
+        print("  - No subscribers, skipping podcast.")
+        return
+    
+    # Convert to list of dicts for easier handling
+    subscriber_list = [{'user_id': row[0], 'style': row[1]} for row in subscribers]
+    demanded_styles = set(sub['style'] for sub in subscriber_list)
+    
+    print(f"  - Found {len(subscriber_list)} subscribers with styles: {demanded_styles}")
+    
     # Fetch and parse RSS feed
     # NOTE: We propagate exceptions here so main daemon knows if it failed
     response = requests.get(feed_url, headers={'User-Agent': 'Mozilla/5.0'}, timeout=30)
@@ -52,7 +74,6 @@ def process_podcast_channel(conn, podcast: dict) -> None:
         new_image = feed.feed.get('image', {}).get('href', '')
         
         print(f"  - Updating podcast metadata: {new_title}")
-        cursor = conn.cursor()
         cursor.execute("""
             UPDATE podcast_channels 
             SET title = %s, description = %s, site_url = %s, image_url = %s 
@@ -79,10 +100,13 @@ def process_podcast_channel(conn, podcast: dict) -> None:
         print(f"  - Checking episode: {title}")
         
         # Check if exists
-        cursor = conn.cursor()
         cursor.execute("SELECT id FROM podcast_episodes WHERE podcast_id = %s AND guid = %s", (podcast_id, guid))
-        if cursor.fetchone():
-            print(f"    - Episode already exists, skipping.")
+        existing = cursor.fetchone()
+        if existing:
+            episode_db_id = existing[0]
+            print(f"    - Episode already exists (ID: {episode_db_id}), checking for missing user styles...")
+            # Still need to lock styles for any new subscribers
+            _lock_user_styles(conn, episode_db_id, subscriber_list)
             continue
             
         print(f"    - New Episode found: {title}")
@@ -90,19 +114,17 @@ def process_podcast_channel(conn, podcast: dict) -> None:
         # Transcribe audio
         print("    - Transcribing audio...")
         transcript = transcribe_audio(audio_url)
-        summary = "No transcript available."
         
-        if transcript:
-            print(f"    - Transcript fetched ({len(transcript)} chars).")
-            
-            # Truncate if too long
-            if len(transcript) > 200000:
-                print("    - Transcript too long, truncating...")
-                transcript = transcript[:200000] + "...(truncated)"
-            
-            print("    - Generating summary...")
-            summary = generate_summary(transcript, is_podcast=True)
-            print("    - Summary generated.")
+        if not transcript:
+            print("    - No transcript available, skipping episode.")
+            continue
+        
+        print(f"    - Transcript fetched ({len(transcript)} chars).")
+        
+        # Truncate if too long
+        if len(transcript) > 200000:
+            print("    - Transcript too long, truncating...")
+            transcript = transcript[:200000] + "...(truncated)"
         
         # Parse published_at
         published_at = datetime.now()
@@ -111,14 +133,40 @@ def process_podcast_channel(conn, podcast: dict) -> None:
         elif hasattr(entry, 'updated_parsed') and entry.updated_parsed:
             published_at = datetime.fromtimestamp(time.mktime(entry.updated_parsed))
 
+        # Insert episode record (without summary - summaries are in separate table now)
         cursor.execute(
             """INSERT INTO podcast_episodes 
-               (podcast_id, guid, title, audio_url, transcript, summary, published_at) 
-               VALUES (%s, %s, %s, %s, %s, %s, %s)""",
-            (podcast_id, guid, title, audio_url, transcript, summary, published_at)
+               (podcast_id, guid, title, audio_url, transcript, published_at) 
+               VALUES (%s, %s, %s, %s, %s, %s) RETURNING id""",
+            (podcast_id, guid, title, audio_url, transcript, published_at)
         )
+        episode_db_id = cursor.fetchone()[0]
         conn.commit()
-        print("    - Saved to DB.")
+        print(f"    - Episode saved to DB (ID: {episode_db_id})")
+        
+        # Generate summaries for each demanded style
+        print(f"    - Generating summaries for styles: {demanded_styles}")
+        successful_styles = 0
+        for style in demanded_styles:
+            try:
+                print(f"      - Generating {style} summary...")
+                summary = generate_summary(transcript, style=style, is_podcast=True)
+                
+                cursor.execute("""
+                    INSERT INTO episode_summaries (episode_id, style, content, created_at)
+                    VALUES (%s, %s, %s, NOW())
+                    ON CONFLICT (episode_id, style) DO NOTHING
+                """, (episode_db_id, style, summary))
+                successful_styles += 1
+            except Exception as e:
+                print(f"      - ⚠️ Failed to generate {style} summary: {e}")
+                continue  # Continue with remaining styles
+        
+        conn.commit()
+        print(f"    - {successful_styles}/{len(demanded_styles)} summaries generated and saved.")
+        
+        # Lock each subscriber's style for this episode (Design B core)
+        _lock_user_styles(conn, episode_db_id, subscriber_list)
         
         # Rate limiting
         delay = random.uniform(5, 10)
@@ -126,6 +174,36 @@ def process_podcast_channel(conn, podcast: dict) -> None:
         time.sleep(delay)
 
     # Update last_updated timestamp
-    cursor = conn.cursor()
     cursor.execute("UPDATE podcast_channels SET last_updated = %s WHERE id = %s", (datetime.now(), podcast_id))
     conn.commit()
+
+
+def _lock_user_styles(conn, episode_db_id: int, subscriber_list: list) -> None:
+    """
+    Lock the summary style for each user for this episode.
+    This ensures that when a user changes their style, past episodes still show the old style.
+    
+    Args:
+        conn: Database connection
+        episode_db_id: The database ID of the episode
+        subscriber_list: List of dicts with 'user_id' and 'style' keys
+    """
+    cursor = conn.cursor()
+    locked_count = 0
+    
+    for sub in subscriber_list:
+        try:
+            cursor.execute("""
+                INSERT INTO user_episode_styles (user_id, episode_id, style)
+                VALUES (%s, %s, %s)
+                ON CONFLICT (user_id, episode_id) DO NOTHING
+            """, (sub['user_id'], episode_db_id, sub['style']))
+            if cursor.rowcount > 0:
+                locked_count += 1
+        except Exception as e:
+            print(f"    - Error locking style for user {sub['user_id']}: {e}")
+    
+    conn.commit()
+    if locked_count > 0:
+        print(f"    - Locked styles for {locked_count} users.")
+

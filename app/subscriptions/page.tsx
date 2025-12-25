@@ -47,17 +47,35 @@ export default function SubscriptionsPage() {
                     </div>
                 ) : subscriptions ? (
                     <ChannelManager
-                        initialChannels={subscriptions.youtube?.map(sub => sub.channel) || []}
+                        initialChannels={subscriptions.youtube?.map(sub => ({
+                            ...sub.channel,
+                            // Include subscription-level data
+                            subscriptionId: sub.id,
+                            summaryStyle: sub.summaryStyle,
+                        })) || []}
                         initialPodcasts={subscriptions.podcasts?.map(sub => ({
                             ...sub.podcast,
-                            last_updated: new Date(sub.podcast.last_updated)
+                            last_updated: new Date(sub.podcast.last_updated),
+                            // Include subscription-level data
+                            subscriptionId: sub.id,
+                            summaryStyle: sub.summaryStyle,
                         })) || []}
                         onRefresh={() => {
                             refetch();
                             queryClient.resetQueries({ queryKey: ['feed'] });
                         }}
                     />
-                ) : null}
+                ) : (
+                    <div className="text-center py-12 text-muted-foreground">
+                        <p>Failed to load subscriptions. Please try refreshing the page.</p>
+                        <button
+                            onClick={() => refetch()}
+                            className="mt-4 px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
+                        >
+                            Retry
+                        </button>
+                    </div>
+                )}
             </main>
         </div>
     );

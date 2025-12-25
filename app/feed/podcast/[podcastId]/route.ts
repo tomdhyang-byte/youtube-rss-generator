@@ -20,8 +20,11 @@ export async function GET(
             where: { id },
             include: {
                 episodes: {
+                    include: {
+                        summaries: true, // Include all summaries
+                    },
                     orderBy: { published_at: 'desc' },
-                    take: 20, // Limit to latest 20 episodes
+                    take: 20,
                 },
             },
         });
@@ -43,18 +46,18 @@ export async function GET(
         const origin = new URL(request.url).origin;
 
         podcast.episodes.forEach((episode) => {
-            const summaryContent = episode.summary || 'No summary available.';
+            // Get the DEFAULT summary, or any available summary
+            const summary = episode.summaries.find(
+                (s: { style: string; content: string }) => s.style === 'DEFAULT'
+            ) || episode.summaries[0];
+            const summaryContent = summary?.content || 'No summary available.';
 
             feed.item({
                 title: episode.title,
                 description: summaryContent,
-                // Link to our summary page instead of audio URL
-                // This prevents RSS readers from fetching content from the original source
                 url: `${origin}/episode/${episode.id}`,
                 guid: episode.guid,
                 date: episode.published_at,
-                // Note: enclosure removed to fix Readwise Reader HTML stripping issue
-                // Audio is still accessible via the episode page
                 custom_elements: [
                     { 'content:encoded': summaryContent },
                 ],
@@ -72,3 +75,4 @@ export async function GET(
         return new NextResponse('Internal Server Error', { status: 500 });
     }
 }
+

@@ -18,8 +18,11 @@ export async function GET(
             where: { id: channelId },
             include: {
                 videos: {
+                    include: {
+                        summaries: true, // Include all summaries
+                    },
                     orderBy: { published_at: 'desc' },
-                    take: 20, // Limit to latest 20 videos for the feed
+                    take: 20,
                 },
             },
         });
@@ -33,7 +36,7 @@ export async function GET(
             description: channel.description || `AI Summaries for ${channel.title}`,
             feed_url: `${new URL(request.url).origin}/feed/${channelId}`,
             site_url: `https://www.youtube.com/channel/${channel.youtube_id}`,
-            image_url: '', // We could fetch the avatar if we stored it
+            image_url: '',
             language: 'en',
             pubDate: channel.last_updated,
         });
@@ -52,14 +55,16 @@ export async function GET(
 
         const origin = new URL(request.url).origin;
 
-        channel.videos.forEach((video: any) => {
-            const summaryContent = video.summary || 'No summary available.';
+        channel.videos.forEach((video) => {
+            // Get the DEFAULT summary, or any available summary
+            const summary = video.summaries.find(
+                (s: { style: string; content: string }) => s.style === 'DEFAULT'
+            ) || video.summaries[0];
+            const summaryContent = summary?.content || 'No summary available.';
 
             feed.item({
                 title: video.title,
                 description: summaryContent,
-                // Link to our summary page instead of YouTube
-                // This prevents RSS readers from fetching content from YouTube
                 url: `${origin}/video/${video.youtube_video_id}`,
                 guid: video.youtube_video_id,
                 date: video.published_at,
@@ -73,7 +78,7 @@ export async function GET(
         return new NextResponse(feed.xml({ indent: true }), {
             headers: {
                 'Content-Type': 'application/xml',
-                'Cache-Control': 's-maxage=0, no-cache, no-store, must-revalidate', // Disable cache for testing
+                'Cache-Control': 's-maxage=0, no-cache, no-store, must-revalidate',
             },
         });
 
@@ -82,3 +87,4 @@ export async function GET(
         return new NextResponse('Internal Server Error', { status: 500 });
     }
 }
+
