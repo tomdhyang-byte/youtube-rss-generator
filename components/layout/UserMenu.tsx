@@ -1,14 +1,29 @@
 'use client';
 
 import { signIn, signOut, useSession } from 'next-auth/react';
-import { useState, useRef, useEffect } from 'react';
-import { LogIn, LogOut, ChevronDown, RefreshCw } from 'lucide-react';
+import { useState, useRef, useEffect, useTransition } from 'react';
+import { LogIn, LogOut, ChevronDown, RefreshCw, Globe, Check } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
+import { useTranslations, useLocale } from 'next-intl';
+import { usePathname, useRouter } from '@/routing';
+
+const LANGUAGE_OPTIONS = [
+    { value: 'en', label: 'English', flag: '🇺🇸' },
+    { value: 'zh-TW', label: '中文 (繁體)', flag: '🇹🇼' },
+];
 
 export function UserMenu() {
     const { data: session, status } = useSession();
     const [isOpen, setIsOpen] = useState(false);
     const menuRef = useRef<HTMLDivElement>(null);
+
+    // ✅ All hooks MUST be called before any conditional returns
+    const t = useTranslations('Navigation');
+    const tCommon = useTranslations('Common');
+    const locale = useLocale();
+    const router = useRouter();
+    const pathname = usePathname();
+    const [isPending, startTransition] = useTransition();
 
     // Close dropdown when clicking outside
     useEffect(() => {
@@ -24,10 +39,19 @@ export function UserMenu() {
         }
     }, [isOpen]);
 
+    const handleLanguageChange = (nextLocale: string) => {
+        if (nextLocale !== locale) {
+            startTransition(() => {
+                router.replace(pathname, { locale: nextLocale });
+            });
+        }
+        setIsOpen(false);
+    };
+
     if (status === 'loading') {
         return (
             <Button variant="ghost" disabled loading>
-                Loading...
+                {tCommon('loading')}
             </Button>
         );
     }
@@ -51,7 +75,7 @@ export function UserMenu() {
                         <p className="text-sm font-medium">{session.user?.name}</p>
                         {session.user?.email === process.env.NEXT_PUBLIC_ADMIN_EMAIL && (
                             <span className="text-xs font-semibold text-purple-600 dark:text-purple-400">
-                                ADMIN
+                                {t('admin')}
                             </span>
                         )}
                     </div>
@@ -75,8 +99,37 @@ export function UserMenu() {
                                 className="flex w-full items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors"
                             >
                                 <RefreshCw className="w-4 h-4" />
-                                Switch Account
+                                {t('switch_account')}
                             </button>
+
+                            {/* Divider */}
+                            <div className="my-1 h-px bg-gray-200 dark:bg-slate-700" />
+
+                            {/* Language Section */}
+                            <div className="px-4 py-2">
+                                <div className="flex items-center gap-2 text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">
+                                    <Globe className="w-3 h-3" />
+                                    {t('language')}
+                                </div>
+                                <div className="space-y-1">
+                                    {LANGUAGE_OPTIONS.map((option) => (
+                                        <button
+                                            key={option.value}
+                                            onClick={() => handleLanguageChange(option.value)}
+                                            disabled={isPending}
+                                            className="flex w-full items-center justify-between px-3 py-1.5 text-sm rounded-md text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors disabled:opacity-50"
+                                        >
+                                            <span className="flex items-center gap-2">
+                                                <span>{option.flag}</span>
+                                                <span>{option.label}</span>
+                                            </span>
+                                            {locale === option.value && (
+                                                <Check className="w-4 h-4 text-green-500" />
+                                            )}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
 
                             {/* Divider */}
                             <div className="my-1 h-px bg-gray-200 dark:bg-slate-700" />
@@ -90,7 +143,7 @@ export function UserMenu() {
                                 className="flex w-full items-center gap-3 px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/20 transition-colors"
                             >
                                 <LogOut className="w-4 h-4" />
-                                Sign Out
+                                {t('sign_out')}
                             </button>
                         </div>
                     </div>
@@ -108,7 +161,7 @@ export function UserMenu() {
             leftIcon={<LogIn className="w-5 h-5" />}
             className="hidden md:inline-flex"
         >
-            Sign in with Google
+            {tCommon('sign_in_google')}
         </Button>
     );
 }

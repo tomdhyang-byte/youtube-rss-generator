@@ -1,20 +1,22 @@
 'use client';
 
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { Link, usePathname } from '@/routing';
 import { useSession } from 'next-auth/react';
 import { UserMenu } from './UserMenu';
 import { cn } from '@/lib/utils';
 import { useQuota } from '@/components/providers/QuotaProvider';
+import LanguageSwitcher from '../ui/LanguageSwitcher';
+import { useTranslations } from 'next-intl';
 
 export function TopNav() {
     const pathname = usePathname();
     const { status } = useSession();
     const { quota, isLoading } = useQuota();
+    const t = useTranslations('Navigation');
 
     const navItems = [
-        { href: '/feed', label: 'Feed' },
-        { href: '/subscriptions', label: 'Subscriptions' },
+        { href: '/feed', label: t('dashboard') },
+        { href: '/subscriptions', label: t('subscriptions') },
     ];
 
     return (
@@ -55,7 +57,7 @@ export function TopNav() {
                     ) : quota ? (
                         quota.isAdmin ? (
                             <div className="mr-3 px-3 py-1 rounded-full text-xs border bg-purple-600 text-white border-purple-500 font-bold">
-                                Admin ∞
+                                {t('admin')} ∞
                             </div>
                         ) : (
                             <div className={cn(
@@ -64,13 +66,13 @@ export function TopNav() {
                                     ? "text-red-400 bg-red-900/20 border-red-900/50"
                                     : "text-green-400 bg-green-900/20 border-green-900/50"
                             )}>
-                                Free • {(quota.limit ?? 0) - quota.current} left
+                                {t('free_plan')} • {(quota.limit ?? 0) - quota.current} {t('left')}
                             </div>
                         )
                     ) : null
                 )}
 
-                {/* User Menu */}
+                {/* User Menu (includes language switcher) */}
                 <UserMenu />
             </div>
         </header>

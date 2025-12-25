@@ -2,6 +2,7 @@ import Image from 'next/image';
 import { Play, Podcast } from 'lucide-react';
 import { cn, getSourceLabel } from '@/lib/utils';
 import { Badge } from '@/components/ui/Badge';
+import { useFormatter, useTranslations } from 'next-intl';
 
 interface FeedCardProps {
     type: 'video' | 'episode';
@@ -16,7 +17,9 @@ interface FeedCardProps {
 }
 
 export function FeedCard({ type, id, title, source, summary, publishedAt, thumbnail, isRead = false, onRead }: FeedCardProps) {
-    const formattedDate = formatRelativeDate(publishedAt);
+    const tCommon = useTranslations('Common');
+    const format = useFormatter();
+    const formattedDate = formatRelativeDate(publishedAt, tCommon, format);
 
     // Truncate summary for preview
     const summaryPreview = stripHtml(summary).slice(0, 200) + (summary.length > 200 ? '...' : '');
@@ -94,17 +97,17 @@ export function FeedCard({ type, id, title, source, summary, publishedAt, thumbn
     );
 }
 
-function formatRelativeDate(dateString: string): string {
+function formatRelativeDate(dateString: string, t: any, format: any): string {
     const date = new Date(dateString);
     const now = new Date();
     const diffMs = now.getTime() - date.getTime();
     const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
 
-    if (diffDays === 0) return 'Today';
-    if (diffDays === 1) return 'Yesterday';
-    if (diffDays < 7) return `${diffDays}d ago`;
-    if (diffDays < 30) return `${Math.floor(diffDays / 7)}w ago`;
-    return date.toLocaleDateString('zh-TW');
+    if (diffDays === 0) return t('today');
+    if (diffDays === 1) return t('yesterday');
+    if (diffDays < 7) return t('days_ago', { count: diffDays });
+    if (diffDays < 30) return t('weeks_ago', { count: Math.floor(diffDays / 7) });
+    return format.dateTime(date, { dateStyle: 'medium' });
 }
 
 function stripHtml(html: string): string {

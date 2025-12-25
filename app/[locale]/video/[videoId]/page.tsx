@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/prisma';
 import { notFound } from 'next/navigation';
+import { getFormatter, getTranslations } from 'next-intl/server';
 
 interface PageProps {
     params: Promise<{ videoId: string }>;
@@ -7,6 +8,8 @@ interface PageProps {
 
 export default async function VideoSummaryPage({ params }: PageProps) {
     const { videoId } = await params;
+    const t = await getTranslations('Detail');
+    const format = await getFormatter();
 
     // Find the video by youtube_video_id, including summaries
     const video = await prisma.youtubeVideo.findUnique({
@@ -25,6 +28,8 @@ export default async function VideoSummaryPage({ params }: PageProps) {
     const summary = video.summaries.find(s => s.style === 'DEFAULT')
         || video.summaries[0];
 
+    const formattedDate = format.dateTime(new Date(video.published_at), { dateStyle: 'medium' });
+
     return (
         <main className="min-h-screen bg-background text-foreground">
             <div className="max-w-4xl mx-auto px-4 py-8">
@@ -34,7 +39,7 @@ export default async function VideoSummaryPage({ params }: PageProps) {
                         {video.title}
                     </h1>
                     <p className="text-muted-foreground">
-                        {video.channel.title} • {new Date(video.published_at).toLocaleDateString('zh-TW')}
+                        {video.channel.title} • {formattedDate}
                     </p>
                 </header>
 
@@ -53,7 +58,7 @@ export default async function VideoSummaryPage({ params }: PageProps) {
                 <section className="bg-card rounded-xl p-6 border border-border">
                     <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
                         <span>🤖</span>
-                        <span>AI 摘要</span>
+                        <span>{t('ai_summary')}</span>
                     </h2>
                     {summary ? (
                         <div
@@ -69,7 +74,7 @@ export default async function VideoSummaryPage({ params }: PageProps) {
                         />
                     ) : (
                         <p className="text-muted-foreground">
-                            此影片尚未生成摘要，請稍後再試。
+                            {t('summary_pending')}
                         </p>
                     )}
                 </section>
@@ -82,7 +87,7 @@ export default async function VideoSummaryPage({ params }: PageProps) {
                         rel="noopener noreferrer"
                         className="hover:text-foreground transition-colors"
                     >
-                        在 YouTube 上觀看原始影片 →
+                        {t('watch_on_youtube')} →
                     </a>
                 </footer>
             </div>
@@ -93,6 +98,7 @@ export default async function VideoSummaryPage({ params }: PageProps) {
 // Generate metadata for SEO
 export async function generateMetadata({ params }: PageProps) {
     const { videoId } = await params;
+    const t = await getTranslations('Detail');
 
     const video = await prisma.youtubeVideo.findUnique({
         where: { youtube_video_id: videoId },
@@ -104,7 +110,7 @@ export async function generateMetadata({ params }: PageProps) {
     }
 
     return {
-        title: `${video.title} | AI Summary`,
+        title: `${video.title} | ${t('ai_summary')}`,
         description: `AI-generated summary for ${video.title} by ${video.channel.title}`,
     };
 }

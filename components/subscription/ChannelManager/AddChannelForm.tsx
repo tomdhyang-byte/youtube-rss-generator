@@ -9,6 +9,8 @@ import { Input } from '@/components/ui/Input';
  * AddChannelForm Component
  * Reusable form for adding YouTube channels or Podcasts.
  */
+import { useTranslations } from 'next-intl';
+
 export function AddChannelForm({
     type,
     value,
@@ -18,13 +20,14 @@ export function AddChannelForm({
     canAddMore,
     error
 }: AddChannelFormProps) {
+    const t = useTranslations('Subscriptions');
     const isYouTube = type === 'youtube';
 
     const placeholder = isYouTube
-        ? "Paste YouTube Channel URL"
-        : "Paste Apple Podcast Link or RSS URL";
+        ? t('add_youtube_placeholder')
+        : t('add_podcast_placeholder');
 
-    const buttonText = isYouTube ? "Add Channel" : "Add Podcast";
+    const buttonText = isYouTube ? t('add_channel_btn') : t('add_podcast_btn');
     const Icon = isYouTube ? Plus : Mic;
 
     return (
@@ -49,7 +52,7 @@ export function AddChannelForm({
                     disabled={!canAddMore}
                     leftIcon={!loading ? <Icon className="w-5 h-5" /> : undefined}
                     className="w-full sm:w-auto h-12 whitespace-nowrap"
-                    title={!canAddMore ? 'Quota reached - please unsubscribe from another to add' : ''}
+                    title={!canAddMore ? t('quota_reached') : ''}
                 >
                     {buttonText}
                 </Button>

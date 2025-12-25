@@ -1,0 +1,101 @@
+{
+    "Home": {
+        "title": "TubeReader",
+        "subtitle": "AI-Powered YouTube & Podcast Summaries",
+        "description": "Transform YouTube videos into readable summaries. Read directly on our site, or grab an RSS feed for your favorite reader.",
+        "get_started": "Try it Free",
+        "features": {
+            "youtube": {
+                "title": "YouTube Channels",
+                "desc": "Subscribe and get AI-generated summaries for every video"
+            },
+            "podcast": {
+                "title": "Podcasts",
+                "desc": "Episodes transcribed and summarized automatically"
+            },
+            "rss": {
+                "title": "RSS Export",
+                "desc": "Use with Readwise, Feedly, or any RSS reader"
+            }
+        },
+        "footer": "© 2025 TubeReader. All rights reserved."
+    },
+    "Common": {
+        "loading": "Loading...",
+        "retry": "Retry",
+        "error": "Error",
+        "today": "Today",
+        "yesterday": "Yesterday",
+        "days_ago": "{count} days ago",
+        "weeks_ago": "{count} weeks ago",
+        "sign_in_google": "Sign in with Google"
+    },
+    "Navigation": {
+        "dashboard": "Dashboard",
+        "subscriptions": "Subscriptions",
+        "admin": "ADMIN",
+        "switch_account": "Switch Account",
+        "sign_out": "Sign Out",
+        "free_plan": "Free",
+        "left": "left",
+        "language": "Language"
+    },
+    "Feed": {
+        "title": "Your Feed",
+        "filter_all": "All",
+        "filter_youtube": "YouTube",
+        "filter_podcast": "Podcasts",
+        "empty_title": "Your feed is empty",
+        "empty_desc": "Add YouTube channels or Podcasts to start building your feed",
+        "add_first_sub": "Add Your First Subscription",
+        "no_content_title": "No {filter} content",
+        "no_content_desc": "You don't have any {filter} subscriptions yet.",
+        "view_all": "View All Content",
+        "processing": "Processing feeds...",
+        "check_again": "Check Again",
+        "read_more": "Read more",
+        "analyzing_title": "We are analyzing your content...",
+        "analyzing_desc": "This process usually takes about 5 minutes for new subscriptions. Feel free to check back soon."
+    },
+    "Subscriptions": {
+        "title": "Manage Subscriptions",
+        "failed_load": "Failed to load subscriptions. Please try refreshing the page.",
+        "add_youtube_placeholder": "Paste YouTube Channel URL",
+        "add_podcast_placeholder": "Paste Apple Podcast Link or RSS URL",
+        "add_channel_btn": "Add Channel",
+        "add_podcast_btn": "Add Podcast",
+        "quota_reached": "Quota reached - please unsubscribe from another to add",
+        "confirm_delete_title": "Unsubscribe",
+        "confirm_delete_desc": "Are you sure you want to unsubscribe from {name}?",
+        "cancel": "Cancel",
+        "confirm": "Unsubscribe",
+        "copy_rss": "Copy RSS",
+        "rss_copied": "RSS Link Copied!",
+        "style_label": "Summary Style",
+        "login_required": "Login Required",
+        "guest_limit": "Guest mode is limited to 1 subscription. Please sign in to add more.",
+        "unsubscribe": "Unsubscribe",
+        "open_youtube": "Open in YouTube",
+        "open_website": "Open Website",
+        "updated": "Updated",
+        "empty_youtube": "No YouTube channels added yet.",
+        "empty_podcast": "No podcasts added yet.",
+        "adding_channel": "Adding Channel...",
+        "adding_channel_desc": "Please wait while we fetch channel details.",
+        "adding_podcast": "Adding Podcast...",
+        "adding_podcast_desc": "Fetching podcast details...",
+        "style_default": "Deep Notes",
+        "style_default_desc": "Complete structured summary for learning",
+        "style_quick": "Quick Read",
+        "style_quick_desc": "Concise highlights, grasp conclusions in 30s",
+        "style_updated": "Style updated! New setting will apply to new content."
+    },
+    "Detail": {
+        "ai_summary": "AI Summary",
+        "summary_pending": "Summary not generated yet, please try again later.",
+        "watch_original": "Watch on YouTube",
+        "download_audio": "Download Audio",
+        "visit_website": "Visit Podcast Website",
+        "watch_on_youtube": "Watch original video on YouTube"
+    }
+}

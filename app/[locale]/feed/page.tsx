@@ -15,6 +15,7 @@ import { useReadStatus } from "@/hooks/useReadStatus";
 import { cn } from "@/lib/utils";
 import { FeedItem } from "@/lib/types";
 import { Button } from "@/components/ui/Button";
+import { useTranslations } from "next-intl";
 
 type FilterType = 'all' | 'youtube' | 'podcast';
 
@@ -27,6 +28,9 @@ export default function FeedPage() {
     const { data: subData } = useSubscriptions();
     const items = data?.items || [];
     const { isRead, markAsRead } = useReadStatus();
+
+    // ✅ All hooks MUST be called before any conditional returns
+    const t = useTranslations('Feed');
 
     // Article Modal state
     const [selectedArticle, setSelectedArticle] = useState<FeedItem | null>(null);
@@ -96,7 +100,7 @@ export default function FeedPage() {
                 {/* Header with filters - always show if not completely empty */}
                 {showFilters && (
                     <div className="flex items-center justify-between mb-6">
-                        <h1 className="text-2xl font-bold">Your Feed</h1>
+                        <h1 className="text-2xl font-bold">{t('title')}</h1>
                         <div className="flex gap-1 bg-muted rounded-lg p-1">
                             {(['all', 'youtube', 'podcast'] as FilterType[]).map((f) => (
                                 <Button
@@ -111,7 +115,7 @@ export default function FeedPage() {
                                             : "text-muted-foreground hover:text-foreground"
                                     )}
                                 >
-                                    {f === 'all' ? 'All' : f === 'youtube' ? 'YouTube' : 'Podcasts'}
+                                    {f === 'all' ? t('filter_all') : f === 'youtube' ? t('filter_youtube') : t('filter_podcast')}
                                 </Button>
                             ))}
                         </div>
@@ -128,7 +132,7 @@ export default function FeedPage() {
                 ) : isFilteredEmpty ? (
                     // Filter has no results - show simple message with link to All
                     <FilteredEmptyState
-                        filterName={filter === 'youtube' ? 'YouTube' : 'Podcast'}
+                        filterName={filter === 'youtube' ? t('filter_youtube') : t('filter_podcast')}
                         onShowAll={() => handleFilterChange('all')}
                     />
                 ) : loading ? (
@@ -167,6 +171,7 @@ export default function FeedPage() {
 
 // Empty state when filter has no results (but user has other subscriptions)
 function FilteredEmptyState({ filterName, onShowAll }: { filterName: string; onShowAll: () => void }) {
+    const t = useTranslations('Feed');
     return (
         <div className="py-16 text-center">
             <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-muted flex items-center justify-center">
@@ -174,15 +179,15 @@ function FilteredEmptyState({ filterName, onShowAll }: { filterName: string; onS
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
             </div>
-            <h2 className="text-xl font-semibold mb-2">No {filterName} content</h2>
+            <h2 className="text-xl font-semibold mb-2">{t('no_content_title', { filter: filterName })}</h2>
             <p className="text-muted-foreground mb-6">
-                You don&apos;t have any {filterName} subscriptions yet.
+                {t('no_content_desc', { filter: filterName })}
             </p>
             <Button
                 variant="primary"
                 onClick={onShowAll}
             >
-                View All Content
+                {t('view_all')}
             </Button>
         </div>
     );
@@ -190,6 +195,7 @@ function FilteredEmptyState({ filterName, onShowAll }: { filterName: string; onS
 
 function EmptyState() {
     const router = useRouter();
+    const t = useTranslations('Feed');
 
     return (
         <div className="py-12 text-center">
@@ -200,9 +206,9 @@ function EmptyState() {
                 </svg>
             </div>
 
-            <h2 className="text-2xl font-bold mb-2">Your feed is empty</h2>
+            <h2 className="text-2xl font-bold mb-2">{t('empty_title')}</h2>
             <p className="text-muted-foreground mb-8">
-                Add YouTube channels or Podcasts to start building your feed
+                {t('empty_desc')}
             </p>
 
             {/* CTA Button */}
@@ -211,7 +217,7 @@ function EmptyState() {
                 size="lg"
                 onClick={() => router.push('/subscriptions')}
             >
-                Add Your First Subscription
+                {t('add_first_sub')}
             </Button>
         </div>
     );

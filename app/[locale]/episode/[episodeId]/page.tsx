@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/prisma';
 import { notFound } from 'next/navigation';
+import { getFormatter, getTranslations } from 'next-intl/server';
 
 interface PageProps {
     params: Promise<{ episodeId: string }>;
@@ -8,6 +9,8 @@ interface PageProps {
 export default async function EpisodeSummaryPage({ params }: PageProps) {
     const { episodeId } = await params;
     const id = parseInt(episodeId);
+    const t = await getTranslations('Detail');
+    const format = await getFormatter();
 
     if (isNaN(id)) {
         notFound();
@@ -30,6 +33,8 @@ export default async function EpisodeSummaryPage({ params }: PageProps) {
     const summary = episode.summaries.find(s => s.style === 'DEFAULT')
         || episode.summaries[0];
 
+    const formattedDate = format.dateTime(new Date(episode.published_at), { dateStyle: 'medium' });
+
     return (
         <main className="min-h-screen bg-background text-foreground">
             <div className="max-w-4xl mx-auto px-4 py-8">
@@ -39,7 +44,7 @@ export default async function EpisodeSummaryPage({ params }: PageProps) {
                         {episode.title}
                     </h1>
                     <p className="text-muted-foreground">
-                        {episode.podcast.title} • {new Date(episode.published_at).toLocaleDateString('zh-TW')}
+                        {episode.podcast.title} • {formattedDate}
                     </p>
                 </header>
 
@@ -60,7 +65,7 @@ export default async function EpisodeSummaryPage({ params }: PageProps) {
                             rel="noopener noreferrer"
                             className="hover:text-foreground transition-colors"
                         >
-                            下載音檔 →
+                            {t('download_audio')} →
                         </a>
                     </p>
                 </div>
@@ -69,7 +74,7 @@ export default async function EpisodeSummaryPage({ params }: PageProps) {
                 <section className="bg-card rounded-xl p-6 border border-border">
                     <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
                         <span>🤖</span>
-                        <span>AI 摘要</span>
+                        <span>{t('ai_summary')}</span>
                     </h2>
                     {summary ? (
                         <div
@@ -85,7 +90,7 @@ export default async function EpisodeSummaryPage({ params }: PageProps) {
                         />
                     ) : (
                         <p className="text-muted-foreground">
-                            此集尚未生成摘要，請稍後再試。
+                            {t('summary_pending')}
                         </p>
                     )}
                 </section>
@@ -99,7 +104,7 @@ export default async function EpisodeSummaryPage({ params }: PageProps) {
                             rel="noopener noreferrer"
                             className="hover:text-foreground transition-colors"
                         >
-                            前往 Podcast 官方網站 →
+                            {t('visit_website')} →
                         </a>
                     )}
                 </footer>
@@ -112,6 +117,7 @@ export default async function EpisodeSummaryPage({ params }: PageProps) {
 export async function generateMetadata({ params }: PageProps) {
     const { episodeId } = await params;
     const id = parseInt(episodeId);
+    const t = await getTranslations('Detail');
 
     if (isNaN(id)) {
         return { title: 'Episode Not Found' };
@@ -127,7 +133,7 @@ export async function generateMetadata({ params }: PageProps) {
     }
 
     return {
-        title: `${episode.title} | AI Summary`,
+        title: `${episode.title} | ${t('ai_summary')}`,
         description: `AI-generated summary for ${episode.title} from ${episode.podcast.title}`,
     };
 }

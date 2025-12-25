@@ -1,0 +1,101 @@
+{
+    "Home": {
+        "title": "TubeReader",
+        "subtitle": "你的 AI 閱讀助手",
+        "description": "將 YouTube 影片轉換成摘要總結，直接在本網站上閱讀，或者取得 RSS，用你習慣的 RSS Reader 閱讀。",
+        "get_started": "免費試用",
+        "features": {
+            "youtube": {
+                "title": "YouTube 頻道",
+                "desc": "訂閱並自動獲取每部影片的 AI 摘要"
+            },
+            "podcast": {
+                "title": "Podcast",
+                "desc": "自動轉錄並生成 Podcast 重點摘要"
+            },
+            "rss": {
+                "title": "RSS 匯出",
+                "desc": "支援 Readwise, Feedly 或任何 RSS 閱讀器"
+            }
+        },
+        "footer": "© 2025 TubeReader. All rights reserved."
+    },
+    "Common": {
+        "loading": "載入中...",
+        "retry": "重試",
+        "error": "錯誤",
+        "today": "今天",
+        "yesterday": "昨天",
+        "days_ago": "{count} 天前",
+        "weeks_ago": "{count} 週前",
+        "sign_in_google": "使用 Google 登入"
+    },
+    "Navigation": {
+        "dashboard": "最新摘要",
+        "subscriptions": "訂閱管理",
+        "admin": "管理員",
+        "switch_account": "切換帳號",
+        "sign_out": "登出",
+        "free_plan": "免費版",
+        "left": "剩餘",
+        "language": "語言"
+    },
+    "Feed": {
+        "title": "最新摘要",
+        "filter_all": "全部",
+        "filter_youtube": "YouTube",
+        "filter_podcast": "Podcast",
+        "empty_title": "您目前沒有任何摘要",
+        "empty_desc": "改快去新增 YouTube 頻道或 Podcast 吧！",
+        "add_first_sub": "新增第一個訂閱",
+        "no_content_title": "尚無 {filter} 內容",
+        "no_content_desc": "您目前尚未訂閱任何 {filter}。",
+        "view_all": "查看全部內容",
+        "processing": "正在處理訂閱源...",
+        "check_again": "重新檢查",
+        "read_more": "閱讀更多",
+        "analyzing_title": "正在分析您的內容...",
+        "analyzing_desc": "此過程通常需要約 5 分鐘。請稍後再回來查看。"
+    },
+    "Subscriptions": {
+        "title": "訂閱管理",
+        "failed_load": "載入訂閱失敗，請嘗試重新整理頁面。",
+        "add_youtube_placeholder": "貼上 YouTube 頻道連結",
+        "add_podcast_placeholder": "貼上 Apple Podcast 或 RSS 連結",
+        "add_channel_btn": "新增頻道",
+        "add_podcast_btn": "新增 Podcast",
+        "quota_reached": "已達訂閱上限 - 請移除舊訂閱以新增",
+        "confirm_delete_title": "取消訂閱",
+        "confirm_delete_desc": "確定要取消訂閱 {name} 嗎？",
+        "cancel": "取消",
+        "confirm": "確認取消",
+        "copy_rss": "複製 RSS",
+        "rss_copied": "RSS 連結已複製！",
+        "style_label": "摘要風格",
+        "login_required": "需要登入",
+        "guest_limit": "訪客模式僅限訂閱 1 個頻道。請登入以新增更多。",
+        "unsubscribe": "取消訂閱",
+        "open_youtube": "在 YouTube 開啟",
+        "open_website": "開啟網站",
+        "updated": "更新於",
+        "empty_youtube": "尚未新增任何 YouTube 頻道。",
+        "empty_podcast": "尚未新增任何 Podcast。",
+        "adding_channel": "新增頻道中...",
+        "adding_channel_desc": "請稍候，正在取得頻道資訊。",
+        "adding_podcast": "新增 Podcast 中...",
+        "adding_podcast_desc": "正在取得 Podcast 資訊...",
+        "style_default": "深度筆記",
+        "style_default_desc": "完整結構化摘要，適合學習",
+        "style_quick": "省時速讀",
+        "style_quick_desc": "精簡重點，30秒掌握結論",
+        "style_updated": "摘要風格已更新！新設定將從下一篇新內容開始生效。"
+    },
+    "Detail": {
+        "ai_summary": "AI 摘要",
+        "summary_pending": "此內容尚未生成摘要，請稍後再試。",
+        "watch_original": "在 YouTube 上觀看",
+        "download_audio": "下載音檔",
+        "visit_website": "前往 Podcast 官方網站",
+        "watch_on_youtube": "在 YouTube 上觀看原始影片"
+    }
+}

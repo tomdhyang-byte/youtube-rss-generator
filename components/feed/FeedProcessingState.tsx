@@ -1,12 +1,15 @@
 'use client';
 
 import { Loader2, Sparkles } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 interface FeedProcessingStateProps {
     onCheckAgain: () => void;
 }
 
 export function FeedProcessingState({ onCheckAgain }: FeedProcessingStateProps) {
+    const t = useTranslations('Feed');
+
     return (
         <div className="py-16 text-center animate-in fade-in zoom-in duration-500">
             {/* Visual: Pulse Animation with Icon */}
@@ -21,12 +24,12 @@ export function FeedProcessingState({ onCheckAgain }: FeedProcessingStateProps) 
             </div>
 
             <h2 className="text-2xl font-bold mb-3 bg-gradient-to-r from-orange-600 to-amber-600 bg-clip-text text-transparent">
-                We are analyzing your content...
+                {t('analyzing_title')}
             </h2>
 
             <div className="max-w-md mx-auto space-y-2 text-muted-foreground mb-8">
                 <p>
-                    This process usually takes about 5 minutes for new subscriptions. Feel free to check back soon.
+                    {t('analyzing_desc')}
                 </p>
             </div>
         </div>

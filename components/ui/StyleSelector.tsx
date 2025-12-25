@@ -4,20 +4,22 @@ import * as React from 'react';
 import { ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { SummaryStyle } from '@/lib/types/summary-style';
+import { useTranslations } from 'next-intl';
 
 // Re-export for convenience
 export type { SummaryStyle } from '@/lib/types/summary-style';
 
 export interface SummaryStyleOption {
     value: SummaryStyle;
-    label: string;
+    labelKey: string;
     emoji: string;
-    description: string;
+    descriptionKey: string;
 }
 
-export const SUMMARY_STYLE_OPTIONS: SummaryStyleOption[] = [
-    { value: 'DEFAULT', label: '深度筆記', emoji: '📚', description: '完整結構化摘要，適合學習' },
-    { value: 'QUICK_READ', label: '省時速讀', emoji: '⚡', description: '精簡重點，30秒掌握結論' },
+// Options with translation keys instead of hardcoded text
+const SUMMARY_STYLE_OPTIONS: SummaryStyleOption[] = [
+    { value: 'DEFAULT', labelKey: 'style_default', emoji: '📚', descriptionKey: 'style_default_desc' },
+    { value: 'QUICK_READ', labelKey: 'style_quick', emoji: '⚡', descriptionKey: 'style_quick_desc' },
 ];
 
 interface StyleSelectorProps {
@@ -40,6 +42,7 @@ export function StyleSelector({
 }: StyleSelectorProps) {
     const [isOpen, setIsOpen] = React.useState(false);
     const dropdownRef = React.useRef<HTMLDivElement>(null);
+    const t = useTranslations('Subscriptions');
 
     const selectedOption = SUMMARY_STYLE_OPTIONS.find(opt => opt.value === value) || SUMMARY_STYLE_OPTIONS[0];
 
@@ -74,7 +77,7 @@ export function StyleSelector({
                 )}
             >
                 <span>{selectedOption.emoji}</span>
-                <span className="text-foreground">{selectedOption.label}</span>
+                <span className="text-foreground">{t(selectedOption.labelKey)}</span>
                 <ChevronDown className={cn(
                     "w-4 h-4 text-muted-foreground transition-transform",
                     isOpen && "transform rotate-180"
@@ -106,10 +109,10 @@ export function StyleSelector({
                                         ? "text-primary"
                                         : "text-foreground"
                                 )}>
-                                    {option.label}
+                                    {t(option.labelKey)}
                                 </div>
                                 <div className="text-xs text-muted-foreground">
-                                    {option.description}
+                                    {t(option.descriptionKey)}
                                 </div>
                             </div>
                         </button>

@@ -26,6 +26,10 @@ import { SummaryStyle } from '@/components/ui/StyleSelector';
  * - Optimistic UI updates
  * - Copy RSS links
  */
+import { useTranslations } from 'next-intl';
+
+// ...
+
 export default function ChannelManager({
     initialChannels,
     initialPodcasts,
@@ -33,6 +37,8 @@ export default function ChannelManager({
 }: ChannelManagerProps) {
     const { data: session } = useSession();
     const { quota, refreshQuota } = useQuota();
+    const t = useTranslations('Subscriptions');
+    const tFeed = useTranslations('Feed');
 
     // Form state
     const [youtubeUrl, setYoutubeUrl] = useState('');
@@ -60,6 +66,9 @@ export default function ChannelManager({
     const [recentlyAddedChannels, setRecentlyAddedChannels] = useState<YoutubeChannel[]>([]);
     const [recentlyAddedPodcasts, setRecentlyAddedPodcasts] = useState<any[]>([]);
 
+    // Optimistic UI state for style changes (key: `${type}-${subscriptionId}`, value: SummaryStyle)
+    const [optimisticStyles, setOptimisticStyles] = useState<Record<string, SummaryStyle>>({});
+
 
     // Determine which channels to display
     const realChannels = session ? initialChannels : localChannels;
@@ -84,7 +93,7 @@ export default function ChannelManager({
     const handleYouTubeSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!youtubeUrl) {
-            toast.error("Please enter a YouTube channel URL");
+            toast.error(t('add_youtube_placeholder')); // Using placeholder as error for empty input or generic error
             return;
         }
 
@@ -93,6 +102,7 @@ export default function ChannelManager({
             setLoginModalOpen(true);
             return;
         }
+
 
         setLoading(true);
         setError('');
@@ -144,11 +154,12 @@ export default function ChannelManager({
 
         // Authenticated mode: Optimistic Update
         const optimisticId = -Date.now();
+        const urlToSubmit = youtubeUrl; // Capture before clearing
         const optimisticChannel: YoutubeChannel = {
             id: optimisticId,
             youtube_id: 'pending-' + optimisticId,
-            title: 'Adding Channel...',
-            description: 'Please wait while we fetch channel details.',
+            title: t('adding_channel'),
+            description: t('adding_channel_desc'),
             rss_url: '',
             last_updated: new Date().toISOString(),
         };
@@ -160,7 +171,7 @@ export default function ChannelManager({
             const res = await fetch('/api/channels', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ url: youtubeUrl }),
+                body: JSON.stringify({ url: urlToSubmit }),
             });
 
             if (!res.ok) {
@@ -206,12 +217,13 @@ export default function ChannelManager({
         setError('');
 
         const optimisticId = -Date.now();
+        const urlToSubmit = podcastUrl; // Capture before clearing
         // Optimistic Podcast Item
         const optimisticPodcast = {
             id: optimisticId,
             feed_url: 'pending',
-            title: 'Adding Podcast...',
-            description: 'Fetching podcast details...',
+            title: t('adding_podcast'),
+            description: t('adding_podcast_desc'),
             site_url: '',
             image_url: null,
             last_updated: new Date(),
@@ -224,7 +236,7 @@ export default function ChannelManager({
             const res = await fetch('/api/podcasts', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ url: podcastUrl }),
+                body: JSON.stringify({ url: urlToSubmit }),
             });
 
             if (!res.ok) {
@@ -323,24 +335,48 @@ export default function ChannelManager({
         toast.success('RSS Link copied to clipboard!');
     };
 
-    const handleStyleChange = async (subscriptionId: number, type: 'youtube' | 'podcast', newStyle: SummaryStyle) => {
-        try {
-            const res = await fetch('/api/subscriptions/style', {
-                method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ subscriptionId, type, newStyle }),
+    const handleStyleChange = (subscriptionId: number, type: 'youtube' | 'podcast', newStyle: SummaryStyle) => {
+        const key = `${type}-${subscriptionId}`;
+
+        // 1. Optimistic update - immediately update UI
+        setOptimisticStyles(prev => ({ ...prev, [key]: newStyle }));
+
+        // 2. Show toast immediately
+        toast.success(t('style_updated'));
+
+        // 3. Fire API call in background (no await)
+        fetch('/api/subscriptions/style', {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ subscriptionId, type, newStyle }),
+        })
+            .then(res => {
+                if (!res.ok) {
+                    throw new Error('Failed to update style');
+                }
+                // Success - clear optimistic state (real data will come from next refresh)
+                setOptimisticStyles(prev => {
+                    const next = { ...prev };
+                    delete next[key];
+                    return next;
+                });
+                onRefresh?.();
+            })
+            .catch(err => {
+                // Revert optimistic update on error
+                setOptimisticStyles(prev => {
+                    const next = { ...prev };
+                    delete next[key];
+                    return next;
+                });
+                toast.error(err.message || 'Failed to update style');
             });
+    };
 
-            if (!res.ok) {
-                const data = await res.json().catch(() => ({}));
-                throw new Error(data.error || 'Failed to update style');
-            }
-
-            toast.success('摘要風格已更新！新設定將從下一部新影片開始生效。');
-            onRefresh?.();
-        } catch (err: any) {
-            toast.error(err.message || 'Failed to update style');
-        }
+    // Helper to get effective style (optimistic or real)
+    const getEffectiveStyle = (subscriptionId: number, type: 'youtube' | 'podcast', realStyle: SummaryStyle): SummaryStyle => {
+        const key = `${type}-${subscriptionId}`;
+        return optimisticStyles[key] ?? realStyle;
     };
 
     // --- Render ---
@@ -369,13 +405,13 @@ export default function ChannelManager({
                             value="youtube"
                             className="data-[state=active]:bg-orange-600 data-[state=active]:text-white text-orange-200/70 hover:text-orange-100 transition-colors py-2"
                         >
-                            YouTube Channels
+                            YouTube
                         </TabsTrigger>
                         <TabsTrigger
                             value="podcast"
                             className="data-[state=active]:bg-orange-600 data-[state=active]:text-white text-orange-200/70 hover:text-orange-100 transition-colors py-2"
                         >
-                            Podcasts
+                            Podcast
                         </TabsTrigger>
                     </TabsList>
 
@@ -401,7 +437,7 @@ export default function ChannelManager({
                                     description={channel.description}
                                     lastUpdated={channel.last_updated}
                                     externalUrl={`https://youtube.com/channel/${channel.youtube_id}`}
-                                    summaryStyle={(channel as any).summaryStyle || 'DEFAULT'}
+                                    summaryStyle={getEffectiveStyle((channel as any).subscriptionId || channel.id, 'youtube', (channel as any).summaryStyle || 'DEFAULT')}
                                     onUnsubscribe={() => handleUnsubscribe(channel.id, 'youtube', channel.title)}
                                     onCopyRss={() => copyRssLink(channel.id, 'youtube')}
                                     onStyleChange={session ? (style) => handleStyleChange((channel as any).subscriptionId || channel.id, 'youtube', style) : undefined}
@@ -413,7 +449,7 @@ export default function ChannelManager({
 
                             {displayChannels.length === 0 && (
                                 <div className="text-center py-12 text-gray-400">
-                                    No YouTube channels added yet.
+                                    {t('empty_youtube')}
                                 </div>
                             )}
                         </div>
@@ -441,7 +477,7 @@ export default function ChannelManager({
                                     description={podcast.description}
                                     lastUpdated={podcast.last_updated}
                                     externalUrl={podcast.site_url}
-                                    summaryStyle={(podcast as any).summaryStyle || 'DEFAULT'}
+                                    summaryStyle={getEffectiveStyle((podcast as any).subscriptionId || podcast.id, 'podcast', (podcast as any).summaryStyle || 'DEFAULT')}
                                     onUnsubscribe={() => handleUnsubscribe(podcast.id, 'podcast', podcast.title || 'this podcast')}
                                     onCopyRss={() => copyRssLink(podcast.id, 'podcast')}
                                     onStyleChange={session ? (style) => handleStyleChange((podcast as any).subscriptionId || podcast.id, 'podcast', style) : undefined}
@@ -451,7 +487,7 @@ export default function ChannelManager({
 
                             {displayPodcasts.length === 0 && (
                                 <div className="text-center py-12 text-gray-400">
-                                    No podcasts added yet.
+                                    {t('empty_podcast')}
                                 </div>
                             )}
                         </div>

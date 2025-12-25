@@ -1,9 +1,9 @@
-'use client';
-
+import React from 'react';
 import { Rss, ExternalLink, Trash2 } from 'lucide-react';
 import { IconButton } from '@/components/ui/IconButton';
 import { StyleSelector, SummaryStyle } from '@/components/ui/StyleSelector';
 import { cn } from '@/lib/utils';
+import { useFormatter, useTranslations } from 'next-intl';
 
 export interface SubscriptionCardProps {
     /** Type of subscription - determines color theme */
@@ -50,20 +50,6 @@ function decodeHtml(html: string): string {
  * 
  * A unified card component for displaying YouTube channels and Podcasts.
  * Now includes a style selector for choosing summary format.
- * 
- * @example
- * <SubscriptionCard
- *   type="youtube"
- *   id={channel.id}
- *   title={channel.title}
- *   description={channel.description}
- *   lastUpdated={channel.last_updated}
- *   summaryStyle="DEFAULT"
- *   externalUrl={`https://youtube.com/channel/${channel.youtube_id}`}
- *   onUnsubscribe={() => handleUnsubscribe(channel.id)}
- *   onCopyRss={() => handleCopyRss(channel.id)}
- *   onStyleChange={(style) => handleStyleChange(channel.id, style)}
- * />
  */
 export function SubscriptionCard({
     type,
@@ -80,6 +66,9 @@ export function SubscriptionCard({
     isAuthenticated = true,
     loading = false,
 }: SubscriptionCardProps) {
+    const t = useTranslations('Subscriptions');
+    const format = useFormatter();
+
     const handleUnsubscribe = () => {
         if (onLoginRequired && !isAuthenticated) {
             onLoginRequired();
@@ -88,7 +77,7 @@ export function SubscriptionCard({
         }
     };
 
-    const formattedDate = new Date(lastUpdated).toLocaleDateString();
+    const formattedDate = format.dateTime(new Date(lastUpdated), { dateStyle: 'medium' });
 
     return (
         <div
@@ -115,7 +104,7 @@ export function SubscriptionCard({
 
                 <div className="flex items-center gap-2 ml-4">
                     <IconButton
-                        aria-label={!isAuthenticated && onLoginRequired ? "Sign in to manage subscriptions" : "Unsubscribe"}
+                        aria-label={!isAuthenticated && onLoginRequired ? "Sign in to manage subscriptions" : t('unsubscribe')}
                         variant="danger"
                         onClick={handleUnsubscribe}
                         disabled={loading}
@@ -123,7 +112,7 @@ export function SubscriptionCard({
                         <Trash2 className="w-5 h-5" />
                     </IconButton>
                     <IconButton
-                        aria-label="Copy RSS Link"
+                        aria-label={t('copy_rss')}
                         variant="warning"
                         onClick={onCopyRss}
                     >
@@ -135,7 +124,7 @@ export function SubscriptionCard({
                             target="_blank"
                             rel="noopener noreferrer"
                             className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
-                            title={type === 'youtube' ? "Open in YouTube" : "Open Website"}
+                            title={type === 'youtube' ? t('open_youtube') : t('open_website')}
                         >
                             <ExternalLink className="w-5 h-5" />
                         </a>
@@ -146,7 +135,7 @@ export function SubscriptionCard({
             {/* Footer Row: Date + Style Selector */}
             <div className="flex items-center justify-between border-t border-gray-100 dark:border-gray-700 pt-3">
                 <span className="text-xs text-gray-400 dark:text-gray-500">
-                    Updated: {formattedDate}
+                    {t('updated')}: {formattedDate}
                 </span>
 
                 {onStyleChange && (
@@ -160,4 +149,3 @@ export function SubscriptionCard({
         </div>
     );
 }
-
