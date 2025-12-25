@@ -27,7 +27,7 @@ export async function GET(
         return new Response("Feed not found", { status: 404 });
     }
 
-    // 2. Query videos with locked styles
+    // 2. Query videos with locked styles - only for active subscriptions
     const videoItems = await prisma.$queryRaw<VideoQueryResult[]>`
         SELECT 
             v.id,
@@ -42,12 +42,13 @@ export async function GET(
         INNER JOIN youtube_videos v ON v.id = uvs.video_id
         INNER JOIN youtube_channels c ON c.id = v.channel_id
         INNER JOIN video_summaries vs ON vs.video_id = v.id AND vs.style::text = uvs.style::text
+        INNER JOIN youtube_subscriptions ys ON ys.user_id = uvs.user_id AND ys.channel_id = c.id
         WHERE uvs.user_id = ${user.id}
         ORDER BY v.published_at DESC
         LIMIT 50
     `;
 
-    // 3. Query podcast episodes with locked styles
+    // 3. Query podcast episodes with locked styles - only for active subscriptions
     const episodeItems = await prisma.$queryRaw<EpisodeQueryResult[]>`
         SELECT 
             e.id,
@@ -63,6 +64,7 @@ export async function GET(
         INNER JOIN podcast_episodes e ON e.id = ues.episode_id
         INNER JOIN podcast_channels p ON p.id = e.podcast_id
         INNER JOIN episode_summaries es ON es.episode_id = e.id AND es.style::text = ues.style::text
+        INNER JOIN podcast_subscriptions ps ON ps.user_id = ues.user_id AND ps.podcast_id = p.id
         WHERE ues.user_id = ${user.id}
         ORDER BY e.published_at DESC
         LIMIT 50
