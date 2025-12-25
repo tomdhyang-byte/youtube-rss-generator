@@ -24,20 +24,28 @@ cd "$(dirname "$0")/.."
 
 PYTHON_EXEC=""
 
-# Hardcoded path for stability in cron environment
-PYTHON_EXEC="/usr/local/bin/python3"
+# 1. Try to find a local virtual environment (.venv or venv)
+if [ -f "$(dirname "$0")/../.venv/bin/python3" ]; then
+    PYTHON_EXEC="$(dirname "$0")/../.venv/bin/python3"
+elif [ -f "$(dirname "$0")/../venv/bin/python3" ]; then
+    PYTHON_EXEC="$(dirname "$0")/../venv/bin/python3"
+else
+    # 2. Fallback to system python (Legacy behavior)
+    # Check if the hardcoded path exists, if not, find python3 in path
+    if [ -f "/usr/local/bin/python3" ]; then
+        PYTHON_EXEC="/usr/local/bin/python3"
+    else
+        PYTHON_EXEC=$(which python3)
+    fi
+fi
 
 # Verify the executable exists
-if [ ! -f "$PYTHON_EXEC" ]; then
-    echo "Error: Python executable not found at $PYTHON_EXEC"
+if [ -z "$PYTHON_EXEC" ] || [ ! -x "$PYTHON_EXEC" ]; then
+    echo "Error: Could not find a suitable Python executable."
+    echo "Please create a virtual environment: python3 -m venv .venv"
     exit 1
 fi
 
-if [ -z "$PYTHON_EXEC" ]; then
-    echo "Error: Could not find a suitable Python executable."
-    echo "Please ensure Python 3 is installed or activate your virtual environment."
-    exit 1
-fi
 
 # Define log files
 LOG_FILE="cron_log.txt"
