@@ -4,6 +4,7 @@ import { getSession, isAdmin } from '@/lib/auth';
 import { localeToSummaryLanguage } from '@/lib/types/summary-language';
 import Parser from 'rss-parser';
 import { checkUserQuota, triggerWorker } from '@/lib/api-utils';
+import { isSafePodcastUrl } from '@/lib/security';
 
 const parser = new Parser();
 
@@ -34,6 +35,12 @@ export async function POST(request: Request) {
 
         if (!url) {
             return NextResponse.json({ error: 'URL is required' }, { status: 400 });
+        }
+
+        // SSRF Protection
+        if (!isSafePodcastUrl(url)) {
+            console.warn(`[API] Blocked potentially unsafe Podcast URL: ${url}`);
+            return NextResponse.json({ error: 'Invalid URL. Private IPs and localhost are not allowed.' }, { status: 400 });
         }
 
         let feedUrl = url;

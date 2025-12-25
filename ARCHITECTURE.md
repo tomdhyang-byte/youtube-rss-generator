@@ -39,6 +39,7 @@ Use this guide to quickly find the file you need to change based on your intent.
 | **Homepage** (Landing) | `app/[locale]/page.tsx` |
 | **Feed Page** (Reader) | `app/[locale]/feed/page.tsx` |
 | **Subscription Manager** | `components/subscription/ChannelManager/index.tsx` |
+| **Subscription Logic** | `components/subscription/ChannelManager/useChannelManager.ts` (State/Logic) |
 | **Colors / Theme** | `app/globals.css` |
 | **Button Styles** | `components/ui/Button.tsx` |
 | **Card Design** | `components/subscription/ChannelManager/SubscriptionCard.tsx` |
@@ -53,11 +54,14 @@ Use this guide to quickly find the file you need to change based on your intent.
 | **AI Summary Prompts** | `backend/worker/summarize.py` |
 | **YouTube Fetch Logic** | `backend/worker/youtube.py` |
 | **Podcast Fetch Logic** | `backend/worker/podcast.py` |
+| **Worker Shared Logic** | `backend/worker/common.py` (New Shared Utils) |
 | **Worker Daemon** | `backend/worker/daemon.py` (New Entry Point) |
 | **Main Worker Loop** | `backend/worker.py` (Legacy/Routine) |
 | **Database Schema** | `prisma/schema.prisma` |
 | **Style Update API** | `app/api/subscriptions/style/route.ts` |
 | **Personalized RSS Feed** | `app/feed/user/[token]/route.ts` |
+| **API Shared Utilities** | `lib/api-utils.ts` (Quota/Worker triggers) |
+| **Security Validation** | `lib/security.ts` (SSRF Protection) |
 
 ---
 
@@ -66,7 +70,7 @@ Use this guide to quickly find the file you need to change based on your intent.
 Understanding how a video becomes a summary:
 
 1.  **User Adds Channel**:
-    *   URL sent to `/api/channels`.
+    *   URL sent to `/api/channels` (Validated by `lib/security.ts`).
     *   Channel saved to DB.
     *   **New**: A `ProcessingQueue` job is created (Status: PENDING).
 2.  **Worker Runs (Real-time)**:
@@ -109,6 +113,7 @@ youtube-rss-generator/
 │   └── subscription/             # Subscription Components
 │       └── ChannelManager/       # The complex subscription manager
 │           ├── index.tsx         # Logic for add/remove/refresh
+│           ├── useChannelManager.ts # Custom Hook (State/Logic)
 │           ├── SubscriptionCard.tsx  # The visual card for channels
 │           └── AddChannelForm.tsx    # The input form
 │
@@ -118,18 +123,23 @@ youtube-rss-generator/
 │
 ├── lib/                          # Utilities
 │   ├── prisma.ts                 # Database Client
-│   └── utils.ts                  # Helper Functions
+│   ├── utils.ts                  # Helper Functions
+│   ├── api-utils.ts              # Shared API Helpers (Auth/Quota)
+│   └── security.ts               # Security Validators (SSRF)
 │
 ├── hooks/                        # Custom React Hooks
 │   ├── useFeed.ts                # Data fetching for feed
-│   └── useSubscriptions.ts       # Data fetching for subs
+│   ├── useSubscriptions.ts       # Data fetching for subs
+│   └── useReadStatus.ts          # Local storage for read status
 │
 ├── backend/                      # Python Worker (The "Brain")
 │   ├── worker/                   # Core Logic Modules
 │   │   ├── config.py             # Configuration & Constants
+│   │   ├── common.py             # Shared Worker Utilities
 │   │   ├── daemon.py             # Real-time Polling Engine
 │   │   ├── summarize.py          # AI Prompts & Logic
 │   │   └── youtube.py            # YouTube API Handling
+│   │   └── podcast.py            # Podcast API Handling
 │   ├── worker.py                 # (Legacy) Full Scan Routine
 │   ├── run_worker.sh             # Launch Script
 │   └── requirements.txt          # Python Dependencies
@@ -139,7 +149,7 @@ youtube-rss-generator/
 ├── middleware.ts                 # Next.js Middleware (Auth + i18n)
 │
 ├── public/                       # Static Assets
-│   └── logo.png                  # App Logo
+│   └── logo.png                  # App Logo (TubeSummary)
 │
 └── prisma/                       # Database
     └── schema.prisma             # Database Schema Definition

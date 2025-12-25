@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { isValidYoutubeUrl } from '@/lib/security';
 
 /**
  * Public endpoint to fetch YouTube channel metadata
@@ -14,6 +15,12 @@ export async function POST(request: Request) {
 
         if (!url) {
             return NextResponse.json({ error: 'URL is required' }, { status: 400 });
+        }
+
+        // SSRF Protection
+        if (!isValidYoutubeUrl(url)) {
+            console.warn(`[API] Blocked potentially unsafe URL: ${url}`);
+            return NextResponse.json({ error: 'Invalid URL. Only YouTube links are allowed.' }, { status: 400 });
         }
 
         let channelId = '';

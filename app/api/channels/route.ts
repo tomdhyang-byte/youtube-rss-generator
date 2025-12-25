@@ -4,6 +4,8 @@ import { getSession } from '@/lib/auth';
 import { localeToSummaryLanguage } from '@/lib/types/summary-language';
 import { checkUserQuota, triggerWorker } from '@/lib/api-utils';
 
+import { isValidYoutubeUrl } from '@/lib/security';
+
 export async function POST(request: Request) {
     console.log('[API] POST /api/channels called');
 
@@ -27,6 +29,12 @@ export async function POST(request: Request) {
 
         if (!url) {
             return NextResponse.json({ error: 'URL is required' }, { status: 400 });
+        }
+
+        // SSRF Protection
+        if (!isValidYoutubeUrl(url)) {
+            console.warn(`[API] Blocked potentially unsafe Youtube URL: ${url}`);
+            return NextResponse.json({ error: 'Invalid URL. Only YouTube links are allowed.' }, { status: 400 });
         }
 
         let channelId = '';
