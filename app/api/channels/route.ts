@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { getSession, isAdmin } from '@/lib/auth';
+import { getSession } from '@/lib/auth';
 import { localeToSummaryLanguage } from '@/lib/types/summary-language';
+import { checkUserQuota, triggerWorker } from '@/lib/api-utils';
 
 export async function POST(request: Request) {
     console.log('[API] POST /api/channels called');
@@ -86,26 +87,13 @@ export async function POST(request: Request) {
             }, { status: 400 });
         }
 
-        // 4. Quota Check (unless admin)
-        if (!isAdmin(userEmail)) {
-            console.log(`[API] Checking quota for user ${userId}`);
-
-            const [ytSubCount, podcastSubCount] = await Promise.all([
-                prisma.youtubeSubscription.count({ where: { userId } }),
-                prisma.podcastSubscription.count({ where: { userId } }),
-            ]);
-
-            const totalSubs = ytSubCount + podcastSubCount;
-            console.log(`[API] User has ${totalSubs} total subscriptions (YT: ${ytSubCount}, Podcast: ${podcastSubCount})`);
-
-            if (totalSubs >= 1) {
-                return NextResponse.json({
-                    error: 'Subscription quota reached. Free users can only subscribe to 1 channel/podcast total. Please unsubscribe from another to add this one.',
-                    quota: { current: totalSubs, limit: 1 }
-                }, { status: 403 });
-            }
-        } else {
-            console.log(`[API] Admin user detected - skipping quota check`);
+        // 4. Quota Check (via shared utility)
+        const quotaResult = await checkUserQuota(session.user);
+        if (!quotaResult.allowed) {
+            return NextResponse.json({
+                error: quotaResult.error,
+                quota: quotaResult.quota
+            }, { status: 403 });
         }
 
         // 5. Check if already subscribed
@@ -202,35 +190,7 @@ export async function POST(request: Request) {
         });
 
         // 9. Trigger Background Worker
-        try {
-            // Check if there's already a pending/processing job for this channel
-            const existingJob = await prisma.processingQueue.findFirst({
-                where: {
-                    entityId: channel.id,
-                    type: 'YOUTUBE',
-                    status: {
-                        in: ['PENDING', 'PROCESSING']
-                    }
-                }
-            });
-
-            if (!existingJob) {
-                console.log(`[API] Triggering worker for YouTube Channel ${channel.id}`);
-                await prisma.processingQueue.create({
-                    data: {
-                        type: 'YOUTUBE',
-                        entityId: channel.id,
-                        status: 'PENDING',
-                        priority: 10 // High priority for new user request
-                    }
-                });
-            } else {
-                console.log(`[API] Worker job already exists for Channel ${channel.id}`);
-            }
-        } catch (queueError) {
-            console.error('[API] Failed to trigger worker:', queueError);
-            // Don't fail the request just because the background job trigger failed
-        }
+        await triggerWorker('YOUTUBE', channel.id);
 
         console.log('[API] Subscription created successfully');
 

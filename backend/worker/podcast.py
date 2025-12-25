@@ -15,6 +15,7 @@ import re
 
 from .transcribe import transcribe_audio
 from .summarize import generate_summary
+from .common import lock_user_styles
 
 
 def strip_html(text: str) -> str:
@@ -107,7 +108,7 @@ def process_podcast_channel(conn, podcast: dict) -> None:
             episode_db_id = existing[0]
             print(f"    - Episode already exists (ID: {episode_db_id}), checking for missing user styles...")
             # Still need to lock styles for any new subscribers
-            _lock_user_styles(conn, episode_db_id, subscriber_list)
+            lock_user_styles(conn, episode_db_id, subscriber_list, 'user_episode_styles', 'episode_id')
             continue
             
         print(f"    - New Episode found: {title}")
@@ -168,7 +169,7 @@ def process_podcast_channel(conn, podcast: dict) -> None:
         print(f"    - {successful_combos}/{len(demanded_combos)} summaries generated and saved.")
         
         # Lock each subscriber's style for this episode (Design B core)
-        _lock_user_styles(conn, episode_db_id, subscriber_list)
+        lock_user_styles(conn, episode_db_id, subscriber_list, 'user_episode_styles', 'episode_id')
         
         # Rate limiting
         delay = random.uniform(5, 10)
@@ -180,32 +181,5 @@ def process_podcast_channel(conn, podcast: dict) -> None:
     conn.commit()
 
 
-def _lock_user_styles(conn, episode_db_id: int, subscriber_list: list) -> None:
-    """
-    Lock the summary style and language for each user for this episode.
-    This ensures that when a user changes their settings, past episodes still show the old style/language.
-    
-    Args:
-        conn: Database connection
-        episode_db_id: The database ID of the episode
-        subscriber_list: List of dicts with 'user_id', 'style', and 'language' keys
-    """
-    cursor = conn.cursor()
-    locked_count = 0
-    
-    for sub in subscriber_list:
-        try:
-            cursor.execute("""
-                INSERT INTO user_episode_styles (user_id, episode_id, style, language)
-                VALUES (%s, %s, %s, %s)
-                ON CONFLICT (user_id, episode_id) DO NOTHING
-            """, (sub['user_id'], episode_db_id, sub['style'], sub['language']))
-            if cursor.rowcount > 0:
-                locked_count += 1
-        except Exception as e:
-            print(f"    - Error locking style for user {sub['user_id']}: {e}")
-    
-    conn.commit()
-    if locked_count > 0:
-        print(f"    - Locked styles for {locked_count} users.")
+
 

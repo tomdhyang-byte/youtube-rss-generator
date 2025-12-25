@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { getSession, isAdmin } from '@/lib/auth';
 import { localeToSummaryLanguage } from '@/lib/types/summary-language';
 import Parser from 'rss-parser';
+import { checkUserQuota, triggerWorker } from '@/lib/api-utils';
 
 const parser = new Parser();
 
@@ -74,26 +75,13 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'Invalid RSS feed' }, { status: 400 });
         }
 
-        // 5. Quota Check (unless admin)
-        if (!isAdmin(userEmail)) {
-            console.log(`[API] Checking quota for user ${userId}`);
-
-            const [ytSubCount, podcastSubCount] = await Promise.all([
-                prisma.youtubeSubscription.count({ where: { userId } }),
-                prisma.podcastSubscription.count({ where: { userId } }),
-            ]);
-
-            const totalSubs = ytSubCount + podcastSubCount;
-            console.log(`[API] User has ${totalSubs} total subscriptions (YT: ${ytSubCount}, Podcast: ${podcastSubCount})`);
-
-            if (totalSubs >= 1) {
-                return NextResponse.json({
-                    error: 'Subscription quota reached. Free users can only subscribe to 1 channel/podcast total. Please unsubscribe from another to add this one.',
-                    quota: { current: totalSubs, limit: 1 }
-                }, { status: 403 });
-            }
-        } else {
-            console.log(`[API] Admin user detected - skipping quota check`);
+        // 5. Quota Check (via shared utility)
+        const quotaResult = await checkUserQuota(session.user);
+        if (!quotaResult.allowed) {
+            return NextResponse.json({
+                error: quotaResult.error,
+                quota: quotaResult.quota
+            }, { status: 403 });
         }
 
         // 6. Upsert Podcast & Create Subscription
@@ -151,35 +139,7 @@ export async function POST(request: Request) {
         });
 
         // 8. Trigger Background Worker
-        try {
-            // Check if there's already a pending/processing job for this podcast
-            const existingJob = await prisma.processingQueue.findFirst({
-                where: {
-                    entityId: podcast.id,
-                    type: 'PODCAST',
-                    status: {
-                        in: ['PENDING', 'PROCESSING']
-                    }
-                }
-            });
-
-            if (!existingJob) {
-                console.log(`[API] Triggering worker for Podcast ${podcast.id}`);
-                await prisma.processingQueue.create({
-                    data: {
-                        type: 'PODCAST',
-                        entityId: podcast.id,
-                        status: 'PENDING',
-                        priority: 10 // High priority for new user request
-                    }
-                });
-            } else {
-                console.log(`[API] Worker job already exists for Podcast ${podcast.id}`);
-            }
-        } catch (queueError) {
-            console.error('[API] Failed to trigger worker:', queueError);
-            // Don't fail the request just because the background job trigger failed
-        }
+        await triggerWorker('PODCAST', podcast.id);
 
         console.log('[API] Podcast subscription created successfully');
 

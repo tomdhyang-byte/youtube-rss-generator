@@ -14,6 +14,7 @@ import scrapetube
 
 from .transcribe import fetch_supadata_transcript
 from .summarize import generate_summary
+from .common import lock_user_styles
 
 
 def parse_relative_time(text: str) -> datetime:
@@ -129,7 +130,7 @@ def process_youtube_channel(conn, channel: dict) -> None:
             video_db_id = existing[0]
             print(f"    - Video already exists (ID: {video_db_id}), checking for missing user styles...")
             # Still need to lock styles for any new subscribers
-            _lock_user_styles(conn, video_db_id, subscriber_list)
+            lock_user_styles(conn, video_db_id, subscriber_list, 'user_video_styles', 'video_id')
             continue
             
         print(f"    - New Video found: {title}")
@@ -182,7 +183,7 @@ def process_youtube_channel(conn, channel: dict) -> None:
         print(f"    - {successful_combos}/{len(demanded_combos)} summaries generated and saved.")
         
         # Lock each subscriber's style for this video (Design B core)
-        _lock_user_styles(conn, video_db_id, subscriber_list)
+        lock_user_styles(conn, video_db_id, subscriber_list, 'user_video_styles', 'video_id')
         
         # Rate limiting
         delay = random.uniform(5, 10)
@@ -194,32 +195,5 @@ def process_youtube_channel(conn, channel: dict) -> None:
     conn.commit()
 
 
-def _lock_user_styles(conn, video_db_id: int, subscriber_list: list) -> None:
-    """
-    Lock the summary style and language for each user for this video.
-    This ensures that when a user changes their settings, past videos still show the old style/language.
-    
-    Args:
-        conn: Database connection
-        video_db_id: The database ID of the video
-        subscriber_list: List of dicts with 'user_id', 'style', and 'language' keys
-    """
-    cursor = conn.cursor()
-    locked_count = 0
-    
-    for sub in subscriber_list:
-        try:
-            cursor.execute("""
-                INSERT INTO user_video_styles (user_id, video_id, style, language)
-                VALUES (%s, %s, %s, %s)
-                ON CONFLICT (user_id, video_id) DO NOTHING
-            """, (sub['user_id'], video_db_id, sub['style'], sub['language']))
-            if cursor.rowcount > 0:
-                locked_count += 1
-        except Exception as e:
-            print(f"    - Error locking style for user {sub['user_id']}: {e}")
-    
-    conn.commit()
-    if locked_count > 0:
-        print(f"    - Locked styles for {locked_count} users.")
+
 

@@ -1,439 +1,49 @@
 'use client';
 
-import { useState } from 'react';
-import { useSession } from 'next-auth/react';
-import { useLocale } from 'next-intl';
-import { toast } from 'sonner';
+import { useTranslations } from 'next-intl';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { LoginModal } from "@/components/auth/LoginModal";
-import { useLocalStorage } from "@/hooks/useLocalStorage";
-import { GuestChannel } from "@/lib/types";
-import { useQuota } from "@/components/providers/QuotaProvider";
 
 // Import sub-components
 import { AddChannelForm } from './AddChannelForm';
 import { SubscriptionCard } from './SubscriptionCard';
-import { ChannelManagerProps, YoutubeChannel } from './types';
-import { SummaryStyle } from '@/components/ui/StyleSelector';
-import { SummaryLanguage } from '@/components/ui/LanguageSelector';
+import { ChannelManagerProps } from './types';
+import { useChannelManager } from './useChannelManager';
 
 /**
  * ChannelManager Component
  * Main component for managing YouTube channel and Podcast subscriptions.
- * 
- * Features:
- * - Add/remove YouTube channels and Podcasts
- * - Guest mode with localStorage persistence
- * - Optimistic UI updates
- * - Copy RSS links
- * - Summary style and language selection
+ * Refactored to use useChannelManager hook for logic.
  */
-import { useTranslations } from 'next-intl';
-
-// ...
-
-export default function ChannelManager({
-    initialChannels,
-    initialPodcasts,
-    onRefresh
-}: ChannelManagerProps) {
-    const { data: session } = useSession();
-    const { quota, refreshQuota } = useQuota();
-    const locale = useLocale();
+export default function ChannelManager(props: ChannelManagerProps) {
     const t = useTranslations('Subscriptions');
-    const tFeed = useTranslations('Feed');
 
-    // Form state
-    const [youtubeUrl, setYoutubeUrl] = useState('');
-    const [podcastUrl, setPodcastUrl] = useState('');
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState('');
-
-    // Modal state
-    const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-    const [deleteTarget, setDeleteTarget] = useState<{ id: number; type: 'youtube' | 'podcast'; name: string } | null>(null);
-    const [loginModalOpen, setLoginModalOpen] = useState(false);
-
-    // Guest mode state
-    const [localChannels, setLocalChannels] = useLocalStorage<GuestChannel[]>('guest_channels', []);
-
-    // Optimistic UI state for deletions
-    const [optimisticDeletedIds, setOptimisticDeletedIds] = useState<number[]>([]);
-
-    // Optimistic UI state for additions
-    const [optimisticChannels, setOptimisticChannels] = useState<YoutubeChannel[]>([]);
-    const [optimisticPodcasts, setOptimisticPodcasts] = useState<any[]>([]); // Using any for podcast for simplicity or correct type if available
-
-    // Recently added items (Bridging state to prevent flicker)
-    // Used to keep the card visible after optimistic removal but before re-fetch validation
-    const [recentlyAddedChannels, setRecentlyAddedChannels] = useState<YoutubeChannel[]>([]);
-    const [recentlyAddedPodcasts, setRecentlyAddedPodcasts] = useState<any[]>([]);
-
-    // Optimistic UI state for style changes (key: `${type}-${subscriptionId}`, value: SummaryStyle)
-    const [optimisticStyles, setOptimisticStyles] = useState<Record<string, SummaryStyle>>({});
-    // Optimistic UI state for language changes (key: `${type}-${subscriptionId}`, value: SummaryLanguage)
-    const [optimisticLanguages, setOptimisticLanguages] = useState<Record<string, SummaryLanguage>>({});
-
-
-    // Determine which channels to display
-    const realChannels = session ? initialChannels : localChannels;
-    // Memoized deduping: recently added items that are NOT yet in realChannels
-    const uniqueRecentChannels = recentlyAddedChannels.filter(
-        recent => !realChannels.some(real => real.id === recent.id)
-    );
-    const displayChannels = [...optimisticChannels, ...uniqueRecentChannels, ...realChannels]
-        .filter(channel => !optimisticDeletedIds.includes(channel.id));
-
-    const uniqueRecentPodcasts = recentlyAddedPodcasts.filter(
-        recent => !initialPodcasts.some(real => real.id === recent.id)
-    );
-    const displayPodcasts = [...optimisticPodcasts, ...uniqueRecentPodcasts, ...initialPodcasts]
-        .filter(podcast => !optimisticDeletedIds.includes(podcast.id));
-
-    // Check if user can add more channels
-    const canAddMore = !quota || quota.isAdmin || quota.current < (quota.limit || 1);
-
-    // --- Handlers ---
-
-    const handleYouTubeSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!youtubeUrl) {
-            toast.error(t('add_youtube_placeholder')); // Using placeholder as error for empty input or generic error
-            return;
-        }
-
-        // Guest mode: Show login modal if trying to add 2nd channel
-        if (!session && localChannels.length >= 1) {
-            setLoginModalOpen(true);
-            return;
-        }
-
-
-        setLoading(true);
-        setError('');
-
-        // Guest mode: Fetch real channel info via backend proxy
-        if (!session) {
-            // ... existing guest mode logic ...
-            try {
-                toast.info('Fetching channel information...');
-                const response = await fetch('/api/channel-info', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ url: youtubeUrl }),
-                });
-
-                if (!response.ok) {
-                    const data = await response.json().catch(() => ({}));
-                    throw new Error(data.error || 'Failed to fetch channel info');
-                }
-
-                const { youtube_id, title, description } = await response.json();
-                const mockId = -(Date.now());
-                const mockChannel: GuestChannel = {
-                    id: mockId,
-                    youtube_id: youtube_id || 'guest-' + mockId,
-                    title: title || 'YouTube Channel',
-                    description: description,
-                    rss_url: null,
-                    last_updated: new Date().toISOString(),
-                    url: youtubeUrl,
-                    cached_metadata: {
-                        youtube_id: youtube_id || 'guest-' + mockId,
-                        title: title || 'YouTube Channel',
-                        description: description,
-                    },
-                };
-
-                setLocalChannels([...localChannels, mockChannel]);
-                setYoutubeUrl('');
-                toast.success('Channel added! Sign in to save permanently.');
-            } catch (err: any) {
-                setError(err.message);
-                toast.error(err.message);
-            } finally {
-                setLoading(false);
-            }
-            return;
-        }
-
-        // Authenticated mode: Optimistic Update
-        const optimisticId = -Date.now();
-        const urlToSubmit = youtubeUrl; // Capture before clearing
-        const optimisticChannel: YoutubeChannel = {
-            id: optimisticId,
-            youtube_id: 'pending-' + optimisticId,
-            title: t('adding_channel'),
-            description: t('adding_channel_desc'),
-            rss_url: '',
-            last_updated: new Date().toISOString(),
-        };
-
-        setOptimisticChannels(prev => [optimisticChannel, ...prev]);
-        setYoutubeUrl('');
-
-        try {
-            const res = await fetch('/api/channels', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ url: urlToSubmit, locale }),
-            });
-
-            if (!res.ok) {
-                const data = await res.json().catch(() => ({}));
-                throw new Error(data.error || 'Failed to add channel');
-            }
-
-            toast.success(t('channel_added_success'));
-            // toast.info("Don't Panic. If the feed is empty, wait for 5 mins and retry.");
-
-            const data = await res.json();
-
-            // Success! Transition from Optimistic -> Recently Added -> Real (eventually)
-            // 1. Add to recently added (keeps it visible)
-            setRecentlyAddedChannels(prev => [data.channel, ...prev]);
-
-            // 2. Remove optimistic channel
-            setOptimisticChannels(prev => prev.filter(c => c.id !== optimisticId));
-
-            // 3. Trigger refresh (fetching real data)
-            onRefresh?.(data.channel);
-
-            // 4. Refresh global quota state
-            refreshQuota();
-        } catch (err: any) {
-            // Revert optimistic
-            setOptimisticChannels(prev => prev.filter(c => c.id !== optimisticId));
-            setError(err.message);
-            toast.error(err.message);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const handlePodcastSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!podcastUrl) {
-            toast.error("Please enter a Podcast URL");
-            return;
-        }
-
-        setLoading(true);
-        setError('');
-
-        const optimisticId = -Date.now();
-        const urlToSubmit = podcastUrl; // Capture before clearing
-        // Optimistic Podcast Item
-        const optimisticPodcast = {
-            id: optimisticId,
-            feed_url: 'pending',
-            title: t('adding_podcast'),
-            description: t('adding_podcast_desc'),
-            site_url: '',
-            image_url: null,
-            last_updated: new Date(),
-        };
-
-        setOptimisticPodcasts(prev => [optimisticPodcast, ...prev]);
-        setPodcastUrl('');
-
-        try {
-            const res = await fetch('/api/podcasts', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ url: urlToSubmit, locale }),
-            });
-
-            if (!res.ok) {
-                const data = await res.json().catch(() => ({}));
-                throw new Error(data.error || 'Failed to add podcast');
-            }
-
-            toast.success(t('podcast_added_success'));
-            // toast.info("Don't Panic. If the feed is empty, wait. The AI backend is working on the backlog.");
-
-            const data = await res.json();
-
-            // Bridging state: Add to recently added to prevent flicker
-            if (data.podcast) {
-                setRecentlyAddedPodcasts(prev => [data.podcast, ...prev]);
-            }
-
-            setOptimisticPodcasts(prev => prev.filter(p => p.id !== optimisticId));
-            onRefresh?.();
-
-            // Refresh global quota state
-            refreshQuota();
-        } catch (err: any) {
-            setOptimisticPodcasts(prev => prev.filter(p => p.id !== optimisticId));
-            setError(err.message);
-            toast.error(err.message);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const handleUnsubscribe = (channelId: number, type: 'youtube' | 'podcast', name: string) => {
-        setDeleteTarget({ id: channelId, type, name });
-        setShowDeleteDialog(true);
-    };
-
-    const confirmUnsubscribe = async () => {
-        if (!deleteTarget) return;
-
-        const { id: targetId, type: targetType, name: targetName } = deleteTarget;
-
-        // Optimistic Update: Hide immediately
-        setShowDeleteDialog(false);
-        setOptimisticDeletedIds(prev => [...prev, targetId]);
-
-        // Guest mode: Remove from local storage immediately
-        if (!session && targetType === 'youtube') {
-            const updatedLocal = localChannels.filter(c => c.id !== targetId);
-            setLocalChannels(updatedLocal);
-            toast.success(`Successfully unsubscribed from ${targetName}!`);
-            setDeleteTarget(null);
-            return;
-        }
-
-        // Authenticated mode
-        toast.success(`Successfully unsubscribed from ${targetName}!`);
-
-        try {
-            const endpoint = targetType === 'youtube' ? '/api/channels' : '/api/podcasts';
-            const idKey = targetType === 'youtube' ? 'channelId' : 'podcastId';
-
-            const res = await fetch(endpoint, {
-                method: 'DELETE',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ [idKey]: targetId }),
-            });
-
-            if (!res.ok) {
-                const data = await res.json().catch(() => ({}));
-                throw new Error(data.error || 'Failed to unsubscribe');
-            }
-
-            onRefresh?.();
-
-            // Refresh global quota state
-            refreshQuota();
-        } catch (err: any) {
-            // Revert optimistic update on failure
-            setOptimisticDeletedIds(prev => prev.filter(id => id !== targetId));
-            toast.error(err.message || "Failed to unsubscribe");
-        } finally {
-            setLoading(false);
-            setDeleteTarget(null);
-        }
-    };
-
-    const copyRssLink = (id: number, type: 'youtube' | 'podcast') => {
-        if (!session) {
-            setLoginModalOpen(true);
-            return;
-        }
-
-        const path = type === 'youtube' ? `/feed/${id}` : `/feed/podcast/${id}`;
-        const link = `${window.location.origin}${path}`;
-        navigator.clipboard.writeText(link);
-        toast.success('RSS Link copied to clipboard!');
-    };
-
-    const handleStyleChange = (subscriptionId: number, type: 'youtube' | 'podcast', newStyle: SummaryStyle) => {
-        const key = `${type}-${subscriptionId}`;
-
-        // 1. Optimistic update - immediately update UI
-        setOptimisticStyles(prev => ({ ...prev, [key]: newStyle }));
-
-        // 2. Show toast immediately
-        toast.success(t('style_updated'));
-
-        // 3. Fire API call in background (no await)
-        fetch('/api/subscriptions/style', {
-            method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ subscriptionId, type, newStyle }),
-        })
-            .then(async res => {
-                if (!res.ok) {
-                    throw new Error('Failed to update style');
-                }
-                // Success - refresh data first, then clear optimistic state
-                await onRefresh?.();
-                // Now clear optimistic state - real data should already be in place
-                setOptimisticStyles(prev => {
-                    const next = { ...prev };
-                    delete next[key];
-                    return next;
-                });
-            })
-            .catch(err => {
-                // Revert optimistic update on error
-                setOptimisticStyles(prev => {
-                    const next = { ...prev };
-                    delete next[key];
-                    return next;
-                });
-                toast.error(err.message || 'Failed to update style');
-            });
-    };
-
-    // Helper to get effective style (optimistic or real)
-    const getEffectiveStyle = (subscriptionId: number, type: 'youtube' | 'podcast', realStyle: SummaryStyle): SummaryStyle => {
-        const key = `${type}-${subscriptionId}`;
-        return optimisticStyles[key] ?? realStyle;
-    };
-
-    // Handler for language change
-    const handleLanguageChange = (subscriptionId: number, type: 'youtube' | 'podcast', newLanguage: SummaryLanguage) => {
-        const key = `${type}-${subscriptionId}`;
-
-        // 1. Optimistic update - immediately update UI
-        setOptimisticLanguages(prev => ({ ...prev, [key]: newLanguage }));
-
-        // 2. Show toast immediately
-        toast.success(t('language_updated'));
-
-        // 3. Fire API call in background (no await)
-        fetch('/api/subscriptions/style', {
-            method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ subscriptionId, type, newLanguage }),
-        })
-            .then(async res => {
-                if (!res.ok) {
-                    throw new Error('Failed to update language');
-                }
-                // Success - refresh data first, then clear optimistic state
-                // The refetch returns a promise, so we wait for it
-                await onRefresh?.();
-                // Now clear optimistic state - real data should already be in place
-                setOptimisticLanguages(prev => {
-                    const next = { ...prev };
-                    delete next[key];
-                    return next;
-                });
-            })
-            .catch(err => {
-                // Revert optimistic update on error
-                setOptimisticLanguages(prev => {
-                    const next = { ...prev };
-                    delete next[key];
-                    return next;
-                });
-                toast.error(err.message || 'Failed to update language');
-            });
-    };
-
-    // Helper to get effective language (optimistic or real)
-    const getEffectiveLanguage = (subscriptionId: number, type: 'youtube' | 'podcast', realLanguage: SummaryLanguage): SummaryLanguage => {
-        const key = `${type}-${subscriptionId}`;
-        return optimisticLanguages[key] ?? realLanguage;
-    };
-
-    // --- Render ---
+    const {
+        // State
+        youtubeUrl, setYoutubeUrl,
+        podcastUrl, setPodcastUrl,
+        loading, error,
+        displayChannels, displayPodcasts,
+        canAddMore,
+        session,
+
+        // Modal State
+        showDeleteDialog, setShowDeleteDialog,
+        deleteTarget, setDeleteTarget,
+        loginModalOpen, setLoginModalOpen,
+
+        // Actions
+        handleYouTubeSubmit,
+        handlePodcastSubmit,
+        handleUnsubscribe,
+        confirmUnsubscribe,
+        copyRssLink,
+        handleStyleChange,
+        handleLanguageChange,
+        getEffectiveStyle,
+        getEffectiveLanguage,
+    } = useChannelManager(props);
 
     return (
         <>
@@ -533,6 +143,8 @@ export default function ChannelManager({
                                     description={podcast.description}
                                     lastUpdated={podcast.last_updated}
                                     externalUrl={podcast.site_url}
+                                    // Cast to any to access subscription props if they exist on the podcast object
+                                    // The hook already merged them
                                     summaryStyle={getEffectiveStyle((podcast as any).subscriptionId || podcast.id, 'podcast', (podcast as any).summaryStyle || 'DEFAULT')}
                                     summaryLanguage={getEffectiveLanguage((podcast as any).subscriptionId || podcast.id, 'podcast', (podcast as any).summaryLanguage || 'ZH_TW')}
                                     onUnsubscribe={() => handleUnsubscribe(podcast.id, 'podcast', podcast.title || 'this podcast')}
@@ -540,6 +152,8 @@ export default function ChannelManager({
                                     onStyleChange={session ? (style) => handleStyleChange((podcast as any).subscriptionId || podcast.id, 'podcast', style) : undefined}
                                     onLanguageChange={session ? (lang) => handleLanguageChange((podcast as any).subscriptionId || podcast.id, 'podcast', lang) : undefined}
                                     loading={loading}
+                                    isAuthenticated={!!session}
+                                    onLoginRequired={() => setLoginModalOpen(true)}
                                 />
                             ))}
 
