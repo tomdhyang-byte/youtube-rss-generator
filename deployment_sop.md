@@ -105,9 +105,9 @@ npm run worker
 
 **Option B: Run in background (Production mode)**
 ```bash
-nohup npm run worker > worker.log 2>&1 &
+nohup npm run worker > /dev/null 2>&1 &
 ```
-*(It will run in the background even if you close the terminal)*
+*(It will run in the background. We discard the standard output because logs are already saved to `cron_log.txt`)*
 
 ---
 
@@ -121,6 +121,6 @@ tail -f cron_log.txt
 ```
 You should see: `Using Python: .../.venv/bin/python3` and `Locked styles...`.
 
-(Note: `worker.log` will mostly be empty because the worker writes directly to `cron_log.txt`)
+(Note: Logs are written directly to `cron_log.txt` by the Python script)
 
 **Congratulations! Deployment Complete.**
