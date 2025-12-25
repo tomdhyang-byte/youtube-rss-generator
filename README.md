@@ -38,13 +38,16 @@ By subscribing to channels here instead of on YouTube:
 -   **Smart Transcription**: Uses specialized APIs to get accurate text from videos and audio.
 -   **Contextual Summaries**: Uses GPT-4o to generate structured summaries that capture the *insight*, not just the transcript.
 
-### 4. Summary Styles (NEW)
--   **Choose Your Style**: Select from 4 AI summary styles per subscription:
-    -   📝 **Default**: Balanced, comprehensive summaries
-    -   💰 **Investment**: Focus on financial insights and market implications
-    -   🔬 **Tech Deep Dive**: Technical details and implementation specifics
-    -   ⚡ **Quick Digest**: Ultra-concise bullet points
+### 4. Summary Styles
+-   **Choose Your Style**: Select from 2 AI summary styles per subscription:
+    -   📚 **Deep Notes** (DEFAULT): Complete structured summary for learning
+    -   ⚡ **Quick Read**: Concise highlights, grasp conclusions in 30 seconds
 -   **Forward-Looking**: Style changes only affect *future* content, preserving RSS feed stability.
+
+### 5. Internationalization (i18n)
+-   **Multi-language Support**: Full bilingual interface (English / 繁體中文)
+-   **Auto-detect**: Defaults to English, users can switch via language selector
+-   **Localized Content**: All UI elements, toasts, and dialogs are translated
 
 ---
 

@@ -5,7 +5,6 @@ import { useSession } from 'next-auth/react';
 import { UserMenu } from './UserMenu';
 import { cn } from '@/lib/utils';
 import { useQuota } from '@/components/providers/QuotaProvider';
-import LanguageSwitcher from '../ui/LanguageSwitcher';
 import { useTranslations } from 'next-intl';
 
 export function TopNav() {

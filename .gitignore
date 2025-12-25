@@ -44,12 +44,10 @@ next-env.d.ts
 # logs
 cron_log.txt
 execution_status.log
+dev_server.log
+dev_server_restart.log
 
 /app/generated/prisma
-
-# Worker logs
-cron_log.txt
-execution_status.log
 
 # Python
 __pycache__/

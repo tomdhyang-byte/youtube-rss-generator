@@ -3,6 +3,8 @@
  * Shared type definitions for YouTube and Podcast channel management.
  */
 
+import { SummaryStyle } from '@prisma/client';
+
 // YouTube Channel from Prisma model
 export interface YoutubeChannel {
     id: number;
@@ -11,6 +13,12 @@ export interface YoutubeChannel {
     description: string | null;
     rss_url: string | null;
     last_updated: string;
+}
+
+// YouTube Channel with subscription-level data
+export interface YoutubeChannelWithSubscription extends YoutubeChannel {
+    subscriptionId: number;
+    summaryStyle: SummaryStyle;
 }
 
 // Podcast Channel from Prisma model
@@ -24,10 +32,16 @@ export interface PodcastChannel {
     last_updated: Date;
 }
 
+// Podcast with subscription-level data
+export interface PodcastWithSubscription extends PodcastChannel {
+    subscriptionId: number;
+    summaryStyle: SummaryStyle;
+}
+
 // Props for the main ChannelManager component
 export interface ChannelManagerProps {
-    initialChannels: YoutubeChannel[];
-    initialPodcasts: PodcastChannel[];
+    initialChannels: YoutubeChannelWithSubscription[];
+    initialPodcasts: PodcastWithSubscription[];
     onRefresh?: (newChannel?: YoutubeChannel | PodcastChannel) => void;
 }
 

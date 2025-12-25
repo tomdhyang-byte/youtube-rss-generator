@@ -65,8 +65,8 @@
         "add_channel_btn": "新增頻道",
         "add_podcast_btn": "新增 Podcast",
         "quota_reached": "已達訂閱上限 - 請移除舊訂閱以新增",
-        "confirm_delete_title": "取消訂閱",
-        "confirm_delete_desc": "確定要取消訂閱 {name} 嗎？",
+        "confirm_delete_title": "確認取消訂閱",
+        "confirm_delete_desc": "您確定要取消訂閱「{name}」嗎？您可以隨時再次訂閱。",
         "cancel": "取消",
         "confirm": "確認取消",
         "copy_rss": "複製 RSS",
@@ -88,7 +88,9 @@
         "style_default_desc": "完整結構化摘要，適合學習",
         "style_quick": "省時速讀",
         "style_quick_desc": "精簡重點，30秒掌握結論",
-        "style_updated": "摘要風格已更新！新設定將從下一篇新內容開始生效。"
+        "style_updated": "摘要風格已更新！新設定將從下一篇新內容開始生效。",
+        "channel_added_success": "YouTube 頻道已成功新增！",
+        "podcast_added_success": "Podcast 已成功新增！"
     },
     "Detail": {
         "ai_summary": "AI 摘要",

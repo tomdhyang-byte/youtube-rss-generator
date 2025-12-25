@@ -179,7 +179,7 @@ export default function ChannelManager({
                 throw new Error(data.error || 'Failed to add channel');
             }
 
-            toast.success('YouTube channel added successfully!');
+            toast.success(t('channel_added_success'));
             // toast.info("Don't Panic. If the feed is empty, wait for 5 mins and retry.");
 
             const data = await res.json();
@@ -244,7 +244,7 @@ export default function ChannelManager({
                 throw new Error(data.error || 'Failed to add podcast');
             }
 
-            toast.success('Podcast added successfully!');
+            toast.success(t('podcast_added_success'));
             // toast.info("Don't Panic. If the feed is empty, wait. The AI backend is working on the backlog.");
 
             const data = await res.json();
@@ -386,10 +386,10 @@ export default function ChannelManager({
             <LoginModal isOpen={loginModalOpen} onClose={() => setLoginModalOpen(false)} />
             <ConfirmDialog
                 isOpen={showDeleteDialog}
-                title="Confirm Unsubscribe"
-                message={`Are you sure you want to unsubscribe from "${deleteTarget?.name}"? You can always subscribe again later.`}
-                confirmText="Unsubscribe"
-                cancelText="Cancel"
+                title={t('confirm_delete_title')}
+                message={t('confirm_delete_desc', { name: deleteTarget?.name || '' })}
+                confirmText={t('confirm')}
+                cancelText={t('cancel')}
                 variant="danger"
                 onConfirm={confirmUnsubscribe}
                 onCancel={() => {

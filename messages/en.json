@@ -65,8 +65,8 @@
         "add_channel_btn": "Add Channel",
         "add_podcast_btn": "Add Podcast",
         "quota_reached": "Quota reached - please unsubscribe from another to add",
-        "confirm_delete_title": "Unsubscribe",
-        "confirm_delete_desc": "Are you sure you want to unsubscribe from {name}?",
+        "confirm_delete_title": "Confirm Unsubscribe",
+        "confirm_delete_desc": "Are you sure you want to unsubscribe from \"{name}\"? You can always subscribe again later.",
         "cancel": "Cancel",
         "confirm": "Unsubscribe",
         "copy_rss": "Copy RSS",
@@ -88,7 +88,9 @@
         "style_default_desc": "Complete structured summary for learning",
         "style_quick": "Quick Read",
         "style_quick_desc": "Concise highlights, grasp conclusions in 30s",
-        "style_updated": "Style updated! New setting will apply to new content."
+        "style_updated": "Style updated! New setting will apply to new content.",
+        "channel_added_success": "YouTube channel added successfully!",
+        "podcast_added_success": "Podcast added successfully!"
     },
     "Detail": {
         "ai_summary": "AI Summary",

@@ -36,14 +36,16 @@ Use this guide to quickly find the file you need to change based on your intent.
 ### Frontend (UI & Logic)
 | I want to change... | Go to File |
 |---------------------|------------|
-| **Homepage** (Landing) | `app/page.tsx` |
-| **Feed Page** (Reader) | `app/feed/page.tsx` |
+| **Homepage** (Landing) | `app/[locale]/page.tsx` |
+| **Feed Page** (Reader) | `app/[locale]/feed/page.tsx` |
 | **Subscription Manager** | `components/subscription/ChannelManager/index.tsx` |
 | **Colors / Theme** | `app/globals.css` |
 | **Button Styles** | `components/ui/Button.tsx` |
 | **Card Design** | `components/subscription/ChannelManager/SubscriptionCard.tsx` |
 | **Summary Style Selector** | `components/ui/StyleSelector.tsx` |
 | **Article Modal** | `components/feed/ArticleModal.tsx` |
+| **i18n Translations** | `messages/en.json`, `messages/zh-TW.json` |
+| **i18n Routing** | `routing.ts`, `middleware.ts` |
 
 ### Backend (AI & Data)
 | I want to change... | Go to File |
@@ -81,11 +83,12 @@ Understanding how a video becomes a summary:
 ```
 youtube-rss-generator/
 ├── app/                          # Next.js App Router
+│   ├── [locale]/                 # i18n Locale Routes
+│   │   ├── page.tsx              # Landing Page
+│   │   ├── feed/page.tsx         # Main Reading Interface
+│   │   └── subscriptions/page.tsx # Subscription Management
 │   ├── api/                      # Backend API Endpoints
-│   ├── feed/page.tsx             # Main Reading Interface
-│   ├── subscriptions/page.tsx    # Subscription Management
-│   ├── globals.css               # Global Styles & Variables
-│   └── page.tsx                  # Landing Page
+│   └── globals.css               # Global Styles & Variables
 │
 ├── components/                   # React Components
 │   ├── ui/                       # Reusable UI Blocks
@@ -93,8 +96,10 @@ youtube-rss-generator/
 │   │   ├── IconButton.tsx        # Icon-only Button
 │   │   ├── Input.tsx             # Form Input
 │   │   ├── Badge.tsx             # Status/Type Label
+│   │   ├── StyleSelector.tsx     # Summary Style Picker
+│   │   ├── LanguageSwitcher.tsx  # i18n Language Picker
 │   │   ├── dialog.tsx            # Modal Base (Shadcn)
-│   │   └── ...
+│   │   └── tabs.tsx              # Tab Component
 │   │
 │   ├── layout/                   # Layout Components (Nav, Menu)
 │   ├── feed/                     # Feed Components
@@ -107,6 +112,10 @@ youtube-rss-generator/
 │           ├── SubscriptionCard.tsx  # The visual card for channels
 │           └── AddChannelForm.tsx    # The input form
 │
+├── messages/                     # i18n Translation Files
+│   ├── en.json                   # English translations
+│   └── zh-TW.json                # Traditional Chinese translations
+│
 ├── lib/                          # Utilities
 │   ├── prisma.ts                 # Database Client
 │   └── utils.ts                  # Helper Functions
@@ -117,15 +126,23 @@ youtube-rss-generator/
 │
 ├── backend/                      # Python Worker (The "Brain")
 │   ├── worker/                   # Core Logic Modules
-│   │   ├── config.py             # *NEW* Configuration & Constants
-│   │   ├── daemon.py             # *NEW* Real-time Polling Engine
+│   │   ├── config.py             # Configuration & Constants
+│   │   ├── daemon.py             # Real-time Polling Engine
 │   │   ├── summarize.py          # AI Prompts & Logic
 │   │   └── youtube.py            # YouTube API Handling
 │   ├── worker.py                 # (Legacy) Full Scan Routine
 │   ├── run_worker.sh             # Launch Script
 │   └── requirements.txt          # Python Dependencies
 │
-└── prisma/schema.prisma          # Database Schema Definition
+├── routing.ts                    # i18n Routing Config
+├── i18n.ts                       # i18n Request Config
+├── middleware.ts                 # Next.js Middleware (Auth + i18n)
+│
+├── public/                       # Static Assets
+│   └── logo.png                  # App Logo
+│
+└── prisma/                       # Database
+    └── schema.prisma             # Database Schema Definition
 ```
 
 ---
@@ -138,20 +155,20 @@ youtube-rss-generator/
 *   **Subscription**: Link between `User` and `Channel`, includes `summaryStyle` preference.
 *   **ProcessingQueue**: Tracks background jobs for real-time processing.
 
-### Summary Style Tables (Design B)
-*   **VideoSummary / EpisodeSummary**: Stores summaries per content, per style. One video can have up to 4 summaries (one per style).
+### Summary Style Tables
+*   **VideoSummary / EpisodeSummary**: Stores summaries per content, per style. One video can have up to 2 summaries (DEFAULT, QUICK_READ).
 *   **UserVideoStyle / UserEpisodeStyle**: **Locks** the style for each user at processing time. Ensures RSS feed stability - style changes only affect future content.
 *   **User.feedToken**: Unique token for personalized RSS feed (`/feed/user/[token]`).
 
-### Design B: "Locked Styles"
+### Locked Styles Design
 ```mermaid
 sequenceDiagram
-    User->>Subscription: Set style = INVESTMENT
+    User->>Subscription: Set style = QUICK_READ
     Worker->>Video: New video detected
-    Worker->>VideoSummary: Generate INVESTMENT summary
-    Worker->>UserVideoStyle: Lock (userId, videoId, INVESTMENT)
-    User->>Subscription: Change style to TECH_DEEP_DIVE
-    Note over UserVideoStyle: Old videos still show INVESTMENT
+    Worker->>VideoSummary: Generate QUICK_READ summary
+    Worker->>UserVideoStyle: Lock (userId, videoId, QUICK_READ)
+    User->>Subscription: Change style to DEFAULT
+    Note over UserVideoStyle: Old videos still show QUICK_READ
     Worker->>Video: Next new video
-    Worker->>VideoSummary: Generate TECH_DEEP_DIVE summary
+    Worker->>VideoSummary: Generate DEFAULT summary
 ```
