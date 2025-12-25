@@ -112,11 +112,15 @@ nohup npm run worker > worker.log 2>&1 &
 ---
 
 ## ✅ Verification
-Check if everything is running smoothly:
+Check if everything is running smoothly.
+
+Since the worker script saves its own logs, you should check `cron_log.txt`:
 
 ```bash
-tail -f worker.log
+tail -f cron_log.txt
 ```
-You should see: `Use virtual environment: .../.venv/bin/python3` and `Locked user styles...`.
+You should see: `Using Python: .../.venv/bin/python3` and `Locked styles...`.
+
+(Note: `worker.log` will mostly be empty because the worker writes directly to `cron_log.txt`)
 
 **Congratulations! Deployment Complete.**
