@@ -28,7 +28,7 @@ export default function SubscriptionsPage() {
             <main className="max-w-3xl mx-auto px-4 py-8">
 
                 {loading ? (
-                    <div className="flex justify-center py-12">
+                    <div className="flex items-center justify-center min-h-[50vh]">
                         <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
                     </div>
                 ) : subscriptions ? (

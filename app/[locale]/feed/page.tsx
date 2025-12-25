@@ -90,7 +90,7 @@ export default function FeedPage() {
     const isProcessing = isEmpty && hasSubscriptions && filter === 'all';
     const isFilteredEmpty = isEmpty && !isProcessing && filter !== 'all';
 
-    const showFilters = !isNoSubs && !isProcessing;
+    const showFilters = !loading && !isNoSubs && !isProcessing;
 
     return (
         <div className="min-h-screen bg-background">
@@ -100,7 +100,6 @@ export default function FeedPage() {
                 {/* Header with filters - always show if not completely empty */}
                 {showFilters && (
                     <div className="flex items-center justify-between mb-6">
-                        <h1 className="text-2xl font-bold">{t('title')}</h1>
                         <div className="flex gap-1 bg-muted rounded-lg p-1">
                             {(['all', 'youtube', 'podcast'] as FilterType[]).map((f) => (
                                 <Button
@@ -136,7 +135,7 @@ export default function FeedPage() {
                         onShowAll={() => handleFilterChange('all')}
                     />
                 ) : loading ? (
-                    <div className="flex justify-center py-12">
+                    <div className="flex items-center justify-center min-h-[50vh]">
                         <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
                     </div>
                 ) : (
