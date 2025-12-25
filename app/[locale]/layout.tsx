@@ -17,7 +17,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "YouTube RSS Generator",
+  title: "TubeSummary",
   description: "Generate RSS feeds for YouTube channels and podcasts",
 };
 

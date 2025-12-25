@@ -7,9 +7,9 @@ WHEN UPDATING THIS FILE:
 3. Tech Stack: Keep strict version numbers (e.g. Next.js 16) to help AI generate compatible code.
 -->
 
-# TubeReader - AI-Powered YouTube & Podcast Reader
+# TubeSummary - AI-Powered YouTube & Podcast Reader
 
-> **Concept**: Stop watching 20-minute videos just to find one insight. TubeReader turns YouTube channels and Podcasts into a readable, high-signal news feed using AI.
+> **Concept**: Stop watching 20-minute videos just to find one insight. TubeSummary turns YouTube channels and Podcasts into a readable, high-signal news feed using AI.
 
 ## 🎯 Project Goal
 
@@ -45,8 +45,9 @@ By subscribing to channels here instead of on YouTube:
 -   **Forward-Looking**: Style changes only affect *future* content, preserving RSS feed stability.
 
 ### 5. Internationalization (i18n)
--   **Multi-language Support**: Full bilingual interface (English / 繁體中文)
--   **Auto-detect**: Defaults to English, users can switch via language selector
+-   **Multi-language Interface**: Full bilingual interface (English / 繁體中文)
+-   **Multi-language Summaries**: Choose your preferred summary language per subscription (e.g. read English tech news in Chinese).
+-   **Auto-detect**: Defaults to your interface language, fully customizable.
 -   **Localized Content**: All UI elements, toasts, and dialogs are translated
 
 ---

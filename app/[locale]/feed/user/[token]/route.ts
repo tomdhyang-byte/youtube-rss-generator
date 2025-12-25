@@ -94,12 +94,12 @@ export async function GET(
         .slice(0, 50);
 
     // 5. Generate RSS XML
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://tubereader.app';
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://tubesummary.app';
 
     const rssXml = `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
 <channel>
-    <title>TubeReader - ${user.name || 'Your'} Feed</title>
+    <title>TubeSummary - ${user.name || 'Your'} Feed</title>
     <link>${baseUrl}</link>
     <description>AI-powered summaries of your subscribed YouTube channels and podcasts.</description>
     <language>zh-TW</language>

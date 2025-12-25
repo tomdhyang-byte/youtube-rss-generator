@@ -1,6 +1,6 @@
 {
     "Home": {
-        "title": "TubeReader",
+        "title": "TubeSummary",
         "subtitle": "你的 AI 閱讀助手",
         "description": "將 YouTube 影片轉換成摘要總結，直接在本網站上閱讀，或者取得 RSS，用你習慣的 RSS Reader 閱讀。",
         "get_started": "免費試用",
@@ -18,7 +18,7 @@
                 "desc": "支援 Readwise, Feedly 或任何 RSS 閱讀器"
             }
         },
-        "footer": "© 2025 TubeReader. All rights reserved."
+        "footer": "© 2025 TubeSummary. All rights reserved."
     },
     "Common": {
         "loading": "載入中...",
@@ -89,6 +89,11 @@
         "style_quick": "省時速讀",
         "style_quick_desc": "精簡重點，30秒掌握結論",
         "style_updated": "摘要風格已更新！新設定將從下一篇新內容開始生效。",
+        "language_en": "English",
+        "language_en_desc": "摘要將以英文生成",
+        "language_zh": "繁體中文",
+        "language_zh_desc": "摘要將以繁體中文生成",
+        "language_updated": "摘要語言已更新！新設定將從下一篇新內容開始生效。",
         "channel_added_success": "YouTube 頻道已成功新增！",
         "podcast_added_success": "Podcast 已成功新增！"
     },

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getSession, isAdmin } from '@/lib/auth';
+import { localeToSummaryLanguage } from '@/lib/types/summary-language';
 
 export async function POST(request: Request) {
     console.log('[API] POST /api/channels called');
@@ -16,8 +17,8 @@ export async function POST(request: Request) {
 
     try {
         const body = await request.json();
-        const { url, metadata } = body;
-        console.log(`[API] Received URL: ${url}`);
+        const { url, metadata, locale } = body;
+        console.log(`[API] Received URL: ${url}, locale: ${locale || 'default'}`);
 
         if (metadata) {
             console.log(`[API] Using cached metadata (skip YouTube fetch)`);
@@ -188,11 +189,15 @@ export async function POST(request: Request) {
             },
         });
 
-        // 8. Create Subscription
+        // 8. Create Subscription with default language based on locale
+        const defaultLanguage = localeToSummaryLanguage(locale || 'en');
+        console.log(`[API] Creating subscription with language: ${defaultLanguage}`);
+
         await prisma.youtubeSubscription.create({
             data: {
                 userId,
                 channelId: channel.id,
+                summaryLanguage: defaultLanguage,
             }
         });
 

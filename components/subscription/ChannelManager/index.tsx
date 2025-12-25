@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useSession } from 'next-auth/react';
+import { useLocale } from 'next-intl';
 import { toast } from 'sonner';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
@@ -15,6 +16,7 @@ import { AddChannelForm } from './AddChannelForm';
 import { SubscriptionCard } from './SubscriptionCard';
 import { ChannelManagerProps, YoutubeChannel } from './types';
 import { SummaryStyle } from '@/components/ui/StyleSelector';
+import { SummaryLanguage } from '@/components/ui/LanguageSelector';
 
 /**
  * ChannelManager Component
@@ -25,6 +27,7 @@ import { SummaryStyle } from '@/components/ui/StyleSelector';
  * - Guest mode with localStorage persistence
  * - Optimistic UI updates
  * - Copy RSS links
+ * - Summary style and language selection
  */
 import { useTranslations } from 'next-intl';
 
@@ -37,6 +40,7 @@ export default function ChannelManager({
 }: ChannelManagerProps) {
     const { data: session } = useSession();
     const { quota, refreshQuota } = useQuota();
+    const locale = useLocale();
     const t = useTranslations('Subscriptions');
     const tFeed = useTranslations('Feed');
 
@@ -68,6 +72,8 @@ export default function ChannelManager({
 
     // Optimistic UI state for style changes (key: `${type}-${subscriptionId}`, value: SummaryStyle)
     const [optimisticStyles, setOptimisticStyles] = useState<Record<string, SummaryStyle>>({});
+    // Optimistic UI state for language changes (key: `${type}-${subscriptionId}`, value: SummaryLanguage)
+    const [optimisticLanguages, setOptimisticLanguages] = useState<Record<string, SummaryLanguage>>({});
 
 
     // Determine which channels to display
@@ -171,7 +177,7 @@ export default function ChannelManager({
             const res = await fetch('/api/channels', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ url: urlToSubmit }),
+                body: JSON.stringify({ url: urlToSubmit, locale }),
             });
 
             if (!res.ok) {
@@ -236,7 +242,7 @@ export default function ChannelManager({
             const res = await fetch('/api/podcasts', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ url: urlToSubmit }),
+                body: JSON.stringify({ url: urlToSubmit, locale }),
             });
 
             if (!res.ok) {
@@ -350,17 +356,18 @@ export default function ChannelManager({
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ subscriptionId, type, newStyle }),
         })
-            .then(res => {
+            .then(async res => {
                 if (!res.ok) {
                     throw new Error('Failed to update style');
                 }
-                // Success - clear optimistic state (real data will come from next refresh)
+                // Success - refresh data first, then clear optimistic state
+                await onRefresh?.();
+                // Now clear optimistic state - real data should already be in place
                 setOptimisticStyles(prev => {
                     const next = { ...prev };
                     delete next[key];
                     return next;
                 });
-                onRefresh?.();
             })
             .catch(err => {
                 // Revert optimistic update on error
@@ -377,6 +384,53 @@ export default function ChannelManager({
     const getEffectiveStyle = (subscriptionId: number, type: 'youtube' | 'podcast', realStyle: SummaryStyle): SummaryStyle => {
         const key = `${type}-${subscriptionId}`;
         return optimisticStyles[key] ?? realStyle;
+    };
+
+    // Handler for language change
+    const handleLanguageChange = (subscriptionId: number, type: 'youtube' | 'podcast', newLanguage: SummaryLanguage) => {
+        const key = `${type}-${subscriptionId}`;
+
+        // 1. Optimistic update - immediately update UI
+        setOptimisticLanguages(prev => ({ ...prev, [key]: newLanguage }));
+
+        // 2. Show toast immediately
+        toast.success(t('language_updated'));
+
+        // 3. Fire API call in background (no await)
+        fetch('/api/subscriptions/style', {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ subscriptionId, type, newLanguage }),
+        })
+            .then(async res => {
+                if (!res.ok) {
+                    throw new Error('Failed to update language');
+                }
+                // Success - refresh data first, then clear optimistic state
+                // The refetch returns a promise, so we wait for it
+                await onRefresh?.();
+                // Now clear optimistic state - real data should already be in place
+                setOptimisticLanguages(prev => {
+                    const next = { ...prev };
+                    delete next[key];
+                    return next;
+                });
+            })
+            .catch(err => {
+                // Revert optimistic update on error
+                setOptimisticLanguages(prev => {
+                    const next = { ...prev };
+                    delete next[key];
+                    return next;
+                });
+                toast.error(err.message || 'Failed to update language');
+            });
+    };
+
+    // Helper to get effective language (optimistic or real)
+    const getEffectiveLanguage = (subscriptionId: number, type: 'youtube' | 'podcast', realLanguage: SummaryLanguage): SummaryLanguage => {
+        const key = `${type}-${subscriptionId}`;
+        return optimisticLanguages[key] ?? realLanguage;
     };
 
     // --- Render ---
@@ -438,9 +492,11 @@ export default function ChannelManager({
                                     lastUpdated={channel.last_updated}
                                     externalUrl={`https://youtube.com/channel/${channel.youtube_id}`}
                                     summaryStyle={getEffectiveStyle((channel as any).subscriptionId || channel.id, 'youtube', (channel as any).summaryStyle || 'DEFAULT')}
+                                    summaryLanguage={getEffectiveLanguage((channel as any).subscriptionId || channel.id, 'youtube', (channel as any).summaryLanguage || 'ZH_TW')}
                                     onUnsubscribe={() => handleUnsubscribe(channel.id, 'youtube', channel.title)}
                                     onCopyRss={() => copyRssLink(channel.id, 'youtube')}
                                     onStyleChange={session ? (style) => handleStyleChange((channel as any).subscriptionId || channel.id, 'youtube', style) : undefined}
+                                    onLanguageChange={session ? (lang) => handleLanguageChange((channel as any).subscriptionId || channel.id, 'youtube', lang) : undefined}
                                     onLoginRequired={() => setLoginModalOpen(true)}
                                     isAuthenticated={!!session}
                                     loading={loading}
@@ -478,9 +534,11 @@ export default function ChannelManager({
                                     lastUpdated={podcast.last_updated}
                                     externalUrl={podcast.site_url}
                                     summaryStyle={getEffectiveStyle((podcast as any).subscriptionId || podcast.id, 'podcast', (podcast as any).summaryStyle || 'DEFAULT')}
+                                    summaryLanguage={getEffectiveLanguage((podcast as any).subscriptionId || podcast.id, 'podcast', (podcast as any).summaryLanguage || 'ZH_TW')}
                                     onUnsubscribe={() => handleUnsubscribe(podcast.id, 'podcast', podcast.title || 'this podcast')}
                                     onCopyRss={() => copyRssLink(podcast.id, 'podcast')}
                                     onStyleChange={session ? (style) => handleStyleChange((podcast as any).subscriptionId || podcast.id, 'podcast', style) : undefined}
+                                    onLanguageChange={session ? (lang) => handleLanguageChange((podcast as any).subscriptionId || podcast.id, 'podcast', lang) : undefined}
                                     loading={loading}
                                 />
                             ))}

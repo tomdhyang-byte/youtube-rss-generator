@@ -77,6 +77,11 @@ enum SummaryStyle {
   QUICK_READ
 }
 
+enum SummaryLanguage {
+  EN
+  ZH_TW
+}
+
 // ============================================
 // YouTube Models
 // ============================================
@@ -112,21 +117,23 @@ model VideoSummary {
   id        Int          @id @default(autoincrement())
   videoId   Int          @map("video_id")
   video     YoutubeVideo @relation(fields: [videoId], references: [id], onDelete: Cascade)
-  style     SummaryStyle @default(DEFAULT)
-  content   String       @db.Text
-  createdAt DateTime     @default(now()) @map("created_at")
+  style     SummaryStyle    @default(DEFAULT)
+  language  SummaryLanguage @default(ZH_TW)
+  content   String          @db.Text
+  createdAt DateTime        @default(now()) @map("created_at")
 
-  @@unique([videoId, style])
+  @@unique([videoId, style, language])
   @@map("video_summaries")
 }
 
 model UserVideoStyle {
-  id      Int          @id @default(autoincrement())
-  userId  String       @map("user_id")
-  videoId Int          @map("video_id")
-  style   SummaryStyle
-  user    User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  video   YoutubeVideo @relation(fields: [videoId], references: [id], onDelete: Cascade)
+  id       Int             @id @default(autoincrement())
+  userId   String          @map("user_id")
+  videoId  Int             @map("video_id")
+  style    SummaryStyle
+  language SummaryLanguage @default(ZH_TW)
+  user     User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  video    YoutubeVideo    @relation(fields: [videoId], references: [id], onDelete: Cascade)
 
   @@unique([userId, videoId])
   @@index([userId])
@@ -134,13 +141,14 @@ model UserVideoStyle {
 }
 
 model YoutubeSubscription {
-  id           Int            @id @default(autoincrement())
-  userId       String         @map("user_id")
-  channelId    Int            @map("channel_id")
-  summaryStyle SummaryStyle   @default(DEFAULT) @map("summary_style")
-  createdAt    DateTime       @default(now()) @map("created_at")
-  user         User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  channel      YoutubeChannel @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  id              Int             @id @default(autoincrement())
+  userId          String          @map("user_id")
+  channelId       Int             @map("channel_id")
+  summaryStyle    SummaryStyle    @default(DEFAULT) @map("summary_style")
+  summaryLanguage SummaryLanguage @default(ZH_TW) @map("summary_language")
+  createdAt       DateTime        @default(now()) @map("created_at")
+  user            User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  channel         YoutubeChannel  @relation(fields: [channelId], references: [id], onDelete: Cascade)
 
   @@unique([userId, channelId])
   @@index([channelId, summaryStyle])
@@ -185,21 +193,23 @@ model EpisodeSummary {
   id        Int            @id @default(autoincrement())
   episodeId Int            @map("episode_id")
   episode   PodcastEpisode @relation(fields: [episodeId], references: [id], onDelete: Cascade)
-  style     SummaryStyle   @default(DEFAULT)
-  content   String         @db.Text
-  createdAt DateTime       @default(now()) @map("created_at")
+  style     SummaryStyle    @default(DEFAULT)
+  language  SummaryLanguage @default(ZH_TW)
+  content   String          @db.Text
+  createdAt DateTime        @default(now()) @map("created_at")
 
-  @@unique([episodeId, style])
+  @@unique([episodeId, style, language])
   @@map("episode_summaries")
 }
 
 model UserEpisodeStyle {
-  id        Int            @id @default(autoincrement())
-  userId    String         @map("user_id")
-  episodeId Int            @map("episode_id")
+  id        Int             @id @default(autoincrement())
+  userId    String          @map("user_id")
+  episodeId Int             @map("episode_id")
   style     SummaryStyle
-  user      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  episode   PodcastEpisode @relation(fields: [episodeId], references: [id], onDelete: Cascade)
+  language  SummaryLanguage @default(ZH_TW)
+  user      User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  episode   PodcastEpisode  @relation(fields: [episodeId], references: [id], onDelete: Cascade)
 
   @@unique([userId, episodeId])
   @@index([userId])
@@ -207,13 +217,14 @@ model UserEpisodeStyle {
 }
 
 model PodcastSubscription {
-  id           Int            @id @default(autoincrement())
-  userId       String         @map("user_id")
-  podcastId    Int            @map("podcast_id")
-  summaryStyle SummaryStyle   @default(DEFAULT) @map("summary_style")
-  createdAt    DateTime       @default(now()) @map("created_at")
-  user         User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  podcast      PodcastChannel @relation(fields: [podcastId], references: [id], onDelete: Cascade)
+  id              Int             @id @default(autoincrement())
+  userId          String          @map("user_id")
+  podcastId       Int             @map("podcast_id")
+  summaryStyle    SummaryStyle    @default(DEFAULT) @map("summary_style")
+  summaryLanguage SummaryLanguage @default(ZH_TW) @map("summary_language")
+  createdAt       DateTime        @default(now()) @map("created_at")
+  user            User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  podcast         PodcastChannel  @relation(fields: [podcastId], references: [id], onDelete: Cascade)
 
   @@unique([userId, podcastId])
   @@index([podcastId, summaryStyle])

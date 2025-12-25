@@ -2,6 +2,7 @@ import React from 'react';
 import { Rss, ExternalLink, Trash2 } from 'lucide-react';
 import { IconButton } from '@/components/ui/IconButton';
 import { StyleSelector, SummaryStyle } from '@/components/ui/StyleSelector';
+import { LanguageSelector, SummaryLanguage } from '@/components/ui/LanguageSelector';
 import { cn } from '@/lib/utils';
 import { useFormatter, useTranslations } from 'next-intl';
 
@@ -20,12 +21,16 @@ export interface SubscriptionCardProps {
     externalUrl?: string | null;
     /** Current summary style */
     summaryStyle?: SummaryStyle;
+    /** Current summary language */
+    summaryLanguage?: SummaryLanguage;
     /** Called when unsubscribe button is clicked */
     onUnsubscribe: () => void;
     /** Called when RSS copy button is clicked */
     onCopyRss: () => void;
     /** Called when summary style is changed */
     onStyleChange?: (newStyle: SummaryStyle) => void;
+    /** Called when summary language is changed */
+    onLanguageChange?: (newLanguage: SummaryLanguage) => void;
     /** Optional: Called when unauthenticated user tries to unsubscribe */
     onLoginRequired?: () => void;
     /** Whether user is authenticated (only needed if onLoginRequired is provided) */
@@ -49,7 +54,7 @@ function decodeHtml(html: string): string {
  * SubscriptionCard Component
  * 
  * A unified card component for displaying YouTube channels and Podcasts.
- * Now includes a style selector for choosing summary format.
+ * Includes selectors for summary style and language.
  */
 export function SubscriptionCard({
     type,
@@ -59,9 +64,11 @@ export function SubscriptionCard({
     lastUpdated,
     externalUrl,
     summaryStyle = 'DEFAULT',
+    summaryLanguage = 'ZH_TW',
     onUnsubscribe,
     onCopyRss,
     onStyleChange,
+    onLanguageChange,
     onLoginRequired,
     isAuthenticated = true,
     loading = false,
@@ -132,20 +139,30 @@ export function SubscriptionCard({
                 </div>
             </div>
 
-            {/* Footer Row: Date + Style Selector */}
+            {/* Footer Row: Date + Settings */}
             <div className="flex items-center justify-between border-t border-gray-100 dark:border-gray-700 pt-3">
                 <span className="text-xs text-gray-400 dark:text-gray-500">
                     {t('updated')}: {formattedDate}
                 </span>
 
-                {onStyleChange && (
-                    <StyleSelector
-                        value={summaryStyle}
-                        onChange={onStyleChange}
-                        disabled={loading}
-                    />
-                )}
+                <div className="flex items-center gap-2">
+                    {onLanguageChange && (
+                        <LanguageSelector
+                            value={summaryLanguage}
+                            onChange={onLanguageChange}
+                            disabled={loading}
+                        />
+                    )}
+                    {onStyleChange && (
+                        <StyleSelector
+                            value={summaryStyle}
+                            onChange={onStyleChange}
+                            disabled={loading}
+                        />
+                    )}
+                </div>
             </div>
         </div>
     );
 }
+

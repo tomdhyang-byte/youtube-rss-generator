@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getSession, isAdmin } from '@/lib/auth';
+import { localeToSummaryLanguage } from '@/lib/types/summary-language';
 import Parser from 'rss-parser';
 
 const parser = new Parser();
@@ -27,7 +28,8 @@ export async function POST(request: Request) {
     const userEmail = session.user.email;
 
     try {
-        const { url } = await request.json();
+        const { url, locale } = await request.json();
+        console.log(`[API] Received URL: ${url}, locale: ${locale || 'default'}`);
 
         if (!url) {
             return NextResponse.json({ error: 'URL is required' }, { status: 400 });
@@ -136,11 +138,15 @@ export async function POST(request: Request) {
             },
         });
 
-        // 7. Create Subscription
+        // 7. Create Subscription with default language based on locale
+        const defaultLanguage = localeToSummaryLanguage(locale || 'en');
+        console.log(`[API] Creating subscription with language: ${defaultLanguage}`);
+
         await prisma.podcastSubscription.create({
             data: {
                 userId,
                 podcastId: podcast.id,
+                summaryLanguage: defaultLanguage,
             }
         });
 

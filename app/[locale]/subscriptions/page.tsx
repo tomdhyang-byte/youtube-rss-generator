@@ -38,6 +38,7 @@ export default function SubscriptionsPage() {
                             // Include subscription-level data
                             subscriptionId: sub.id,
                             summaryStyle: sub.summaryStyle,
+                            summaryLanguage: sub.summaryLanguage,
                         })) || []}
                         initialPodcasts={subscriptions.podcasts?.map(sub => ({
                             ...sub.podcast,
@@ -45,9 +46,10 @@ export default function SubscriptionsPage() {
                             // Include subscription-level data
                             subscriptionId: sub.id,
                             summaryStyle: sub.summaryStyle,
+                            summaryLanguage: sub.summaryLanguage,
                         })) || []}
-                        onRefresh={() => {
-                            refetch();
+                        onRefresh={async () => {
+                            await refetch();
                             queryClient.resetQueries({ queryKey: ['feed'] });
                         }}
                     />

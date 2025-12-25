@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 
-const STORAGE_KEY = 'tubereader_read_items';
+const STORAGE_KEY = 'tubesummary_read_items';
 
 /**
  * Hook to manage read/unread status using localStorage

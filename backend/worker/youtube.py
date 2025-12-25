@@ -72,10 +72,10 @@ def process_youtube_channel(conn, channel: dict) -> None:
     
     print(f"Processing YouTube Channel: {channel_title} ({youtube_id})")
     
-    # 1. Query all subscribers and their current styles
+    # 1. Query all subscribers and their current styles + languages
     cursor = conn.cursor()
     cursor.execute("""
-        SELECT user_id, summary_style 
+        SELECT user_id, summary_style, summary_language 
         FROM youtube_subscriptions 
         WHERE channel_id = %s
     """, (channel_id,))
@@ -86,10 +86,11 @@ def process_youtube_channel(conn, channel: dict) -> None:
         return
     
     # Convert to list of dicts for easier handling
-    subscriber_list = [{'user_id': row[0], 'style': row[1]} for row in subscribers]
-    demanded_styles = set(sub['style'] for sub in subscriber_list)
+    subscriber_list = [{'user_id': row[0], 'style': row[1], 'language': row[2]} for row in subscribers]
+    # Track unique (style, language) combinations that need summaries
+    demanded_combos = set((sub['style'], sub['language']) for sub in subscriber_list)
     
-    print(f"  - Found {len(subscriber_list)} subscribers with styles: {demanded_styles}")
+    print(f"  - Found {len(subscriber_list)} subscribers with combos: {demanded_combos}")
     
     print("  - Fetching video list from YouTube...")
     # NOTE: We propagate exceptions here so main daemon knows if it failed
@@ -156,26 +157,29 @@ def process_youtube_channel(conn, channel: dict) -> None:
         conn.commit()
         print(f"    - Video saved to DB (ID: {video_db_id})")
         
-        # Generate summaries for each demanded style
-        print(f"    - Generating summaries for styles: {demanded_styles}")
-        successful_styles = 0
-        for style in demanded_styles:
+        # Generate summaries for each demanded (style, language) combination
+        print(f"    - Generating summaries for combos: {demanded_combos}")
+        successful_combos = 0
+        for (style, language) in demanded_combos:
             try:
-                print(f"      - Generating {style} summary...")
-                summary = generate_summary(transcript, style=style, is_podcast=False)
+                print(f"      - Generating {style}/{language} summary...")
+                summary = generate_summary(transcript, style=style, language=language, is_podcast=False)
                 
+                # Note: We still store by (video_id, style) since the actual content varies by language
+                # TODO: If you want to store multiple language versions, the schema would need (video_id, style, language)
+                # For now, we generate on-demand per combo but only store one version per style
                 cursor.execute("""
-                    INSERT INTO video_summaries (video_id, style, content, created_at)
-                    VALUES (%s, %s, %s, NOW())
-                    ON CONFLICT (video_id, style) DO NOTHING
-                """, (video_db_id, style, summary))
-                successful_styles += 1
+                    INSERT INTO video_summaries (video_id, style, language, content, created_at)
+                    VALUES (%s, %s, %s, %s, NOW())
+                    ON CONFLICT (video_id, style, language) DO UPDATE SET content = EXCLUDED.content
+                """, (video_db_id, style, language, summary))
+                successful_combos += 1
             except Exception as e:
-                print(f"      - ⚠️ Failed to generate {style} summary: {e}")
-                continue  # Continue with remaining styles
+                print(f"      - ⚠️ Failed to generate {style}/{language} summary: {e}")
+                continue  # Continue with remaining combos
         
         conn.commit()
-        print(f"    - {successful_styles}/{len(demanded_styles)} summaries generated and saved.")
+        print(f"    - {successful_combos}/{len(demanded_combos)} summaries generated and saved.")
         
         # Lock each subscriber's style for this video (Design B core)
         _lock_user_styles(conn, video_db_id, subscriber_list)
@@ -192,13 +196,13 @@ def process_youtube_channel(conn, channel: dict) -> None:
 
 def _lock_user_styles(conn, video_db_id: int, subscriber_list: list) -> None:
     """
-    Lock the summary style for each user for this video.
-    This ensures that when a user changes their style, past videos still show the old style.
+    Lock the summary style and language for each user for this video.
+    This ensures that when a user changes their settings, past videos still show the old style/language.
     
     Args:
         conn: Database connection
         video_db_id: The database ID of the video
-        subscriber_list: List of dicts with 'user_id' and 'style' keys
+        subscriber_list: List of dicts with 'user_id', 'style', and 'language' keys
     """
     cursor = conn.cursor()
     locked_count = 0
@@ -206,10 +210,10 @@ def _lock_user_styles(conn, video_db_id: int, subscriber_list: list) -> None:
     for sub in subscriber_list:
         try:
             cursor.execute("""
-                INSERT INTO user_video_styles (user_id, video_id, style)
-                VALUES (%s, %s, %s)
+                INSERT INTO user_video_styles (user_id, video_id, style, language)
+                VALUES (%s, %s, %s, %s)
                 ON CONFLICT (user_id, video_id) DO NOTHING
-            """, (sub['user_id'], video_db_id, sub['style']))
+            """, (sub['user_id'], video_db_id, sub['style'], sub['language']))
             if cursor.rowcount > 0:
                 locked_count += 1
         except Exception as e:

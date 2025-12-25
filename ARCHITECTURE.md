@@ -97,7 +97,7 @@ youtube-rss-generator/
 │   │   ├── Input.tsx             # Form Input
 │   │   ├── Badge.tsx             # Status/Type Label
 │   │   ├── StyleSelector.tsx     # Summary Style Picker
-│   │   ├── LanguageSwitcher.tsx  # i18n Language Picker
+│   │   ├── LanguageSelector.tsx  # Summary Language Picker (NEW)
 │   │   ├── dialog.tsx            # Modal Base (Shadcn)
 │   │   └── tabs.tsx              # Tab Component
 │   │
@@ -156,8 +156,8 @@ youtube-rss-generator/
 *   **ProcessingQueue**: Tracks background jobs for real-time processing.
 
 ### Summary Style Tables
-*   **VideoSummary / EpisodeSummary**: Stores summaries per content, per style. One video can have up to 2 summaries (DEFAULT, QUICK_READ).
-*   **UserVideoStyle / UserEpisodeStyle**: **Locks** the style for each user at processing time. Ensures RSS feed stability - style changes only affect future content.
+*   **VideoSummary / EpisodeSummary**: Stores summaries per content, per style, **per language**. One video can have multiple summaries (e.g. DEFAULT-EN, DEFAULT-ZH, QUICK-EN...).
+*   **UserVideoStyle / UserEpisodeStyle**: **Locks** the style AND language for each user at processing time. Ensures RSS feed stability - style/language changes only affect future content.
 *   **User.feedToken**: Unique token for personalized RSS feed (`/feed/user/[token]`).
 
 ### Locked Styles Design
@@ -165,8 +165,8 @@ youtube-rss-generator/
 sequenceDiagram
     User->>Subscription: Set style = QUICK_READ
     Worker->>Video: New video detected
-    Worker->>VideoSummary: Generate QUICK_READ summary
-    Worker->>UserVideoStyle: Lock (userId, videoId, QUICK_READ)
+    Worker->>VideoSummary: Generate QUICK_READ summary (e.g. in EN)
+    Worker->>UserVideoStyle: Lock (userId, videoId, QUICK_READ, EN)
     User->>Subscription: Change style to DEFAULT
     Note over UserVideoStyle: Old videos still show QUICK_READ
     Worker->>Video: Next new video

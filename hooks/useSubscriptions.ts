@@ -1,12 +1,13 @@
 import { useQuery } from '@tanstack/react-query';
 import { Channel, PodcastChannel } from '@/lib/types';
-import { SummaryStyle } from '@prisma/client';
+import { SummaryStyle, SummaryLanguage } from '@prisma/client';
 
 interface YoutubeSubscription {
     id: number;
     userId: string;
     channelId: number;
     summaryStyle: SummaryStyle;
+    summaryLanguage: SummaryLanguage;
     createdAt: string;
     channel: Channel;
 }
@@ -16,6 +17,7 @@ interface PodcastSubscription {
     userId: string;
     podcastId: number;
     summaryStyle: SummaryStyle;
+    summaryLanguage: SummaryLanguage;
     createdAt: string;
     podcast: PodcastChannel;
 }

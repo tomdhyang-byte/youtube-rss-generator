@@ -2,12 +2,19 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getSession } from '@/lib/auth';
 import { SummaryStyle, VALID_STYLES, isValidStyle } from '@/lib/types/summary-style';
+import { SummaryLanguage, VALID_LANGUAGES, isValidLanguage } from '@/lib/types/summary-language';
 
 /**
  * PATCH /api/subscriptions/style
  * 
- * Update the summary style for a subscription.
+ * Update the summary style and/or language for a subscription.
  * Changes only affect future videos/episodes.
+ * 
+ * Request body:
+ * - subscriptionId: number (required)
+ * - type: 'youtube' | 'podcast' (required)
+ * - newStyle: SummaryStyle (optional)
+ * - newLanguage: SummaryLanguage (optional)
  */
 export async function PATCH(request: Request) {
     // 1. Authentication Check
@@ -20,12 +27,19 @@ export async function PATCH(request: Request) {
 
     try {
         const body = await request.json();
-        const { subscriptionId, type, newStyle } = body;
+        const { subscriptionId, type, newStyle, newLanguage } = body;
 
         // 2. Validate input
-        if (!subscriptionId || !type || !newStyle) {
+        if (!subscriptionId || !type) {
             return NextResponse.json(
-                { error: 'Missing required fields: subscriptionId, type, newStyle' },
+                { error: 'Missing required fields: subscriptionId, type' },
+                { status: 400 }
+            );
+        }
+
+        if (!newStyle && !newLanguage) {
+            return NextResponse.json(
+                { error: 'At least one of newStyle or newLanguage must be provided' },
                 { status: 400 }
             );
         }
@@ -37,14 +51,26 @@ export async function PATCH(request: Request) {
             );
         }
 
-        if (!isValidStyle(newStyle)) {
+        if (newStyle && !isValidStyle(newStyle)) {
             return NextResponse.json(
                 { error: `Invalid style. Must be one of: ${VALID_STYLES.join(', ')}` },
                 { status: 400 }
             );
         }
 
-        // 3. Update subscription based on type
+        if (newLanguage && !isValidLanguage(newLanguage)) {
+            return NextResponse.json(
+                { error: `Invalid language. Must be one of: ${VALID_LANGUAGES.join(', ')}` },
+                { status: 400 }
+            );
+        }
+
+        // 3. Build update data
+        const updateData: { summaryStyle?: SummaryStyle; summaryLanguage?: SummaryLanguage } = {};
+        if (newStyle) updateData.summaryStyle = newStyle as SummaryStyle;
+        if (newLanguage) updateData.summaryLanguage = newLanguage as SummaryLanguage;
+
+        // 4. Update subscription based on type
         if (type === 'youtube') {
             // Verify ownership
             const subscription = await prisma.youtubeSubscription.findFirst({
@@ -60,7 +86,7 @@ export async function PATCH(request: Request) {
 
             await prisma.youtubeSubscription.update({
                 where: { id: subscriptionId },
-                data: { summaryStyle: newStyle as SummaryStyle },
+                data: updateData,
             });
         } else {
             // Podcast
@@ -77,17 +103,17 @@ export async function PATCH(request: Request) {
 
             await prisma.podcastSubscription.update({
                 where: { id: subscriptionId },
-                data: { summaryStyle: newStyle as SummaryStyle },
+                data: updateData,
             });
         }
 
         return NextResponse.json({
             success: true,
-            message: '摘要風格已更新！新設定將從下一部新影片開始生效。',
+            message: 'Settings updated! New settings will apply to new content.',
         });
 
     } catch (error) {
-        console.error('Error updating subscription style:', error);
+        console.error('Error updating subscription settings:', error);
         return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
     }
 }

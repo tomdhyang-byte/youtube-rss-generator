@@ -1,6 +1,6 @@
 {
     "Home": {
-        "title": "TubeReader",
+        "title": "TubeSummary",
         "subtitle": "AI-Powered YouTube & Podcast Summaries",
         "description": "Transform YouTube videos into readable summaries. Read directly on our site, or grab an RSS feed for your favorite reader.",
         "get_started": "Try it Free",
@@ -18,7 +18,7 @@
                 "desc": "Use with Readwise, Feedly, or any RSS reader"
             }
         },
-        "footer": "© 2025 TubeReader. All rights reserved."
+        "footer": "© 2025 TubeSummary. All rights reserved."
     },
     "Common": {
         "loading": "Loading...",
@@ -89,6 +89,11 @@
         "style_quick": "Quick Read",
         "style_quick_desc": "Concise highlights, grasp conclusions in 30s",
         "style_updated": "Style updated! New setting will apply to new content.",
+        "language_en": "English",
+        "language_en_desc": "Summaries generated in English",
+        "language_zh": "繁體中文",
+        "language_zh_desc": "Summaries generated in Traditional Chinese",
+        "language_updated": "Language updated! New setting will apply to new content.",
         "channel_added_success": "YouTube channel added successfully!",
         "podcast_added_success": "Podcast added successfully!"
     },
