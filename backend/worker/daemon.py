@@ -35,12 +35,12 @@ class TaskProcessor:
         try:
             cursor = conn.cursor()
             # Find stuck tasks
-            cursor.execute("""
-                UPDATE "ProcessingQueue"
+            cursor.execute(f"""
+                UPDATE "processing_queue"
                 SET status = 'PENDING', "updatedAt" = NOW()
                 WHERE status = 'PROCESSING'
-                AND "updatedAt" < NOW() - INTERVAL '%s seconds'
-            """, (STUCK_TASK_THRESHOLD,))
+                AND "updatedAt" < NOW() - INTERVAL '{STUCK_TASK_THRESHOLD} seconds'
+            """)
             
             if cursor.rowcount > 0:
                 logger.warning(f"Recovered {cursor.rowcount} stuck tasks.")
@@ -59,7 +59,7 @@ class TaskProcessor:
             # Select and lock the next task
             cursor.execute("""
                 SELECT id, type, "entityId", attempts
-                FROM "ProcessingQueue"
+                FROM "processing_queue"
                 WHERE status = 'PENDING'
                 ORDER BY priority DESC, "createdAt" ASC
                 LIMIT 1
@@ -70,7 +70,7 @@ class TaskProcessor:
                 task_id = task[0]
                 # Mark as PROCESSING immediately
                 cursor.execute("""
-                    UPDATE "ProcessingQueue"
+                    UPDATE "processing_queue"
                     SET status = 'PROCESSING', "updatedAt" = NOW()
                     WHERE id = %s
                 """, (task_id,))
@@ -152,7 +152,7 @@ class TaskProcessor:
         try:
             cursor = conn.cursor()
             cursor.execute("""
-                UPDATE "ProcessingQueue"
+                UPDATE "processing_queue"
                 SET status = %s, "updatedAt" = NOW(), "errorMessage" = %s
                 WHERE id = %s
             """, (status, error, task_id))

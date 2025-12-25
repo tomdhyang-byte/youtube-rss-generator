@@ -74,9 +74,7 @@ model VerificationToken {
 
 enum SummaryStyle {
   DEFAULT
-  INVESTMENT
-  TECH_DEEP_DIVE
-  QUICK_DIGEST
+  QUICK_READ
 }
 
 // ============================================

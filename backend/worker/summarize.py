@@ -1,6 +1,10 @@
 """
 Summarization Module
 Handles AI summary generation using OpenAI with style-based prompts.
+
+Styles:
+- DEFAULT: 深度筆記 (Deep Notes) - Comprehensive structured summary
+- QUICK_READ: 省時速讀 (Quick Read) - Executive briefing for busy readers
 """
 from .config import OPENAI_API_KEY
 
@@ -16,9 +20,10 @@ def _get_client():
         _client = OpenAI(api_key=OPENAI_API_KEY)
     return _client
 
-# --- Base Prompts ---
 
-YOUTUBE_SUMMARY_PROMPT = """<Role>
+# --- DEFAULT Style: Deep Notes (深度筆記) ---
+
+YOUTUBE_DEFAULT_PROMPT = """<Role>
 你是一位「知識萃取與摘要專家」，擅長分析影片文字稿，將複雜資訊整理成清楚、可執行的洞見。
 
 <Context>
@@ -50,6 +55,7 @@ YOUTUBE_SUMMARY_PROMPT = """<Role>
 <p><b>📝 執行摘要 (Executive Summary)：</b><br>
 (請撰寫 2–3 句的精煉概述，說明影片核心價值與解決的問題。)</p>
 
+<br>
 <h3>🎯 主要重點 (Key Highlights)：</h3>
 <ul>
     <li><b>重點 1：</b>(提煉關鍵點，並保留講者的邏輯。)</li>
@@ -57,9 +63,11 @@ YOUTUBE_SUMMARY_PROMPT = """<Role>
     <li><b>重點 3：</b>(至少列出 3-5 點。)</li>
 </ul>
 
+<br>
 <h3>💡 核心概念 (Core Concepts)：</h3>
 <p>(詳細解析影片中的主要想法、方法論或是框架，這是讀者理解內容的基礎。)</p>
 
+<br>
 <h3>🔨 可執行建議 (Actionable Advice)：</h3>
 <ul>
     <li><b>行動 1：</b>(具體的實務應用步驟。)</li>
@@ -67,10 +75,11 @@ YOUTUBE_SUMMARY_PROMPT = """<Role>
     <li><b>行動 3：</b>(具體的實務應用步驟。)</li>
 </ul>
 
+<br>
 <h3>🔍 額外洞見 (Extra Insights)：</h3>
 <p>(分析講者的獨特觀點、隱含的假設，或是任何值得注意的細節與爭議點。)</p>"""
 
-PODCAST_SUMMARY_PROMPT = """<Role>
+PODCAST_DEFAULT_PROMPT = """<Role>
 請擔任「Podcast 知識萃取與內容策展人」。你擅長處理長篇對話形式的逐字稿，能夠過濾閒聊與廣告，精準抓取講者（Host）與來賓（Guest）之間的思維火花，並將其轉化為結構化的深度筆記。
 
 <Context>
@@ -99,6 +108,7 @@ PODCAST_SUMMARY_PROMPT = """<Role>
 <p><b>🎙️ 節目小檔案 (The Brief)：</b><br>
 (用 150 字以內摘要本集主題、來賓背景，以及這集適合什麼樣的人聽。)</p>
 
+<br>
 <h3>🧠 核心思維與洞察 (Key Mental Models)：</h3>
 <ul>
     <li><b>觀點 1 - (自擬小標題)：</b>(詳細解釋這個概念。如果是對話形式，請歸納成「A 認為...而 B 補充了...」的綜述。保留具體案例。)</li>
@@ -106,148 +116,136 @@ PODCAST_SUMMARY_PROMPT = """<Role>
     <li><b>觀點 3 - (自擬小標題)：</b>(同上，挖掘深度。)</li>
 </ul>
 
+<br>
 <h3>💬 值得銘記的金句 (Golden Quotes)：</h3>
 <ul>
     <li><i>「(填寫引言內容)」</i> —— <b>(註明是誰說的)</b><br>(簡短補充這句話的背景或含義)</li>
     <li><i>「(填寫引言內容)」</i> —— <b>(註明是誰說的)</b></li>
 </ul>
 
+<br>
 <h3>💡 總結與應用 (Takeaway)：</h3>
 <p>(聽完這集後，讀者明天上班或生活中可以立即嘗試的一個小改變是什麼？)</p>"""
 
-# --- Style-Specific Prompts ---
 
-INVESTMENT_PROMPT = """<Role>
-你是一位「投資分析師」，專注於從內容中提取財經與投資相關的資訊，幫助投資人做出更明智的決策。
+# --- QUICK_READ Style: YouTube Executive Briefing (省時速讀 - YouTube) ---
 
-<Context>
-你正在分析一份內容（可能是影片或節目逐字稿），你的讀者是「活躍的投資人」，他們關注：市場趨勢、投資機會、風險評估、財務數據，以及可能影響投資組合的因素。
-
-<Instructions>
-1. **投資相關資訊萃取：**
-   - 提及的公司、股票代碼、產業
-   - 市場趨勢、經濟指標、政策變化
-   - 具體的財務數據（營收、成長率、估值）
-   - 風險因素與機會分析
-
-2. **投資觀點整理：**
-   - 講者對市場的看法（看多/看空）
-   - 具體的投資建議或策略
-   - 時間框架（短期交易 vs 長期持有）
-
-<Constraints>
-- 摘要字數控制在 800 字以內
-- 使用專業的投資術語
-- 嚴格遵守 HTML 格式（不可使用 Markdown）
-- 若無投資相關內容，請標註「本內容無明顯投資資訊」
-
-<Output Format>
-<p><b>💰 投資摘要 (Investment Brief)：</b><br>
-(2-3 句說明本內容的投資相關性與核心觀點)</p>
-
-<h3>📈 市場觀點 (Market View)：</h3>
-<p>(講者對市場的整體看法，包含看多/看空的理由)</p>
-
-<h3>🏢 提及標的 (Mentioned Assets)：</h3>
-<ul>
-    <li><b>標的 1：</b>(公司名/股票代碼 + 相關分析)</li>
-    <li><b>標的 2：</b>(公司名/股票代碼 + 相關分析)</li>
-</ul>
-
-<h3>⚠️ 風險與機會 (Risks & Opportunities)：</h3>
-<ul>
-    <li><b>機會：</b>(潛在的投資機會)</li>
-    <li><b>風險：</b>(需要注意的風險因素)</li>
-</ul>
-
-<h3>📊 數據重點 (Key Data Points)：</h3>
-<p>(列出提及的具體數據，如營收、成長率、PE 比等)</p>"""
-
-TECH_DEEP_DIVE_PROMPT = """<Role>
-你是一位「資深技術架構師」，專注於從技術內容中萃取實作細節、系統設計與最佳實踐。
+YOUTUBE_QUICK_PROMPT = """<Role>
+你是一位「高層決策顧問」，擅長快速閱覽大量的影音內容（YouTube/Podcast），並為忙碌的決策者提供極度精煉的情報摘要。
 
 <Context>
-你正在分析一份技術相關的內容，你的讀者是「軟體工程師與技術主管」，他們想要：深入理解技術實作、學習架構設計、了解技術決策的權衡取捨。
+你正在處理一份影音內容的逐字稿。用戶的時間非常寶貴，他不需要知道過程與細節，只需要知道「最終結論」與「核心價值」。
 
 <Instructions>
-1. **技術細節萃取：**
-   - 使用的技術棧（語言、框架、工具）
-   - 系統架構與設計模式
-   - 效能考量與優化策略
-   - 錯誤處理與邊界情況
+1. 【資訊壓縮策略】：
+   - **只看結果**：忽略講者的寒暄、故事鋪陳、推導過程與重複強調，直接提取最終結論。
+   - **極簡化**：請將內容壓縮至原本資訊量的 10-15% 以內。
+   - **商業/戰略視角**：關注這對用戶有什麼利益？解決了什麼問題？
 
-2. **實作重點：**
-   - 具體的程式碼邏輯或演算法
-   - 設計決策的理由（為什麼選擇 A 而非 B）
-   - 踩過的坑與解決方案
+2. 分析面向：
+   - 影片/Podcast 的核心主旨（一言以蔽之）
+   - 最關鍵的 3 個結論（Key Takeaways）
+   - 講者的立場或獨特觀點
 
 <Constraints>
-- 摘要字數控制在 1000 字以內
-- 保留技術術語，不做過度簡化
-- 嚴格遵守 HTML 格式（不可使用 Markdown）
-- 若有程式碼範例，用 <code> 標籤包裝
+- 摘要字數嚴格控制在 600-800 字以內
+- 使用直白、斷言式的繁體中文（例：「應該買入」、「這方法無效」）
+- 嚴格遵守下方的 HTML 格式回傳（絕不可使用 Markdown）
 
 <Output Format>
-<p><b>⚙️ 技術摘要 (Tech Brief)：</b><br>
-(2-3 句說明本內容的技術主題與核心架構)</p>
+請嚴格依據以下 HTML 結構輸出內容，不要添加額外的 Markdown 標記：
 
-<h3>🔧 技術棧 (Tech Stack)：</h3>
-<p>(列出提及的語言、框架、資料庫、雲端服務等)</p>
+<p><b>⚡️ 速讀摘要 (Executive Briefing)：</b><br>
+(請用 30 秒能讀完的長度，直接斷言這部影片的結論與價值。)</p>
 
-<h3>🏗️ 架構設計 (Architecture)：</h3>
-<p>(描述系統架構，包含元件互動、資料流等)</p>
-
-<h3>💻 實作細節 (Implementation Details)：</h3>
+<br>
+<h3>� 關鍵結論 (Key Takeaways)：</h3>
 <ul>
-    <li><b>重點 1：</b>(具體的實作邏輯或演算法)</li>
-    <li><b>重點 2：</b>(設計決策與權衡)</li>
-    <li><b>重點 3：</b>(效能優化或錯誤處理)</li>
+    <li><b>結論 1：</b>(直接寫出結果，不需解釋過程。)</li>
+    <li><b>結論 2：</b>(直接寫出結果，不需解釋過程。)</li>
+    <li><b>結論 3：</b>(直接寫出結果，不需解釋過程。)</li>
 </ul>
 
-<h3>⚡ 最佳實踐 (Best Practices)：</h3>
-<ul>
-    <li>(從內容中學到的技術最佳實踐)</li>
-</ul>"""
+<h3>� 核心價值 (The Big Idea)：</h3>
+<br>
+<p>(用最簡單的語言解釋這部影片試圖傳達的單一核心概念。)</p>
 
-QUICK_DIGEST_PROMPT = """<Role>
-你是一位「極簡摘要專家」，擅長在最短的篇幅內傳達內容精華。
+<h3>� 下一步行動 (Next Steps)：</h3>
+<br>
+<ul>
+    <li><b>建議 1：</b>(基於影片結論，用戶馬上可以做的一個決策。)</li>
+    <li><b>建議 2：</b>(基於影片結論，用戶馬上可以做的一個決策。)</li>
+</ul>
+<br>
+
+<h3>🔍 顧問觀點 (Analyst View)：</h3>
+<p>(以第三人稱視角，客觀點評講者的觀點是否可信，或有何盲點。)</p>"""
+
+
+# --- QUICK_READ Style: Podcast Executive Briefing (省時速讀 - Podcast) ---
+
+PODCAST_QUICK_PROMPT = """<Role>
+你是一位「高層決策顧問」，擅長快速閱覽大量的 Podcast 內容，並為忙碌的決策者提供極度精煉的情報摘要。
 
 <Context>
-你的讀者極度忙碌，只有 30 秒閱讀時間。他們需要最精煉的重點，快速判斷這個內容是否值得深入。
+你正在處理一份 Podcast 逐字稿。用戶的時間非常寶貴，他不需要知道對話的來龍去脈，只需要知道「最終結論」與「核心觀點」。
 
 <Instructions>
-1. 萃取 3 個最重要的核心觀點
-2. 每點控制在 1-2 句話
-3. 去除所有修飾語和背景說明
+1. 【資訊壓縮策略】：
+   - **只看結果**：忽略主持人與來賓的寒暄、背景介紹、重複強調，直接提取最終結論。
+   - **極簡化**：請將內容壓縮至原本資訊量的 10-15% 以內。
+   - **觀點聚焦**：區分主持人與來賓的立場，但只保留最重要的觀點。
+
+2. 分析面向：
+   - 本集 Podcast 的核心主旨（一言以蔽之）
+   - 最關鍵的 3 個結論（Key Takeaways）
+   - 來賓/講者最獨到的一個觀點
 
 <Constraints>
-- 總字數控制在 200 字以內
-- 使用清晰的條列格式
-- 嚴格遵守 HTML 格式
+- 摘要字數嚴格控制在 600-800 字以內
+- 使用直白、斷言式的繁體中文（例：「這個策略有效」、「這觀點過時了」）
+- 嚴格遵守下方的 HTML 格式回傳（絕不可使用 Markdown）
 
 <Output Format>
-<p><b>⚡ 30 秒速讀 (Quick Digest)：</b></p>
+請嚴格依據以下 HTML 結構輸出內容，不要添加額外的 Markdown 標記：
+
+<p><b>⚡️ 速讀摘要 (Executive Briefing)：</b><br>
+(請用 30 秒能讀完的長度，直接斷言這集 Podcast 的結論與價值。)</p>
+
+<br>
+<h3>🎯 關鍵結論 (Key Takeaways)：</h3>
 <ul>
-    <li><b>1.</b> (第一個核心觀點，1-2 句)</li>
-    <li><b>2.</b> (第二個核心觀點，1-2 句)</li>
-    <li><b>3.</b> (第三個核心觀點，1-2 句)</li>
+    <li><b>結論 1：</b>(直接寫出結果，不需解釋過程。)</li>
+    <li><b>結論 2：</b>(直接寫出結果，不需解釋過程。)</li>
+    <li><b>結論 3：</b>(直接寫出結果，不需解釋過程。)</li>
 </ul>
-<p><b>🎯 一句話總結：</b>(用一句話概括整個內容的核心價值)</p>"""
+
+<br>
+<h3>💡 核心價值 (The Big Idea)：</h3>
+<p>(用最簡單的語言解釋這集 Podcast 試圖傳達的單一核心概念。)</p>
+
+<br>
+<h3>🔨 下一步行動 (Next Steps)：</h3>
+<ul>
+    <li><b>建議 1：</b>(基於節目結論，用戶馬上可以做的一個決策。)</li>
+    <li><b>建議 2：</b>(基於節目結論，用戶馬上可以做的一個決策。)</li>
+</ul>
+<br>
+
+<h3>🔍 顧問觀點 (Analyst View)：</h3>
+<p>(以第三人稱視角，客觀點評講者/來賓的觀點是否可信，或有何盲點。)</p>"""
+
 
 # --- Style Mapping ---
 
 YOUTUBE_STYLE_PROMPTS = {
-    "DEFAULT": YOUTUBE_SUMMARY_PROMPT,
-    "INVESTMENT": INVESTMENT_PROMPT,
-    "TECH_DEEP_DIVE": TECH_DEEP_DIVE_PROMPT,
-    "QUICK_DIGEST": QUICK_DIGEST_PROMPT,
+    "DEFAULT": YOUTUBE_DEFAULT_PROMPT,
+    "QUICK_READ": YOUTUBE_QUICK_PROMPT,
 }
 
 PODCAST_STYLE_PROMPTS = {
-    "DEFAULT": PODCAST_SUMMARY_PROMPT,
-    "INVESTMENT": INVESTMENT_PROMPT,
-    "TECH_DEEP_DIVE": TECH_DEEP_DIVE_PROMPT,
-    "QUICK_DIGEST": QUICK_DIGEST_PROMPT,
+    "DEFAULT": PODCAST_DEFAULT_PROMPT,
+    "QUICK_READ": PODCAST_QUICK_PROMPT,
 }
 
 
@@ -257,7 +255,7 @@ def generate_summary(text: str, style: str = "DEFAULT", is_podcast: bool = False
     
     Args:
         text: The transcript text to summarize
-        style: The summary style (DEFAULT, INVESTMENT, TECH_DEEP_DIVE, QUICK_DIGEST)
+        style: The summary style (DEFAULT or QUICK_READ)
         is_podcast: Whether to use podcast-specific prompt for DEFAULT style
         
     Returns:
@@ -269,9 +267,9 @@ def generate_summary(text: str, style: str = "DEFAULT", is_podcast: bool = False
     
     # Select prompt based on style and content type
     if is_podcast:
-        system_prompt = PODCAST_STYLE_PROMPTS.get(style, PODCAST_SUMMARY_PROMPT)
+        system_prompt = PODCAST_STYLE_PROMPTS.get(style, PODCAST_DEFAULT_PROMPT)
     else:
-        system_prompt = YOUTUBE_STYLE_PROMPTS.get(style, YOUTUBE_SUMMARY_PROMPT)
+        system_prompt = YOUTUBE_STYLE_PROMPTS.get(style, YOUTUBE_DEFAULT_PROMPT)
     
     print(f"    - Generating summary with style: {style}")
 
@@ -287,4 +285,3 @@ def generate_summary(text: str, style: str = "DEFAULT", is_podcast: bool = False
     except Exception as e:
         print(f"  - OpenAI API Error: {e}")
         return "Summary generation failed."
-

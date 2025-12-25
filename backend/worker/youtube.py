@@ -8,11 +8,54 @@ Design B Implementation:
 """
 import time
 import random
-from datetime import datetime
+import re
+from datetime import datetime, timedelta
 import scrapetube
 
 from .transcribe import fetch_supadata_transcript
 from .summarize import generate_summary
+
+
+def parse_relative_time(text: str) -> datetime:
+    """
+    Parse relative time strings like '3 days ago' into datetime objects.
+    
+    Args:
+        text: Relative time string from YouTube (e.g., '3 days ago', '2 weeks ago')
+        
+    Returns:
+        Approximate datetime when the video was published
+    """
+    if not text:
+        return datetime.now()
+    
+    now = datetime.now()
+    text_lower = text.lower()
+    
+    # Extract number and unit
+    match = re.search(r'(\d+)\s*(second|minute|hour|day|week|month|year)', text_lower)
+    if not match:
+        return now  # Can't parse, use current time
+    
+    num = int(match.group(1))
+    unit = match.group(2)
+    
+    if 'second' in unit:
+        return now - timedelta(seconds=num)
+    elif 'minute' in unit:
+        return now - timedelta(minutes=num)
+    elif 'hour' in unit:
+        return now - timedelta(hours=num)
+    elif 'day' in unit:
+        return now - timedelta(days=num)
+    elif 'week' in unit:
+        return now - timedelta(weeks=num)
+    elif 'month' in unit:
+        return now - timedelta(days=num * 30)  # Approximate
+    elif 'year' in unit:
+        return now - timedelta(days=num * 365)  # Approximate
+    
+    return now
 
 
 def process_youtube_channel(conn, channel: dict) -> None:
@@ -50,7 +93,7 @@ def process_youtube_channel(conn, channel: dict) -> None:
     
     print("  - Fetching video list from YouTube...")
     # NOTE: We propagate exceptions here so main daemon knows if it failed
-    videos = scrapetube.get_channel(channel_id=youtube_id, limit=3)
+    videos = scrapetube.get_channel(channel_id=youtube_id, limit=1)
     print("  - Video list fetched.")
 
     first_video = True
@@ -99,7 +142,9 @@ def process_youtube_channel(conn, channel: dict) -> None:
             continue
         
         print("    - Transcript fetched.")
-        published_at = datetime.now()
+        published_time_text = video.get('publishedTimeText', {}).get('simpleText', '')
+        published_at = parse_relative_time(published_time_text)
+        print(f"    - Published: {published_time_text} -> {published_at}")
 
         # Insert video record (without summary - summaries are in separate table now)
         cursor.execute(

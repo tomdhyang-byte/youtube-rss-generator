@@ -16,10 +16,8 @@ export interface SummaryStyleOption {
 }
 
 export const SUMMARY_STYLE_OPTIONS: SummaryStyleOption[] = [
-    { value: 'DEFAULT', label: '通用摘要', emoji: '📝', description: '完整的結構化摘要' },
-    { value: 'INVESTMENT', label: '投資導向', emoji: '💰', description: '關注財經與投資資訊' },
-    { value: 'TECH_DEEP_DIVE', label: '技術深潛', emoji: '⚙️', description: '深入技術實作細節' },
-    { value: 'QUICK_DIGEST', label: '極簡速讀', emoji: '⚡', description: '30 秒快速掌握重點' },
+    { value: 'DEFAULT', label: '深度筆記', emoji: '📚', description: '完整結構化摘要，適合學習' },
+    { value: 'QUICK_READ', label: '省時速讀', emoji: '⚡', description: '精簡重點，30秒掌握結論' },
 ];
 
 interface StyleSelectorProps {
