@@ -5,14 +5,22 @@ Handles fetching and processing YouTube channel videos with style-based summarie
 Design B Implementation:
 - Demand-driven: Only generate summaries for styles that subscribers have selected
 - Locked style: Record each user's style at the time of video processing
+
+Transcript Fetching (Multi-tier):
+1. Free youtube-transcript-api (with quota/cooldown)
+2. Supadata (paid)
+3. Deepgram + yt-dlp (for videos without subtitles)
 """
 import time
 import random
 import re
+import os
+import subprocess
+import tempfile
 from datetime import datetime, timedelta
 import scrapetube
 
-from .transcribe import fetch_supadata_transcript
+from .transcribe import fetch_transcript_with_fallback, transcribe_audio_file
 from .summarize import generate_summary
 from .common import lock_user_styles
 
@@ -57,6 +65,47 @@ def parse_relative_time(text: str) -> datetime:
         return now - timedelta(days=num * 365)  # Approximate
     
     return now
+
+
+def download_and_transcribe_audio(video_id: str) -> str | None:
+    """
+    Downloads audio from a YouTube video using yt-dlp and transcribes it using Deepgram.
+    
+    Args:
+        video_id: The YouTube video ID.
+        
+    Returns:
+        The transcribed text, or None if transcription fails.
+    """
+    print(f"      - Attempting to download audio for {video_id}...")
+    
+    # Create a temporary directory for the audio file
+    with tempfile.TemporaryDirectory() as tmpdir:
+        output_path = os.path.join(tmpdir, f"{video_id}.mp3")
+        
+        # yt-dlp command to download audio
+        command = [
+            "yt-dlp",
+            "--extract-audio",
+            "--audio-format", "mp3",
+            "--output", output_path,
+            f"https://www.youtube.com/watch?v={video_id}"
+        ]
+        
+        try:
+            subprocess.run(command, check=True, capture_output=True, text=True)
+            print(f"      - Audio downloaded to {output_path}")
+            
+            # Transcribe the downloaded audio file
+            transcript = transcribe_audio_file(output_path)
+            return transcript
+            
+        except subprocess.CalledProcessError as e:
+            print(f"      - yt-dlp failed for {video_id}: {e.stderr}")
+            return None
+        except Exception as e:
+            print(f"      - Error during audio download or transcription for {video_id}: {e}")
+            return None
 
 
 def process_youtube_channel(conn, channel: dict) -> None:
@@ -135,15 +184,22 @@ def process_youtube_channel(conn, channel: dict) -> None:
             
         print(f"    - New Video found: {title}")
         
-        # Fetch transcript once
-        print("    - Fetching transcript from Supadata...")
-        transcript = fetch_supadata_transcript(video_id)
+        # Fetch transcript using multi-tier fallback
+        print("    - Fetching transcript...")
+        transcript, source = fetch_transcript_with_fallback(video_id)
+        
+        # If both free API and Supadata failed, try Deepgram (download audio first)
+        if not transcript:
+            print("    - No subtitle available. Trying Deepgram (yt-dlp + STT)...")
+            transcript = download_and_transcribe_audio(video_id)
+            if transcript:
+                source = "deepgram"
         
         if not transcript:
-            print("    - No transcript available, skipping video.")
+            print("    - ❌ No transcript available from any source, skipping video.")
             continue
         
-        print("    - Transcript fetched.")
+        print(f"    - ✅ Transcript fetched (source: {source})")
         published_time_text = video.get('publishedTimeText', {}).get('simpleText', '')
         published_at = parse_relative_time(published_time_text)
         print(f"    - Published: {published_time_text} -> {published_at}")

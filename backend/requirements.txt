@@ -4,3 +4,4 @@ python-dotenv
 feedparser
 requests
 pg8000
+youtube-transcript-api

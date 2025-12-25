@@ -35,7 +35,11 @@ By subscribing to channels here instead of on YouTube:
 -   Sign in with Google only when you want to sync across devices or add more channels.
 
 ### 3. AI Processing
--   **Smart Transcription**: Uses specialized APIs to get accurate text from videos and audio.
+-   **Multi-tier Transcript Fetching (YouTube)**:
+    1.  Free `youtube-transcript-api` (rate-limited: 10/day, 30min cooldown)
+    2.  Supadata API (paid fallback)
+    3.  Deepgram + yt-dlp (for videos without subtitles)
+-   **Podcast Transcription**: Deepgram speech-to-text.
 -   **Contextual Summaries**: Uses GPT-4o to generate structured summaries that capture the *insight*, not just the transcript.
 
 ### 4. Summary Styles
@@ -141,7 +145,7 @@ npm install
 
 # Backend dependencies
 cd backend
-pip install -r requirements.txt
+pip install -r requirements.txt  # Includes youtube-transcript-api
 cd ..
 
 # 2. Setup Env

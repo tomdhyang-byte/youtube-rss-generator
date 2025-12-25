@@ -23,6 +23,10 @@ POLL_INTERVAL = 10         # Seconds between queue checks
 MAINTENANCE_INTERVAL = 3600 # 1 Hour between full scans
 STUCK_TASK_THRESHOLD = 1800 # 30 Minutes before resetting stuck tasks
 
+# Free YouTube Transcript API Quota Settings
+FREE_API_DAILY_LIMIT = 10          # 每日最多使用次數
+FREE_API_COOLDOWN_MINUTES = 30     # 每次使用間隔（分鐘）
+
 
 def validate_config():
     """

@@ -52,9 +52,11 @@ Use this guide to quickly find the file you need to change based on your intent.
 | I want to change... | Go to File |
 |---------------------|------------|
 | **AI Summary Prompts** | `backend/worker/summarize.py` |
+| **Transcript Fetching** | `backend/worker/transcribe.py` (Multi-tier: Free API → Supadata → Deepgram) |
 | **YouTube Fetch Logic** | `backend/worker/youtube.py` |
 | **Podcast Fetch Logic** | `backend/worker/podcast.py` |
 | **Worker Shared Logic** | `backend/worker/common.py` (New Shared Utils) |
+| **Worker Config** | `backend/worker/config.py` (API limits, cooldowns) |
 | **Worker Daemon** | `backend/worker/daemon.py` (New Entry Point) |
 | **Main Worker Loop** | `backend/worker.py` (Legacy/Routine) |
 | **Database Schema** | `prisma/schema.prisma` |
@@ -75,8 +77,20 @@ Understanding how a video becomes a summary:
     *   **New**: A `ProcessingQueue` job is created (Status: PENDING).
 2.  **Worker Runs (Real-time)**:
     *   Daemon polls DB every 10s.
-    *   Picks up the job -> Fetches content -> Summarizes.
-3.  **Display**:
+    *   Picks up the job → Fetches content → Summarizes.
+3.  **Transcript Fetching (YouTube)**:
+    ```
+    ┌─────────────────────────────────────────┐
+    │ 1. Free API (youtube-transcript-api)    │
+    │    ├─ Daily limit: 10 calls             │
+    │    └─ Cooldown: 30 min between calls    │
+    │              ↓ (fail or cooldown)       │
+    │ 2. Supadata API (paid)                  │
+    │              ↓ (no subtitles)           │
+    │ 3. Deepgram + yt-dlp (audio → STT)      │
+    └─────────────────────────────────────────┘
+    ```
+4.  **Display**:
     *   User sees "Processing" state initially.
     *   Once worker finishes, feed auto-updates (on refresh).
 
@@ -134,11 +148,12 @@ youtube-rss-generator/
 │
 ├── backend/                      # Python Worker (The "Brain")
 │   ├── worker/                   # Core Logic Modules
-│   │   ├── config.py             # Configuration & Constants
+│   │   ├── config.py             # Configuration & Constants (incl. API limits)
 │   │   ├── common.py             # Shared Worker Utilities
 │   │   ├── daemon.py             # Real-time Polling Engine
+│   │   ├── transcribe.py         # Multi-tier Transcript Fetching (NEW)
 │   │   ├── summarize.py          # AI Prompts & Logic
-│   │   └── youtube.py            # YouTube API Handling
+│   │   ├── youtube.py            # YouTube API Handling
 │   │   └── podcast.py            # Podcast API Handling
 │   ├── worker.py                 # (Legacy) Full Scan Routine
 │   ├── run_worker.sh             # Launch Script
