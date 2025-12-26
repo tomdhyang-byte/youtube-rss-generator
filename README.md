@@ -169,9 +169,7 @@ In addition to the Web Reader, you can also consume content via RSS feeds in any
 
 | Type | URL Pattern | Description |
 |------|-------------|-------------|
-| **Personalized Feed** | `/feed/user/[feedToken]` | Your unified feed with locked summary styles |
-| YouTube Channel | `/feed/[channelDbId]` | Per-channel feed (DEFAULT style) |
-| Podcast | `/feed/podcast/[podcastDbId]` | Per-podcast feed (DEFAULT style) |
+| **Personalized Feed** | `/feed/user/[feedToken]` | Your unified feed with locked summary styles, now featuring channel-specific icons. |
 
 > **Note**: The personalized feed uses your `feedToken` (found in your account) and respects the summary style you chose at the time each video/episode was processed.
 

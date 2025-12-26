@@ -56,6 +56,7 @@ Use this guide to quickly find the file you need to change based on your intent.
 | **YouTube Fetch Logic** | `backend/worker/youtube.py` |
 | **Podcast Fetch Logic** | `backend/worker/podcast.py` |
 | **Worker Shared Logic** | `backend/worker/common.py` (New Shared Utils) |
+| **Worker Cleanup** | `backend/worker/cleanup.py` (Video Retention Policy - 15 limit) |
 | **Worker Config** | `backend/worker/config.py` (API limits, cooldowns) |
 | **Worker Daemon** | `backend/worker/daemon.py` (New Entry Point) |
 | **Main Worker Loop** | `backend/worker.py` (Legacy/Routine) |
@@ -93,6 +94,9 @@ Understanding how a video becomes a summary:
 4.  **Display**:
     *   User sees "Processing" state initially.
     *   Once worker finishes, feed auto-updates (on refresh).
+5.  **Retention Policy**:
+    *   Worker automatically keeps only the latest **15 videos** per channel.
+    *   Older content is cascade-deleted to maintain database health.
 
 ---
 
@@ -150,6 +154,7 @@ youtube-rss-generator/
 │   ├── worker/                   # Core Logic Modules
 │   │   ├── config.py             # Configuration & Constants (incl. API limits)
 │   │   ├── common.py             # Shared Worker Utilities
+│   │   ├── cleanup.py            # Video Retention Logic
 │   │   ├── daemon.py             # Real-time Polling Engine
 │   │   ├── transcribe.py         # Multi-tier Transcript Fetching (NEW)
 │   │   ├── summarize.py          # AI Prompts & Logic
