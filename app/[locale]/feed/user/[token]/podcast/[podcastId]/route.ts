@@ -77,7 +77,7 @@ export async function GET(
     `;
 
     // 4. Generate RSS XML
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://tubesummary.app';
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://youtube-rss-generator.vercel.app';
 
     const items = episodeItems.map(e => ({
         title: e.title,
