@@ -1,0 +1,13 @@
+<svg width="512" height="512" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background: Deep dark grey/black -->
+  <rect width="100" height="100" rx="25" fill="#1A1A1A"/>
+  
+  <!-- Bar 1: White/Grey (Top) -->
+  <rect x="20" y="25" width="60" height="12" rx="6" fill="#FFFFFF"/>
+  
+  <!-- Bar 2: YouTube Red (Middle - Main Accent) -->
+  <rect x="20" y="45" width="40" height="12" rx="6" fill="#FF0000"/>
+  
+  <!-- Bar 3: Darker Grey (Bottom) -->
+  <rect x="20" y="65" width="50" height="12" rx="6" fill="#444444"/>
+</svg>

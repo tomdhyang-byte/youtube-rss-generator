@@ -19,6 +19,9 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "TubeSummary",
   description: "Generate RSS feeds for YouTube channels and podcasts",
+  icons: {
+    icon: '/icon.svg',
+  },
 };
 
 import { NextIntlClientProvider } from 'next-intl';
