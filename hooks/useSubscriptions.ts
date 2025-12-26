@@ -30,6 +30,7 @@ interface SubscriptionData {
         limit: number | null;
         isAdmin: boolean;
     };
+    feedToken?: string;
 }
 
 export const fetchSubscriptions = async (): Promise<SubscriptionData> => {

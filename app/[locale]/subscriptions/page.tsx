@@ -48,6 +48,7 @@ export default function SubscriptionsPage() {
                             summaryStyle: sub.summaryStyle,
                             summaryLanguage: sub.summaryLanguage,
                         })) || []}
+                        feedToken={subscriptions.feedToken}
                         onRefresh={async () => {
                             await refetch();
                             queryClient.resetQueries({ queryKey: ['feed'] });

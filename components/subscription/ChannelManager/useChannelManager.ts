@@ -13,6 +13,7 @@ import { SummaryLanguage } from '@/components/ui/LanguageSelector';
 export function useChannelManager({
     initialChannels,
     initialPodcasts,
+    feedToken,
     onRefresh
 }: ChannelManagerProps) {
     const { data: session } = useSession();
@@ -282,16 +283,20 @@ export function useChannelManager({
         }
     };
 
-    const copyRssLink = (id: number, type: 'youtube' | 'podcast') => {
+    const copyRssLink = () => {
         if (!session) {
             setLoginModalOpen(true);
             return;
         }
 
-        const path = type === 'youtube' ? `/feed/${id}` : `/feed/podcast/${id}`;
-        const link = `${window.location.origin}${path}`;
+        if (!feedToken) {
+            toast.error('Feed token not found. Please try refreshing the page.');
+            return;
+        }
+
+        const link = `${window.location.origin}/feed/user/${feedToken}`;
         navigator.clipboard.writeText(link);
-        toast.success('RSS Link copied to clipboard!');
+        toast.success('Personal RSS Feed link copied to clipboard!');
     };
 
     const handleStyleChange = (subscriptionId: number, type: 'youtube' | 'podcast', newStyle: SummaryStyle) => {

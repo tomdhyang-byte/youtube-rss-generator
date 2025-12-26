@@ -42,6 +42,7 @@ export interface PodcastWithSubscription extends PodcastChannel {
 export interface ChannelManagerProps {
     initialChannels: YoutubeChannelWithSubscription[];
     initialPodcasts: PodcastWithSubscription[];
+    feedToken?: string;
     onRefresh?: (newChannel?: YoutubeChannel | PodcastChannel) => void;
 }
 
