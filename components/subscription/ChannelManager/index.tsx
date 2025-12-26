@@ -104,7 +104,7 @@ export default function ChannelManager(props: ChannelManagerProps) {
                                     summaryStyle={getEffectiveStyle((channel as any).subscriptionId || channel.id, 'youtube', (channel as any).summaryStyle || 'DEFAULT')}
                                     summaryLanguage={getEffectiveLanguage((channel as any).subscriptionId || channel.id, 'youtube', (channel as any).summaryLanguage || 'ZH_TW')}
                                     onUnsubscribe={() => handleUnsubscribe(channel.id, 'youtube', channel.title)}
-                                    onCopyRss={() => copyRssLink()}
+                                    onCopyRss={() => copyRssLink(channel.id, 'youtube')}
                                     onStyleChange={session ? (style) => handleStyleChange((channel as any).subscriptionId || channel.id, 'youtube', style) : undefined}
                                     onLanguageChange={session ? (lang) => handleLanguageChange((channel as any).subscriptionId || channel.id, 'youtube', lang) : undefined}
                                     onLoginRequired={() => setLoginModalOpen(true)}
@@ -148,7 +148,7 @@ export default function ChannelManager(props: ChannelManagerProps) {
                                     summaryStyle={getEffectiveStyle((podcast as any).subscriptionId || podcast.id, 'podcast', (podcast as any).summaryStyle || 'DEFAULT')}
                                     summaryLanguage={getEffectiveLanguage((podcast as any).subscriptionId || podcast.id, 'podcast', (podcast as any).summaryLanguage || 'ZH_TW')}
                                     onUnsubscribe={() => handleUnsubscribe(podcast.id, 'podcast', podcast.title || 'this podcast')}
-                                    onCopyRss={() => copyRssLink()}
+                                    onCopyRss={() => copyRssLink(podcast.id, 'podcast')}
                                     onStyleChange={session ? (style) => handleStyleChange((podcast as any).subscriptionId || podcast.id, 'podcast', style) : undefined}
                                     onLanguageChange={session ? (lang) => handleLanguageChange((podcast as any).subscriptionId || podcast.id, 'podcast', lang) : undefined}
                                     loading={loading}

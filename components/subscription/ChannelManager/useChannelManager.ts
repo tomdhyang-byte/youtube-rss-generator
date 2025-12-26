@@ -283,7 +283,7 @@ export function useChannelManager({
         }
     };
 
-    const copyRssLink = () => {
+    const copyRssLink = (id: number, type: 'youtube' | 'podcast') => {
         if (!session) {
             setLoginModalOpen(true);
             return;
@@ -294,9 +294,12 @@ export function useChannelManager({
             return;
         }
 
-        const link = `${window.location.origin}/feed/user/${feedToken}`;
+        const path = type === 'youtube'
+            ? `/feed/user/${feedToken}/channel/${id}`
+            : `/feed/user/${feedToken}/podcast/${id}`;
+        const link = `${window.location.origin}${path}`;
         navigator.clipboard.writeText(link);
-        toast.success('Personal RSS Feed link copied to clipboard!');
+        toast.success('RSS Feed link copied to clipboard!');
     };
 
     const handleStyleChange = (subscriptionId: number, type: 'youtube' | 'podcast', newStyle: SummaryStyle) => {
