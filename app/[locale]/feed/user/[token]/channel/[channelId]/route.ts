@@ -80,7 +80,7 @@ export async function GET(
 
     const items = videoItems.map(v => ({
         title: v.title,
-        link: `https://youtube.com/watch?v=${v.youtube_video_id}`,
+        link: `${baseUrl}/video/${v.youtube_video_id}`,
         guid: `video-${v.id}`,
         pubDate: new Date(v.published_at).toUTCString(),
         description: v.summary || 'No summary available.',
@@ -90,7 +90,7 @@ export async function GET(
     if (items.length === 0) {
         items.push({
             title: "Welcome to Your RSS Feed!",
-            link: `https://www.youtube.com/channel/${channel.youtube_id}`,
+            link: `${baseUrl}/video/${channel.youtube_id}`,
             guid: `welcome-msg-channel-${channelId}-user-${user.id}`,
             pubDate: new Date().toUTCString(),
             description: "This feed is empty because no videos have been processed yet. Our AI worker processes new channels every few hours. Please check back later.",

@@ -81,7 +81,7 @@ export async function GET(
 
     const items = episodeItems.map(e => ({
         title: e.title,
-        link: e.audio_url,
+        link: `${baseUrl}/episode/${e.id}`,
         guid: `episode-${e.id}`,
         pubDate: new Date(e.published_at).toUTCString(),
         description: e.summary || 'No summary available.',
@@ -91,7 +91,7 @@ export async function GET(
     if (items.length === 0) {
         items.push({
             title: "Welcome to Your RSS Feed!",
-            link: podcast.site_url || podcast.feed_url,
+            link: `${baseUrl}/episode/welcome`,
             guid: `welcome-msg-podcast-${podcastId}-user-${user.id}`,
             pubDate: new Date().toUTCString(),
             description: "This feed is empty because no episodes have been processed yet. Our AI worker processes new podcasts every few hours. Please check back later.",
