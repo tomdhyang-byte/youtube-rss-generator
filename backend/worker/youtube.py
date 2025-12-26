@@ -23,6 +23,7 @@ import scrapetube
 from .transcribe import fetch_transcript_with_fallback, transcribe_audio_file
 from .summarize import generate_summary
 from .common import lock_user_styles
+from .cleanup import enforce_video_retention
 
 
 def parse_relative_time(text: str) -> datetime:
@@ -245,6 +246,9 @@ def process_youtube_channel(conn, channel: dict) -> None:
         delay = random.uniform(5, 10)
         print(f"    - Waiting {delay:.1f} seconds before next video...")
         time.sleep(delay)
+
+    # Enforce retention policy (Keep latest 15 videos)
+    enforce_video_retention(conn, channel_id, limit=15)
 
     # Update last_updated timestamp
     cursor.execute("UPDATE youtube_channels SET last_updated = %s WHERE id = %s", (datetime.now(), channel_id))
