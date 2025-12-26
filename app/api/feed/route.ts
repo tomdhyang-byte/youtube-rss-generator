@@ -9,6 +9,12 @@ import { VideoQueryResult, EpisodeQueryResult } from '@/lib/types/feed';
  * 
  * Web Feed API using Design B (locked styles).
  * Returns videos and episodes with their locked summary styles.
+ * Supports cursor-based pagination for infinite scroll.
+ * 
+ * Query params:
+ * - filter: 'all' | 'youtube' | 'podcast'
+ * - cursor: ISO date string (publishedAt of last item)
+ * - limit: number (default 10)
  */
 export async function GET(request: Request) {
     // 1. Authentication Check
@@ -20,13 +26,19 @@ export async function GET(request: Request) {
     const userId = session.user.id;
     const { searchParams } = new URL(request.url);
     const filter = searchParams.get('filter') || 'all';
+    const cursor = searchParams.get('cursor'); // ISO date string
+    const limit = Math.min(parseInt(searchParams.get('limit') || '10'), 50); // Cap at 50
 
     try {
         const items: FeedItem[] = [];
 
         if (filter === 'all' || filter === 'youtube') {
             // Query videos with locked styles - only for active subscriptions
-            const videoItems = await prisma.$queryRaw<VideoQueryResult[]>`
+            const cursorCondition = cursor
+                ? `AND v.published_at < '${new Date(cursor).toISOString()}'::timestamp`
+                : '';
+
+            const videoItems = await prisma.$queryRawUnsafe<VideoQueryResult[]>(`
                 SELECT 
                     v.id,
                     v.title,
@@ -41,10 +53,11 @@ export async function GET(request: Request) {
                 INNER JOIN youtube_channels c ON c.id = v.channel_id
                 INNER JOIN video_summaries vs ON vs.video_id = v.id AND vs.style::text = uvs.style::text AND vs.language::text = uvs.language::text
                 INNER JOIN youtube_subscriptions ys ON ys.user_id = uvs.user_id AND ys.channel_id = c.id
-                WHERE uvs.user_id = ${userId}
+                WHERE uvs.user_id = '${userId}'
+                ${cursorCondition}
                 ORDER BY v.published_at DESC
-                LIMIT 50
-            `;
+                LIMIT ${limit + 1}
+            `);
 
             items.push(...videoItems.map(video => ({
                 type: 'video' as const,
@@ -61,7 +74,11 @@ export async function GET(request: Request) {
 
         if (filter === 'all' || filter === 'podcast') {
             // Query episodes with locked styles - only for active subscriptions
-            const episodeItems = await prisma.$queryRaw<EpisodeQueryResult[]>`
+            const cursorCondition = cursor
+                ? `AND e.published_at < '${new Date(cursor).toISOString()}'::timestamp`
+                : '';
+
+            const episodeItems = await prisma.$queryRawUnsafe<EpisodeQueryResult[]>(`
                 SELECT 
                     e.id,
                     e.title,
@@ -79,10 +96,11 @@ export async function GET(request: Request) {
                 INNER JOIN podcast_channels p ON p.id = e.podcast_id
                 INNER JOIN episode_summaries es ON es.episode_id = e.id AND es.style::text = ues.style::text AND es.language::text = ues.language::text
                 INNER JOIN podcast_subscriptions ps ON ps.user_id = ues.user_id AND ps.podcast_id = p.id
-                WHERE ues.user_id = ${userId}
+                WHERE ues.user_id = '${userId}'
+                ${cursorCondition}
                 ORDER BY e.published_at DESC
-                LIMIT 50
-            `;
+                LIMIT ${limit + 1}
+            `);
 
             items.push(...episodeItems.map(episode => ({
                 type: 'episode' as const,
@@ -101,10 +119,21 @@ export async function GET(request: Request) {
         // Sort combined items by publishedAt
         items.sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime());
 
-        return NextResponse.json({ items });
+        // Determine if there are more items (we fetched limit+1)
+        const hasMore = items.length > limit;
+        const paginatedItems = items.slice(0, limit);
+        const nextCursor = hasMore && paginatedItems.length > 0
+            ? paginatedItems[paginatedItems.length - 1].publishedAt
+            : null;
+
+        return NextResponse.json({
+            items: paginatedItems,
+            nextCursor,
+        });
 
     } catch (error) {
         console.error('Error fetching feed:', error);
         return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
     }
 }
+

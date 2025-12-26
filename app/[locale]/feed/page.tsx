@@ -11,6 +11,8 @@ import { TopNav } from "@/components/layout/TopNav";
 import { FeedCard } from "@/components/feed/FeedCard";
 import { ArticleModal } from "@/components/feed/ArticleModal";
 import { FeedProcessingState } from "@/components/feed/FeedProcessingState";
+import { InfiniteScrollTrigger } from "@/components/feed/InfiniteScrollTrigger";
+import { FeedCardSkeleton } from "@/components/feed/FeedCardSkeleton";
 import { useReadStatus } from "@/hooks/useReadStatus";
 import { cn } from "@/lib/utils";
 import { FeedItem } from "@/lib/types";
@@ -24,9 +26,17 @@ export default function FeedPage() {
     const router = useRouter();
     const queryClient = useQueryClient();
     const [filter, setFilter] = useState<FilterType>('all');
-    const { data, isLoading: loading, refetch: refetchFeed } = useFeed(filter);
+    const {
+        data,
+        isLoading: loading,
+        refetch: refetchFeed,
+        fetchNextPage,
+        hasNextPage,
+        isFetchingNextPage,
+    } = useFeed(filter);
     const { data: subData } = useSubscriptions();
-    const items = data?.items || [];
+    // Flatten paginated data into single array
+    const items = data?.pages?.flatMap(page => page.items) || [];
     const { isRead, markAsRead } = useReadStatus();
 
     // ✅ All hooks MUST be called before any conditional returns
@@ -46,9 +56,10 @@ export default function FeedPage() {
     useEffect(() => {
         if (status === "authenticated") {
             (['all', 'youtube', 'podcast'] as FilterType[]).forEach(filter => {
-                queryClient.prefetchQuery({
+                queryClient.prefetchInfiniteQuery({
                     queryKey: ['feed', filter],
-                    queryFn: () => fetchFeed(filter),
+                    queryFn: ({ pageParam }) => fetchFeed(filter, pageParam),
+                    initialPageParam: undefined as string | undefined,
                     staleTime: 5 * 60 * 1000 // 5 minutes
                 });
             });
@@ -90,7 +101,7 @@ export default function FeedPage() {
     const isProcessing = isEmpty && hasSubscriptions && filter === 'all';
     const isFilteredEmpty = isEmpty && !isProcessing && filter !== 'all';
 
-    const showFilters = !loading && !isNoSubs && !isProcessing;
+    const showFilters = !isNoSubs && !isProcessing;
 
     return (
         <div className="min-h-screen bg-background">
@@ -135,24 +146,31 @@ export default function FeedPage() {
                         onShowAll={() => handleFilterChange('all')}
                     />
                 ) : loading ? (
-                    <div className="flex items-center justify-center min-h-[50vh]">
-                        <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+                    <div className="space-y-3">
+                        {[...Array(5)].map((_, i) => <FeedCardSkeleton key={i} />)}
                     </div>
                 ) : (
-                    // Feed items
-                    <div className="space-y-3">
-                        {items.map((item) => (
-                            <FeedCard
-                                key={`${item.type}-${item.id}`}
-                                {...item}
-                                isRead={isRead(item.type, item.id)}
-                                onRead={() => {
-                                    markAsRead(item.type, item.id);
-                                    setSelectedArticle(item);
-                                }}
-                            />
-                        ))}
-                    </div>
+                    // Feed items with infinite scroll
+                    <>
+                        <div className="space-y-3">
+                            {items.map((item) => (
+                                <FeedCard
+                                    key={`${item.type}-${item.id}`}
+                                    {...item}
+                                    isRead={isRead(item.type, item.id)}
+                                    onRead={() => {
+                                        markAsRead(item.type, item.id);
+                                        setSelectedArticle(item);
+                                    }}
+                                />
+                            ))}
+                        </div>
+                        <InfiniteScrollTrigger
+                            onTrigger={() => fetchNextPage()}
+                            hasMore={!!hasNextPage}
+                            isLoading={isFetchingNextPage}
+                        />
+                    </>
                 )}
             </main>
 
