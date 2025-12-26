@@ -106,6 +106,11 @@ export async function GET(
     <description>${escapeXml(podcast.description || `AI Summaries for ${podcast.title || 'this podcast'}`)}</description>
     <language>zh-TW</language>
     <lastBuildDate>${new Date().toUTCString()}</lastBuildDate>
+    <image>
+        <url>${baseUrl}/icon.svg</url>
+        <title>${escapeXml(podcast.title || 'Podcast')} (AI Summarized)</title>
+        <link>${podcast.site_url || podcast.feed_url}</link>
+    </image>
     <atom:link href="${baseUrl}/feed/user/${token}/podcast/${podcastId}" rel="self" type="application/rss+xml"/>
     ${items.map(item => `
     <item>

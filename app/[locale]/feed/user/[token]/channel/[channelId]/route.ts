@@ -105,6 +105,11 @@ export async function GET(
     <description>${escapeXml(channel.description || `AI Summaries for ${channel.title}`)}</description>
     <language>zh-TW</language>
     <lastBuildDate>${new Date().toUTCString()}</lastBuildDate>
+    <image>
+        <url>${baseUrl}/icon.svg</url>
+        <title>${escapeXml(channel.title)} (AI Summarized)</title>
+        <link>https://www.youtube.com/channel/${channel.youtube_id}</link>
+    </image>
     <atom:link href="${baseUrl}/feed/user/${token}/channel/${channelId}" rel="self" type="application/rss+xml"/>
     ${items.map(item => `
     <item>
