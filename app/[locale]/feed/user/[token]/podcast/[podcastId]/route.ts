@@ -93,7 +93,7 @@ export async function GET(
             title: "Welcome to Your RSS Feed!",
             link: `${baseUrl}/episode/welcome`,
             guid: `welcome-msg-podcast-${podcastId}-user-${user.id}`,
-            pubDate: new Date().toUTCString(),
+            pubDate: new Date('2000-01-01').toUTCString(),
             description: "This feed is empty because no episodes have been processed yet. Our AI worker processes new podcasts every few hours. Please check back later.",
         });
     }

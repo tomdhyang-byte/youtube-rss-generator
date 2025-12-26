@@ -92,7 +92,7 @@ export async function GET(
             title: "Welcome to Your RSS Feed!",
             link: `${baseUrl}/video/${channel.youtube_id}`,
             guid: `welcome-msg-channel-${channelId}-user-${user.id}`,
-            pubDate: new Date().toUTCString(),
+            pubDate: new Date('2000-01-01').toUTCString(),
             description: "This feed is empty because no videos have been processed yet. Our AI worker processes new channels every few hours. Please check back later.",
         });
     }

@@ -48,7 +48,7 @@ export async function GET(
                 description: "This feed is empty because no videos have been processed yet. Our AI worker processes new channels every few hours. Please check back in a few minutes, or up to 6 hours for the first update. Thank you for your patience!",
                 url: `https://www.youtube.com/channel/${channel.youtube_id}`,
                 guid: `welcome-msg-channel-${channelId}`,
-                date: channel.last_updated,
+                date: new Date('2000-01-01'),
                 author: channel.title,
             });
         }
