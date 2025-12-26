@@ -99,7 +99,7 @@ export async function GET(
     }
 
     const rssXml = `<?xml version="1.0" encoding="UTF-8"?>
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
 <channel>
     <title>${escapeXml(podcast.title || 'Podcast')} (AI Summarized)</title>
     <link>${podcast.site_url || podcast.feed_url}</link>
@@ -114,6 +114,7 @@ export async function GET(
         <guid isPermaLink="false">${item.guid}</guid>
         <pubDate>${item.pubDate}</pubDate>
         <description><![CDATA[${item.description}]]></description>
+        <content:encoded><![CDATA[${item.description}]]></content:encoded>
     </item>`).join('')}
 </channel>
 </rss>`;
