@@ -88,7 +88,7 @@ export function FeedCard({ type, id, title, source, summary, publishedAt, thumbn
                     <p className="text-sm text-muted-foreground mt-1">
                         {source} • {formattedDate}
                     </p>
-                    <p className="text-sm text-muted-foreground/80 mt-2 line-clamp-2 hidden md:block">
+                    <p className="text-sm text-muted-foreground/80 mt-2 line-clamp-1 hidden md:block">
                         {summaryPreview}
                     </p>
                 </div>
