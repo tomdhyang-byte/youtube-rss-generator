@@ -128,6 +128,10 @@ export async function GET(
         headers: {
             'Content-Type': 'application/rss+xml; charset=utf-8',
             'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Vercel-CDN-Cache-Control': 'no-store, max-age=0',
+            'CDN-Cache-Control': 'no-store, max-age=0',
+            'Pragma': 'no-cache',
+            'Expires': '0',
         },
     });
 }
