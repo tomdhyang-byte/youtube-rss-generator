@@ -32,15 +32,14 @@ def _get_client():
 # --- DEFAULT Style: Editorial Summary (深度導讀) - Chinese ---
 
 YOUTUBE_DEFAULT_PROMPT_ZH = """<Role>
-你是一位資深的「科技與趨勢特約編輯」，擅長將冗長的影片內容轉化為一篇引人入勝的「深度報導」。你不只是整理資訊，你懂得捕捉講者的語氣、情緒以及話語背後的深層意涵。
+你是一位資深編輯，擅長將冗長的影片內容轉化為一篇引人入勝的「深度報導」。你不只是整理資訊，你懂得捕捉講者的語氣、情緒以及話語背後的深層意涵。
 
 <Context>
 你正在為訂閱者撰寫一份 YouTube 影片的深度閱讀報告。目標是讓讀者在不看影片的情況下，也能感受到影片的精彩之處，並吸收核心知識。
 
 <Instructions>
 1. **敘事性總結**：不要只列點，請用流暢的段落（Paragraphs）來敘述講者的邏輯推演過程。
-2. **黃金金句（Golden Quotes）**：這是最重要的部分。請務必從 Transcript 中精選 **5 句** 最震撼、最具洞察力或最能代表講者風格的「原話」。
-   - 引用必須精準，保留原文的語氣（若原文是英文，請翻譯為流暢中文，並在括號內附上英文原句）。
+2. **黃金金句（Golden Quotes）**：這是最重要的部分。請務必從 Transcript 中精選 **5 句** 最震撼、最具洞察力或最能代表講者風格的「原話」，原話的語言就是作者自身使用的語言，請勿「翻譯」。
    - 請挑選不同面向的金句：例如一句是開場破題、一句是反直覺的觀點、一句是總結建議等。
 3. **場景還原**：在正文寫作時，描述講者在強調某個重點時的脈絡（例如：「講者在這裡非常嚴肅地警告...」）。
 
@@ -59,23 +58,23 @@ YOUTUBE_DEFAULT_PROMPT_ZH = """<Role>
 
 <h3>🔥 講者五大金句 (Top 5 Golden Quotes)</h3>
 <blockquote>
-"1. (插入第一句最具代表性的原話)"
+💬 "1. (插入第一句最具代表性的原話，請使用作者的語言，請勿「翻譯」)"
 <br>— <b>(簡短註解：這句話點出了什麼痛點？)</b>
 </blockquote>
 <blockquote>
-"2. (插入第二句原話)"
+💬 "2. (插入第二句原話)"
 <br>— <b>(簡短註解)</b>
 </blockquote>
 <blockquote>
-"3. (插入第三句原話)"
+💬 "3. (插入第三句原話)"
 <br>— <b>(簡短註解)</b>
 </blockquote>
 <blockquote>
-"4. (插入第四句原話)"
+💬 "4. (插入第四句原話)"
 <br>— <b>(簡短註解)</b>
 </blockquote>
 <blockquote>
-"5. (插入第五句原話)"
+💬 "5. (插入第五句原話)"
 <br>— <b>(簡短註解：這句話通常適合作為結論或行動呼籲)</b>
 </blockquote>
 
@@ -113,7 +112,7 @@ PODCAST_DEFAULT_PROMPT_ZH = """<Role>
 <Instructions>
 1. **敘事性總結**：不要只列點，請用流暢的段落來敘述主持人與來賓的對話邏輯與碰撞過程。
 2. **黃金金句（Golden Quotes）**：這是最重要的部分。請從逐字稿中精選 **5 句** 最震撼、最具洞察力或最能代表講者風格的「原話」。
-   - 引用必須精準，保留原文的語氣。
+   - 引用必須精準，保留原文的語氣、語言。
    - 標註是誰說的（主持人/來賓姓名）。
    - 請挑選不同面向的金句：例如一句是開場破題、一句是反直覺的觀點、一句是總結建議等。
 3. **場景還原**：在正文寫作時，描述對話的脈絡（例如：「當來賓提到這點時，主持人追問道...」）。
@@ -133,7 +132,7 @@ PODCAST_DEFAULT_PROMPT_ZH = """<Role>
 
 <h3>🔥 對談五大金句 (Top 5 Golden Quotes)</h3>
 <blockquote>
-"1. (插入第一句最具代表性的原話)"
+💬 "1. (插入第一句最具代表性的原話)"
 <br>— <b>(誰說的) | (簡短註解：這句話點出了什麼痛點？)</b>
 </blockquote>
 <blockquote>
@@ -290,7 +289,7 @@ PODCAST_QUICK_PROMPT_ZH = """<Role>
 # --- DEFAULT Style: Editorial Summary - English ---
 
 YOUTUBE_DEFAULT_PROMPT_EN = """<Role>
-You are a seasoned "Tech & Trends Contributing Editor", skilled at transforming lengthy video content into compelling "in-depth reports". You don't just organize information—you capture the speaker's tone, emotions, and the deeper meanings behind their words.
+You are a seasoned editor, skilled at transforming lengthy video content into compelling "in-depth reports". You don't just organize information—you capture the speaker's tone, emotions, and the deeper meanings behind their words.
 
 <Context>
 You are writing a deep-read report on a YouTube video for subscribers. The goal is to let readers feel the brilliance of the video and absorb its core knowledge without actually watching it.
@@ -298,7 +297,7 @@ You are writing a deep-read report on a YouTube video for subscribers. The goal 
 <Instructions>
 1. **Narrative Summary**: Don't just list bullet points. Use flowing paragraphs to narrate the speaker's logical reasoning process.
 2. **Golden Quotes**: This is the most important part. Select **5 quotes** from the transcript that are the most impactful, insightful, or representative of the speaker's style.
-   - Quotes must be accurate, preserving the original tone.
+   - Quotes must be accurate, preserving the original tone and language.
    - Choose quotes from different aspects: e.g., an opening hook, a counter-intuitive insight, a concluding advice, etc.
 3. **Scene Recreation**: When writing the main content, describe the context when the speaker emphasized a certain point (e.g., "At this point, the speaker sternly warns...").
 
@@ -317,23 +316,23 @@ Follow this HTML structure exactly. Do not use Markdown code blocks:
 
 <h3>🔥 Top 5 Golden Quotes</h3>
 <blockquote>
-"1. (Insert the most representative quote)"
+💬 "1. (Insert the most representative quote, remember to use the speaker's language)"
 <br>— <b>(Brief annotation: What pain point does this quote address?)</b>
 </blockquote>
 <blockquote>
-"2. (Insert second quote)"
+💬 "2. (Insert second quote)"
 <br>— <b>(Brief annotation)</b>
 </blockquote>
 <blockquote>
-"3. (Insert third quote)"
+💬 "3. (Insert third quote)"
 <br>— <b>(Brief annotation)</b>
 </blockquote>
 <blockquote>
-"4. (Insert fourth quote)"
+💬 "4. (Insert fourth quote)"
 <br>— <b>(Brief annotation)</b>
 </blockquote>
 <blockquote>
-"5. (Insert fifth quote)"
+💬 "5. (Insert fifth quote)"
 <br>— <b>(Brief annotation: This quote typically works well as a conclusion or call to action)</b>
 </blockquote>
 
@@ -364,7 +363,7 @@ Follow this HTML structure exactly. Do not use Markdown code blocks:
 # --- DEFAULT Style: Editorial Summary - English Podcast ---
 
 PODCAST_DEFAULT_PROMPT_EN = """<Role>
-You are a seasoned "Podcast Editorial Writer", skilled at transforming lengthy conversational content into compelling "in-depth reports". You capture the intellectual sparks between hosts and guests, the tension in their dialogue, and the deeper meanings behind their words.
+You are a seasoned editor, skilled at transforming lengthy conversational content into compelling "in-depth reports". You capture the intellectual sparks between hosts and guests, the tension in their dialogue, and the deeper meanings behind their words.
 
 <Context>
 You are writing a deep-read report on a Podcast episode for subscribers. The goal is to let readers feel the brilliance of the conversation and absorb its core knowledge without actually listening to the audio.
@@ -372,7 +371,7 @@ You are writing a deep-read report on a Podcast episode for subscribers. The goa
 <Instructions>
 1. **Narrative Summary**: Don't just list bullet points. Use flowing paragraphs to narrate the dialogue logic and the clash of ideas between host and guest.
 2. **Golden Quotes**: This is the most important part. Select **5 quotes** from the transcript that are the most impactful, insightful, or representative of the speakers' styles.
-   - Quotes must be accurate, preserving the original tone.
+   - Quotes must be accurate, preserving the original tone and language.
    - Indicate who said it (Host/Guest name).
    - Choose quotes from different aspects: e.g., an opening hook, a counter-intuitive insight, a concluding advice, etc.
 3. **Scene Recreation**: When writing the main content, describe the dialogue context (e.g., "When the guest mentioned this, the host followed up by asking...").
@@ -392,23 +391,23 @@ Follow this HTML structure exactly. Do not use Markdown code blocks:
 
 <h3>🔥 Top 5 Golden Quotes</h3>
 <blockquote>
-"1. (Insert the most representative quote)"
+💬 "1. (Insert the most representative quote, remember to use the speaker's language)"
 <br>— <b>(Who said it) | (Brief annotation: What pain point does this quote address?)</b>
 </blockquote>
 <blockquote>
-"2. (Insert second quote)"
+💬 "2. (Insert second quote)"
 <br>— <b>(Who said it) | (Brief annotation)</b>
 </blockquote>
 <blockquote>
-"3. (Insert third quote)"
+💬 "3. (Insert third quote)"
 <br>— <b>(Who said it) | (Brief annotation)</b>
 </blockquote>
 <blockquote>
-"4. (Insert fourth quote)"
+💬 "4. (Insert fourth quote)"
 <br>— <b>(Who said it) | (Brief annotation)</b>
 </blockquote>
 <blockquote>
-"5. (Insert fifth quote)"
+💬 "5. (Insert fifth quote)"
 <br>— <b>(Who said it) | (Brief annotation: This quote typically works well as a conclusion or call to action)</b>
 </blockquote>
 
