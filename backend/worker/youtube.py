@@ -19,6 +19,9 @@ import subprocess
 import tempfile
 from datetime import datetime, timedelta
 import scrapetube
+import feedparser
+import ssl
+import urllib.request
 
 from .transcribe import fetch_transcript_with_fallback, transcribe_audio_file
 from .summarize import generate_summary
@@ -66,6 +69,92 @@ def parse_relative_time(text: str) -> datetime:
         return now - timedelta(days=num * 365)  # Approximate
     
     return now
+
+
+def fetch_videos_from_rss(youtube_channel_id: str, limit: int = 15) -> list | None:
+    """
+    Fetch videos from YouTube RSS feed with precise timestamps.
+    
+    Args:
+        youtube_channel_id: The YouTube channel ID (e.g., UC...)
+        limit: Maximum number of videos to return
+        
+    Returns:
+        List of video dicts with 'video_id', 'title', 'published_at', or None if RSS unavailable
+    """
+    rss_url = f"https://www.youtube.com/feeds/videos.xml?channel_id={youtube_channel_id}"
+    
+    try:
+        # Use custom SSL context to handle certificate issues on some systems (e.g., macOS)
+        ssl_context = ssl.create_default_context()
+        ssl_context.check_hostname = False
+        ssl_context.verify_mode = ssl.CERT_NONE
+        
+        req = urllib.request.Request(rss_url, headers={'User-Agent': 'Mozilla/5.0'})
+        with urllib.request.urlopen(req, context=ssl_context, timeout=15) as response:
+            content = response.read().decode('utf-8')
+        
+        feed = feedparser.parse(content)
+        
+        if not feed.entries:
+            return None
+        
+        videos = []
+        for entry in feed.entries[:limit]:
+            # Extract video ID from the yt:videoId tag
+            video_id = getattr(entry, 'yt_videoid', None)
+            if not video_id and hasattr(entry, 'id'):
+                # Fallback: extract from entry.id (format: yt:video:VIDEO_ID)
+                video_id = entry.id.split(':')[-1] if 'yt:video:' in entry.id else None
+            
+            if not video_id:
+                continue
+                
+            # Parse published time (precise!)
+            if hasattr(entry, 'published_parsed') and entry.published_parsed:
+                published_at = datetime(*entry.published_parsed[:6])
+            else:
+                published_at = datetime.now()
+            
+            videos.append({
+                'video_id': video_id,
+                'title': entry.title,
+                'published_at': published_at
+            })
+        
+        return videos if videos else None
+        
+    except Exception as e:
+        print(f"    - RSS fetch error: {e}")
+        return None
+
+
+def fetch_videos_from_scrapetube(youtube_channel_id: str, limit: int = 15) -> list:
+    """
+    Fetch videos using scrapetube (fallback with relative time parsing).
+    
+    Args:
+        youtube_channel_id: The YouTube channel ID
+        limit: Maximum number of videos to return
+        
+    Returns:
+        List of video dicts with 'video_id', 'title', 'published_at', 'raw_video' (for metadata)
+    """
+    videos = []
+    for video in scrapetube.get_channel(channel_id=youtube_channel_id, limit=limit):
+        video_id = video['videoId']
+        title = video['title']['runs'][0]['text']
+        published_time_text = video.get('publishedTimeText', {}).get('simpleText', '')
+        published_at = parse_relative_time(published_time_text)
+        
+        videos.append({
+            'video_id': video_id,
+            'title': title,
+            'published_at': published_at,
+            'raw_video': video  # Keep raw for channel title extraction
+        })
+    
+    return videos
 
 
 def download_and_transcribe_audio(video_id: str) -> str | None:
@@ -143,23 +232,37 @@ def process_youtube_channel(conn, channel: dict) -> None:
     
     print(f"  - Found {len(subscriber_list)} subscribers with combos: {demanded_combos}")
     
-    print("  - Fetching video list from YouTube...")
-    # NOTE: We propagate exceptions here so main daemon knows if it failed
-    videos = scrapetube.get_channel(channel_id=youtube_id, limit=1)
-    print("  - Video list fetched.")
+    # Fetch videos: RSS first (precise timestamps), scrapetube fallback (relative time)
+    print("  - Fetching video list from YouTube RSS...")
+    videos = fetch_videos_from_rss(youtube_id, limit=1)
+    video_source = "rss"
+    
+    if not videos:
+        print("  - RSS unavailable, falling back to scrapetube...")
+        videos = fetch_videos_from_scrapetube(youtube_id, limit=1)
+        video_source = "scrapetube"
+    
+    if not videos:
+        print("  - ❌ No videos found from any source.")
+        return
+        
+    print(f"  - Video list fetched (source: {video_source}).")
 
     first_video = True
-    for video in videos:
-        video_id = video['videoId']
-        title = video['title']['runs'][0]['text']
+    for video_info in videos:
+        video_id = video_info['video_id']
+        title = video_info['title']
+        published_at = video_info['published_at']
+        raw_video = video_info.get('raw_video')  # Only available in scrapetube fallback
+        
         print(f"  - Checking video: {title} ({video_id})")
         
-        # Update channel title if it's a placeholder
-        if first_video and (channel_title == 'New Channel'):
+        # Update channel title if it's a placeholder (only works with scrapetube)
+        if first_video and (channel_title == 'New Channel') and raw_video:
             try:
-                new_title = video.get('ownerText', {}).get('runs', [{}])[0].get('text')
+                new_title = raw_video.get('ownerText', {}).get('runs', [{}])[0].get('text')
                 if not new_title:
-                    new_title = video.get('shortBylineText', {}).get('runs', [{}])[0].get('text')
+                    new_title = raw_video.get('shortBylineText', {}).get('runs', [{}])[0].get('text')
                 
                 if new_title:
                     print(f"    - Found real channel title: {new_title}")
@@ -201,9 +304,7 @@ def process_youtube_channel(conn, channel: dict) -> None:
             continue
         
         print(f"    - ✅ Transcript fetched (source: {source})")
-        published_time_text = video.get('publishedTimeText', {}).get('simpleText', '')
-        published_at = parse_relative_time(published_time_text)
-        print(f"    - Published: {published_time_text} -> {published_at}")
+        print(f"    - Published: {published_at} (via {video_source})")
 
         # Insert video record (without summary - summaries are in separate table now)
         cursor.execute(
