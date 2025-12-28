@@ -1,6 +1,6 @@
 import { withAuth } from "next-auth/middleware";
 import createMiddleware from "next-intl/middleware";
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 import { routing } from "./routing";
 
@@ -23,11 +23,15 @@ const authMiddleware = withAuth(
 );
 
 export default function middleware(req: NextRequest) {
-    // Skip i18n redirect for RSS feed routes (they should work without locale prefix)
-    // This prevents 307 redirects that can cause issues with RSS Readers
+    // For RSS feed routes without locale prefix, rewrite to /en/feed/... internally
+    // This avoids 307 redirect (which causes issues with RSS Readers) while still routing correctly
     if (req.nextUrl.pathname.startsWith('/feed/user/')) {
-        return; // Let Next.js handle it directly without locale redirect
+        const url = req.nextUrl.clone();
+        url.pathname = `/en${req.nextUrl.pathname}`;
+        // Use rewrite (not redirect) - this keeps the URL clean for the client
+        return NextResponse.rewrite(url);
     }
+
 
     // Define paths that require authentication
     // Note: We need to account for locale prefixes (e.g., /en/subscriptions, /zh-TW/subscriptions)
