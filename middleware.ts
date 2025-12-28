@@ -23,6 +23,12 @@ const authMiddleware = withAuth(
 );
 
 export default function middleware(req: NextRequest) {
+    // Skip i18n redirect for RSS feed routes (they should work without locale prefix)
+    // This prevents 307 redirects that can cause issues with RSS Readers
+    if (req.nextUrl.pathname.startsWith('/feed/user/')) {
+        return; // Let Next.js handle it directly without locale redirect
+    }
+
     // Define paths that require authentication
     // Note: We need to account for locale prefixes (e.g., /en/subscriptions, /zh-TW/subscriptions)
     const privatePathnameRegex = /^\/(?:(zh-TW|en)\/)?(feed$|subscriptions|api\/channels|api\/podcasts|api\/subscriptions\/styles)/;
