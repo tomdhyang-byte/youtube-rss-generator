@@ -54,12 +54,12 @@ export default async function RootLayout({
       >
         <NextIntlClientProvider messages={messages}>
           <SessionProvider>
-            <QuotaProvider>
-              <QueryProvider>
+            <QueryProvider>
+              <QuotaProvider>
                 {children}
                 <Toaster position="top-center" />
-              </QueryProvider>
-            </QuotaProvider>
+              </QuotaProvider>
+            </QueryProvider>
           </SessionProvider>
         </NextIntlClientProvider>
       </body>
