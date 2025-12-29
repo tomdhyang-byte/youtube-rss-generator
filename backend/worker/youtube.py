@@ -71,6 +71,45 @@ def parse_relative_time(text: str) -> datetime:
     return now
 
 
+def is_short_video(video_id: str) -> bool:
+    """
+    Check if a video is a YouTube Short using HTTP Redirect method.
+    
+    Args:
+        video_id: The YouTube video ID
+        
+    Returns:
+        True if it's a Short, False if it's a regular video (or unable to determine)
+    """
+    try:
+        url = f"https://www.youtube.com/shorts/{video_id}"
+        
+        # Create a request that forbids automatic redirects
+        # Note: urllib.request follows redirects by default. We need to check the response URL.
+        # However, for efficiency, a HEAD request is better. 
+        # But 'http.client' or 'requests' is needed for true no-follow.
+        # With standard urllib, we can let it redirect and check the final URL.
+        
+        req = urllib.request.Request(url, method='HEAD', headers={'User-Agent': 'Mozilla/5.0'})
+        
+        # Use a custom SSL context to avoid certificate issues
+        ssl_context = ssl.create_default_context()
+        ssl_context.check_hostname = False
+        ssl_context.verify_mode = ssl.CERT_NONE
+        
+        with urllib.request.urlopen(req, context=ssl_context, timeout=5) as response:
+            final_url = response.geturl()
+            # If redirected to /watch, it's a regular video
+            if "/watch" in final_url:
+                return False
+            # If stays on /shorts/, it's a Short
+            return True
+            
+    except Exception as e:
+        print(f"    - Warning: Could not check if video is Short ({e}), assuming regular video.")
+        return False
+
+
 def fetch_videos_from_rss(youtube_channel_id: str, limit: int = 15) -> list | None:
     """
     Fetch videos from YouTube RSS feed with precise timestamps.
@@ -116,6 +155,11 @@ def fetch_videos_from_rss(youtube_channel_id: str, limit: int = 15) -> list | No
             else:
                 published_at = datetime.now()
             
+            # Check for Shorts (Redirect Method)
+            if is_short_video(video_id):
+                print(f"    - ⏭️  Skipping Shorts (RSS): {entry.title}")
+                continue
+
             videos.append({
                 'video_id': video_id,
                 'title': entry.title,
@@ -141,7 +185,8 @@ def fetch_videos_from_scrapetube(youtube_channel_id: str, limit: int = 15) -> li
         List of video dicts with 'video_id', 'title', 'published_at', 'raw_video' (for metadata)
     """
     videos = []
-    for video in scrapetube.get_channel(channel_id=youtube_channel_id, limit=limit):
+    # Use content_type='videos' to exclude Shorts
+    for video in scrapetube.get_channel(channel_id=youtube_channel_id, limit=limit, content_type="videos"):
         video_id = video['videoId']
         title = video['title']['runs'][0]['text']
         published_time_text = video.get('publishedTimeText', {}).get('simpleText', '')
