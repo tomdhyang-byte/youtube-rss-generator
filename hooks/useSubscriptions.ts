@@ -53,5 +53,6 @@ export function useSubscriptions() {
     return useQuery({
         queryKey: ['subscriptions'],
         queryFn: fetchSubscriptions,
+        staleTime: 0,
     });
 }
