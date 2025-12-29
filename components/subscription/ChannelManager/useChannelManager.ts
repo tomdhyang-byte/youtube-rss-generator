@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useLocale, useTranslations } from 'next-intl';
 import { toast } from 'sonner';
+import { useQueryClient } from '@tanstack/react-query';
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { useQuota } from "@/components/providers/QuotaProvider";
 import { ChannelManagerProps, YoutubeChannel, YoutubeChannelWithSubscription, PodcastWithSubscription } from './types';
@@ -18,6 +19,7 @@ export function useChannelManager({
 }: ChannelManagerProps) {
     const { data: session } = useSession();
     const { quota, refreshQuota } = useQuota();
+    const queryClient = useQueryClient();
     const locale = useLocale();
     const t = useTranslations('Subscriptions');
 
@@ -133,19 +135,40 @@ export function useChannelManager({
             return;
         }
 
-        // Authenticated mode: Optimistic Update
+        // Authenticated mode: Optimistic Update via React Query Cache
         const optimisticId = -Date.now();
         const urlToSubmit = youtubeUrl;
-        const optimisticChannel: YoutubeChannel = {
+
+        // Create optimistic subscription entry matching the cache structure
+        const optimisticSub = {
             id: optimisticId,
-            youtube_id: 'pending-' + optimisticId,
-            title: t('adding_channel'),
-            description: t('adding_channel_desc'),
-            rss_url: '',
-            last_updated: new Date().toISOString(),
+            channelId: optimisticId,
+            userId: session.user.id,
+            summaryStyle: 'DEFAULT' as const,
+            summaryLanguage: locale === 'zh-TW' ? 'ZH_TW' as const : 'EN' as const,
+            createdAt: new Date().toISOString(),
+            channel: {
+                id: optimisticId,
+                youtube_id: 'pending-' + optimisticId,
+                title: t('adding_channel'),
+                description: t('adding_channel_desc'),
+                rss_url: '',
+                last_updated: new Date().toISOString(),
+            }
         };
 
-        setOptimisticChannels(prev => [optimisticChannel, ...prev]);
+        // Snapshot for rollback
+        const previousData = queryClient.getQueryData(['subscriptions']);
+
+        // Optimistically update the cache
+        queryClient.setQueryData(['subscriptions'], (old: any) => {
+            if (!old) return old;
+            return {
+                ...old,
+                youtube: [optimisticSub, ...(old.youtube || [])],
+            };
+        });
+
         setYoutubeUrl('');
 
         try {
@@ -161,15 +184,14 @@ export function useChannelManager({
             }
 
             toast.success(t('channel_added_success'));
-            const data = await res.json();
 
-            // Success! Transition
-            setRecentlyAddedChannels(prev => [data.channel, ...prev]);
-            setOptimisticChannels(prev => prev.filter(c => c.id !== optimisticId));
-            onRefresh?.(data.channel);
+            // Invalidate to get fresh data from server
+            await queryClient.invalidateQueries({ queryKey: ['subscriptions'] });
+            queryClient.invalidateQueries({ queryKey: ['feed'] });
             refreshQuota();
         } catch (err: any) {
-            setOptimisticChannels(prev => prev.filter(c => c.id !== optimisticId));
+            // Rollback on error
+            queryClient.setQueryData(['subscriptions'], previousData);
             setError(err.message);
             toast.error(err.message);
         } finally {
