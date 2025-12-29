@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useTranslations } from 'next-intl';
 import { Channel, PodcastChannel } from '@/lib/types';
 import { SummaryStyle, SummaryLanguage } from '@prisma/client';
 
@@ -69,8 +70,19 @@ export function useSubscriptions() {
  * Mutation hook for adding a YouTube channel.
  * Implements proper optimistic update with cancelQueries protection.
  */
+/**
+ * Mutation hook for adding a YouTube channel.
+ * Implements proper optimistic update with cancelQueries protection.
+ */
 export function useAddChannelMutation() {
     const queryClient = useQueryClient();
+    // Dynamically load translations for optimistic UI
+    // Note: We need to use a namespace that is available. 'Subscriptions' seems appropriate.
+    // However, hooks run in components, so this is valid.
+    // Ensure 'Subscriptions' namespace is loaded in the page calling this.
+    // If not, we might need a fallback. But standard setup usually loads common namespaces.
+    // Let's assume 'Subscriptions' is available as it is used in ChannelManager.
+    const t = useTranslations('Subscriptions');
 
     return useMutation({
         mutationFn: async ({ url, locale }: { url: string; locale: string }) => {
@@ -108,8 +120,8 @@ export function useAddChannelMutation() {
                     channel: {
                         id: optimisticId,
                         youtube_id: 'pending-' + optimisticId,
-                        title: 'Adding channel...',
-                        description: 'Please wait while we fetch channel info...',
+                        title: t('adding_channel'),
+                        description: t('adding_channel_desc'),
                         rss_url: '',
                         last_updated: new Date().toISOString(),
                     }
@@ -135,9 +147,35 @@ export function useAddChannelMutation() {
             }
         },
 
+        onSuccess: (data, variables, context) => {
+            console.log('[useAddChannelMutation] onSuccess called with data:', data);
+            console.log('[useAddChannelMutation] subscription.channel:', data?.subscription?.channel);
+            // Merge real subscription data into cache, replacing optimistic entry
+            if (data?.subscription) {
+                if (!data.subscription.channel) {
+                    console.error('[useAddChannelMutation] WARNING: subscription.channel is missing!');
+                }
+                console.log('[useAddChannelMutation] Merging subscription into cache:', JSON.stringify(data.subscription, null, 2));
+                queryClient.setQueryData<SubscriptionData>(['subscriptions'], (old) => {
+                    console.log('[useAddChannelMutation] Old youtube array:', old?.youtube);
+                    if (!old) return old;
+                    // Remove optimistic entry (negative id) and add real subscription
+                    const filteredYoutube = old.youtube.filter(s => s.id > 0);
+                    console.log('[useAddChannelMutation] Filtered youtube (removed optimistic):', filteredYoutube);
+                    const newData = {
+                        ...old,
+                        youtube: [data.subscription, ...filteredYoutube],
+                    };
+                    console.log('[useAddChannelMutation] New youtube array:', newData.youtube);
+                    return newData;
+                });
+            } else {
+                console.log('[useAddChannelMutation] No subscription in response, skipping cache update');
+            }
+        },
+
         onSettled: () => {
-            // Always refetch to get fresh data after mutation completes
-            queryClient.invalidateQueries({ queryKey: ['subscriptions'] });
+            // Invalidate feed to show new content when available
             queryClient.invalidateQueries({ queryKey: ['feed'] });
         },
     });
@@ -149,6 +187,7 @@ export function useAddChannelMutation() {
  */
 export function useAddPodcastMutation() {
     const queryClient = useQueryClient();
+    const t = useTranslations('Subscriptions');
 
     return useMutation({
         mutationFn: async ({ url, locale }: { url: string; locale: string }) => {
@@ -182,8 +221,8 @@ export function useAddPodcastMutation() {
                     podcast: {
                         id: optimisticId,
                         feed_url: 'pending',
-                        title: 'Adding podcast...',
-                        description: 'Please wait while we fetch podcast info...',
+                        title: t('adding_podcast'),
+                        description: t('adding_podcast_desc'),
                         site_url: '',
                         image_url: null,
                         last_updated: new Date().toISOString(),
@@ -209,8 +248,23 @@ export function useAddPodcastMutation() {
             }
         },
 
+        onSuccess: (data, variables, context) => {
+            // Merge real subscription data into cache, replacing optimistic entry
+            if (data?.subscription) {
+                queryClient.setQueryData<SubscriptionData>(['subscriptions'], (old) => {
+                    if (!old) return old;
+                    // Remove optimistic entry (negative id) and add real subscription
+                    const filteredPodcasts = old.podcasts.filter(s => s.id > 0);
+                    return {
+                        ...old,
+                        podcasts: [data.subscription, ...filteredPodcasts],
+                    };
+                });
+            }
+        },
+
         onSettled: () => {
-            queryClient.invalidateQueries({ queryKey: ['subscriptions'] });
+            // Invalidate feed to show new content when available
             queryClient.invalidateQueries({ queryKey: ['feed'] });
         },
     });

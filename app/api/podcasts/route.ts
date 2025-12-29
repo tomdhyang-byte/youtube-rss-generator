@@ -137,12 +137,15 @@ export async function POST(request: Request) {
         const defaultLanguage = localeToSummaryLanguage(locale || 'en');
         console.log(`[API] Creating subscription with language: ${defaultLanguage}`);
 
-        await prisma.podcastSubscription.create({
+        const subscription = await prisma.podcastSubscription.create({
             data: {
                 userId,
                 podcastId: podcast.id,
                 summaryLanguage: defaultLanguage,
-            }
+            },
+            include: {
+                podcast: true,  // Include full podcast object
+            },
         });
 
         // 8. Trigger Background Worker
@@ -152,7 +155,8 @@ export async function POST(request: Request) {
 
         return NextResponse.json({
             success: true,
-            podcast,
+            subscription,  // Full subscription with nested podcast
+            podcast,       // Keep for backward compatibility
             message: 'Successfully subscribed to podcast'
         });
 

@@ -48,12 +48,7 @@ export function TopNav() {
 
                 {/* Quota Badge */}
                 {status === 'authenticated' && (
-                    isLoading ? (
-                        // Loading placeholder - prevents flicker
-                        <div className="mr-3 px-3 py-1 rounded-full text-xs border bg-gray-800 border-gray-700 min-w-[80px] text-center">
-                            <span className="opacity-50 animate-pulse">• • •</span>
-                        </div>
-                    ) : quota ? (
+                    quota ? (
                         quota.isAdmin ? (
                             <div className="mr-3 px-3 py-1 rounded-full text-xs border bg-purple-600 text-white border-purple-500 font-bold">
                                 {t('admin')} ∞
@@ -68,6 +63,11 @@ export function TopNav() {
                                 {t('free_plan')} • {t('quota_remaining', { count: (quota.limit ?? 0) - quota.current })}
                             </div>
                         )
+                    ) : isLoading ? (
+                        // Only show loading placeholder if we have NO data yet (initial load)
+                        <div className="mr-3 px-3 py-1 rounded-full text-xs border bg-gray-800 border-gray-700 min-w-[80px] text-center">
+                            <span className="opacity-50 animate-pulse">• • •</span>
+                        </div>
                     ) : null
                 )}
 

@@ -19,6 +19,10 @@ export default function SubscriptionsPage() {
     const t = useTranslations('Subscriptions');
     const tCommon = useTranslations('Common');
 
+    // Debug: Log subscriptions on every render
+    console.log('[SubscriptionsPage] Render with subscriptions:', subscriptions?.youtube?.length, 'youtube,', subscriptions?.podcasts?.length, 'podcasts');
+    console.log('[SubscriptionsPage] YouTube IDs:', subscriptions?.youtube?.map(s => s.id));
+
     // ...
 
     return (

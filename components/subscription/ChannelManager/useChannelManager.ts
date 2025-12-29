@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useLocale, useTranslations } from 'next-intl';
 import { toast } from 'sonner';
@@ -41,22 +41,38 @@ export function useChannelManager({
     // Guest mode state
     const [localChannels, setLocalChannels] = useLocalStorage<GuestChannel[]>('guest_channels', []);
 
-    // Optimistic UI state for deletions (keep for delete flow)
-    const [optimisticDeletedIds, setOptimisticDeletedIds] = useState<number[]>([]);
+    // Optimistic UI state for deletions (list of "${type}-${id}")
+    const [optimisticDeletedIds, setOptimisticDeletedIds] = useState<string[]>([]);
 
     // Optimistic UI state for style/language changes
     const [optimisticStyles, setOptimisticStyles] = useState<Record<string, SummaryStyle>>({});
     const [optimisticLanguages, setOptimisticLanguages] = useState<Record<string, SummaryLanguage>>({});
 
     // Determine which channels to display
-    // For authenticated users, use initialChannels from React Query cache (includes optimistic data)
-    // For guests, use localChannels from localStorage
     const displayChannels = session
-        ? initialChannels.filter(channel => !optimisticDeletedIds.includes(channel.id))
-        : localChannels.filter(channel => !optimisticDeletedIds.includes(channel.id));
+        ? initialChannels.filter(channel => !optimisticDeletedIds.includes(`youtube-${channel.id}`))
+        : localChannels.filter(channel => !optimisticDeletedIds.includes(`youtube-${channel.id}`));
 
     const displayPodcasts = initialPodcasts
-        .filter(podcast => !optimisticDeletedIds.includes(podcast.id));
+        .filter(podcast => !optimisticDeletedIds.includes(`podcast-${podcast.id}`));
+
+    // Auto-clear optimisticDeletedIds when data confirms deletion
+    useEffect(() => {
+        setOptimisticDeletedIds(prev => prev.filter(key => {
+            const [type, idStr] = key.split('-');
+            const id = parseInt(idStr);
+            if (type === 'youtube') {
+                // Keep suppressing if it STILL exists in data (stale)
+                // Remove (stop suppressing) if it is GONE from data (confirmed delete)
+                return session
+                    ? initialChannels.some(c => c.id === id)
+                    : localChannels.some(c => c.id === id);
+            } else if (type === 'podcast') {
+                return initialPodcasts.some(p => p.id === id);
+            }
+            return false;
+        }));
+    }, [initialChannels, initialPodcasts, localChannels, session]);
 
     // Check if user can add more channels
     const canAddMore = !quota || quota.isAdmin || quota.current < (quota.limit || 1);
@@ -175,9 +191,10 @@ export function useChannelManager({
         if (!deleteTarget) return;
 
         const { id: targetId, type: targetType, name: targetName } = deleteTarget;
+        const optimisticKey = `${targetType}-${targetId}`;
 
         setShowDeleteDialog(false);
-        setOptimisticDeletedIds(prev => [...prev, targetId]);
+        setOptimisticDeletedIds(prev => [...prev, optimisticKey]);
 
         if (!session && targetType === 'youtube') {
             const updatedLocal = localChannels.filter(c => c.id !== targetId);
@@ -207,8 +224,13 @@ export function useChannelManager({
             // Invalidate to refresh data
             queryClient.invalidateQueries({ queryKey: ['subscriptions'] });
             queryClient.invalidateQueries({ queryKey: ['feed'] });
+
+            // NOTE: We do NOT manually clear optimisticDeletedIds here anymore.
+            // The useEffect above handles cleanup once the new data (without the item) arrives.
+            // This prevents the "flashback" where item reappears briefly before vanish.
         } catch (err: any) {
-            setOptimisticDeletedIds(prev => prev.filter(id => id !== targetId));
+            // Revert on error
+            setOptimisticDeletedIds(prev => prev.filter(key => key !== optimisticKey));
             toast.error(err.message || "Failed to unsubscribe");
         } finally {
             setDeleteTarget(null);

@@ -155,20 +155,30 @@ export async function POST(request: Request) {
         const defaultLanguage = localeToSummaryLanguage(locale || 'en');
         console.log(`[API] Creating subscription with language: ${defaultLanguage}`);
 
+        let subscription;
         try {
-            await prisma.youtubeSubscription.create({
+            subscription = await prisma.youtubeSubscription.create({
                 data: {
                     userId,
                     channelId: channel.id,
                     summaryLanguage: defaultLanguage,
-                }
+                },
+                include: {
+                    channel: true,  // Include the full channel object
+                },
             });
         } catch (error: any) {
             // Handle unique constraint violation (P2002) - User double-clicked or race condition
             if (error.code === 'P2002') {
                 console.log('[API] Subscription already exists (race condition handled)');
+                // Fetch existing subscription to return consistent response
+                const existingSub = await prisma.youtubeSubscription.findFirst({
+                    where: { userId, channelId: channel.id },
+                    include: { channel: true },
+                });
                 return NextResponse.json({
                     success: true,
+                    subscription: existingSub,
                     channel,
                     message: 'Already subscribed'
                 });
@@ -183,7 +193,8 @@ export async function POST(request: Request) {
 
         return NextResponse.json({
             success: true,
-            channel,
+            subscription,  // Full subscription object with nested channel
+            channel,       // Keep for backward compatibility
             message: 'Successfully subscribed to channel'
         });
 
