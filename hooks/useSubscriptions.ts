@@ -34,7 +34,15 @@ interface SubscriptionData {
 }
 
 export const fetchSubscriptions = async (): Promise<SubscriptionData> => {
-    const res = await fetch('/api/subscriptions');
+    // Prevent caching to ensure fresh data on navigation
+    const res = await fetch('/api/subscriptions', {
+        cache: 'no-store',
+        headers: {
+            'Pragma': 'no-cache',
+            'Cache-Control': 'no-store, no-cache, must-revalidate',
+        }
+    });
+
     if (!res.ok) {
         throw new Error('Failed to fetch subscriptions');
     }

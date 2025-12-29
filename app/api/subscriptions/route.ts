@@ -2,6 +2,9 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getSession, isAdmin } from '@/lib/auth';
 
+// Ensure this route is always dynamic and never cached statically
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: Request) {
     console.log('[API] GET /api/subscriptions called');
 
