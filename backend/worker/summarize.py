@@ -78,7 +78,8 @@ YOUTUBE_DEFAULT_PROMPT_ZH = """<Role>
 <br>— <b>(簡短註解：這句話通常適合作為結論或行動呼籲)</b>
 </blockquote>
 
-<br>
+<hr>
+
 <h3>🧐 核心論點解析 (Deep Dive)</h3>
 <p><b>論點一：(請填寫標題)</b></p>
 <p>(使用敘事性的段落來解釋此論點。請在此處嘗試嵌入講者的原話，例如：「正如講者所說『......』，這意味著......」。)</p>
@@ -89,15 +90,17 @@ YOUTUBE_DEFAULT_PROMPT_ZH = """<Role>
 <p><b>論點三：(請填寫標題)</b></p>
 <p>(繼續使用敘事性段落。)</p>
 
-<br>
-<h3>� 實戰應用 (Key Takeaways)</h3>
+<hr>
+
+<h3>💡 實戰應用 (Key Takeaways)</h3>
 <ul>
     <li><b>(行動建議 1)</b>：(結合講者建議與具體執行步驟)</li>
     <li><b>(行動建議 2)</b>：(結合講者建議與具體執行步驟)</li>
     <li><b>(行動建議 3)</b>：(結合講者建議與具體執行步驟)</li>
 </ul>
 
-<br>
+<hr>
+
 <h3>🔍 編輯觀點 (Editor's Note)</h3>
 <p>(以編輯的角度，總結這部影片的獨特價值，或是它遺漏了什麼？這部分是給讀者的最後思考。)</p>"""
 
@@ -152,7 +155,8 @@ PODCAST_DEFAULT_PROMPT_ZH = """<Role>
 <br>— <b>(誰說的) | (簡短註解：這句話通常適合作為結論或行動呼籲)</b>
 </blockquote>
 
-<br>
+<hr>
+
 <h3>🧐 核心論點解析 (Deep Dive)</h3>
 <p><b>論點一：(請填寫標題)</b></p>
 <p>(使用敘事性的段落來解釋此論點。描述主持人與來賓如何討論這個議題，例如：「來賓認為『......』，而主持人則補充道......」。)</p>
@@ -163,16 +167,18 @@ PODCAST_DEFAULT_PROMPT_ZH = """<Role>
 <p><b>論點三：(請填寫標題)</b></p>
 <p>(繼續使用敘事性段落。)</p>
 
-<br>
-<h3>� 實戰應用 (Key Takeaways)</h3>
+<hr>
+
+<h3>🎯 實戰應用 (Key Takeaways)</h3>
 <ul>
     <li><b>(行動建議 1)</b>：(結合對談結論與具體執行步驟)</li>
     <li><b>(行動建議 2)</b>：(結合對談結論與具體執行步驟)</li>
     <li><b>(行動建議 3)</b>：(結合對談結論與具體執行步驟)</li>
 </ul>
 
-<br>
-<h3>� 編輯觀點 (Editor's Note)</h3>
+<hr>
+
+<h3>🔍 編輯觀點 (Editor's Note)</h3>
 <p>(以編輯的角度，總結這集對談的獨特價值，或是它遺漏了什麼？這部分是給讀者的最後思考。)</p>"""
 
 
@@ -336,7 +342,8 @@ Follow this HTML structure exactly. Do not use Markdown code blocks:
 <br>— <b>(Brief annotation: This quote typically works well as a conclusion or call to action)</b>
 </blockquote>
 
-<br>
+<hr>
+
 <h3>🧐 Deep Dive</h3>
 <p><b>Point One: (Fill in title)</b></p>
 <p>(Use narrative paragraphs to explain this point. Try to embed the speaker's original words here, e.g., "As the speaker said, '......', this means......")</p>
@@ -348,14 +355,15 @@ Follow this HTML structure exactly. Do not use Markdown code blocks:
 <p>(Continue with narrative paragraphs.)</p>
 
 <br>
-<h3>� Key Takeaways</h3>
+<h3>💡 Key Takeaways</h3>
 <ul>
     <li><b>(Action 1)</b>: (Combine speaker's advice with specific execution steps)</li>
     <li><b>(Action 2)</b>: (Combine speaker's advice with specific execution steps)</li>
     <li><b>(Action 3)</b>: (Combine speaker's advice with specific execution steps)</li>
 </ul>
 
-<br>
+<hr>
+
 <h3>🔍 Editor's Note</h3>
 <p>(From an editor's perspective, summarize the unique value of this video, or what it might have missed. This is the final thought for readers.)</p>"""
 
@@ -411,7 +419,8 @@ Follow this HTML structure exactly. Do not use Markdown code blocks:
 <br>— <b>(Who said it) | (Brief annotation: This quote typically works well as a conclusion or call to action)</b>
 </blockquote>
 
-<br>
+<hr>
+
 <h3>🧐 Deep Dive</h3>
 <p><b>Point One: (Fill in title)</b></p>
 <p>(Use narrative paragraphs to explain this point. Describe how the host and guest discussed this topic, e.g., "The guest believes '...', and the host adds...".)</p>
@@ -423,15 +432,16 @@ Follow this HTML structure exactly. Do not use Markdown code blocks:
 <p>(Continue with narrative paragraphs.)</p>
 
 <br>
-<h3>� Key Takeaways</h3>
+<h3>💡 Key Takeaways</h3>
 <ul>
     <li><b>(Action 1)</b>: (Combine dialogue conclusions with specific execution steps)</li>
     <li><b>(Action 2)</b>: (Combine dialogue conclusions with specific execution steps)</li>
     <li><b>(Action 3)</b>: (Combine dialogue conclusions with specific execution steps)</li>
 </ul>
 
-<br>
-<h3>� Editor's Note</h3>
+<hr>
+
+<h3>🔍 Editor's Note</h3>
 <p>(From an editor's perspective, summarize the unique value of this conversation, or what it might have missed. This is the final thought for readers.)</p>"""
 
 

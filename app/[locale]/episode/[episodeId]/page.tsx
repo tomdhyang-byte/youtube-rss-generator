@@ -84,6 +84,10 @@ export default async function EpisodeSummaryPage({ params }: PageProps) {
                                 prose-li:text-foreground/90 prose-li:leading-relaxed prose-li:my-2
                                 prose-strong:text-foreground prose-strong:text-orange-400
                                 prose-a:text-primary
+                                prose-blockquote:border-l-4 prose-blockquote:border-orange-400
+                                prose-blockquote:bg-orange-400/10 prose-blockquote:rounded-r-lg
+                                prose-blockquote:px-4 prose-blockquote:py-3 prose-blockquote:my-4
+                                prose-blockquote:not-italic prose-blockquote:text-foreground/90
                                 [&>p]:my-4
                                 [&_br]:block [&_br]:my-2"
                             dangerouslySetInnerHTML={{ __html: summary.content }}

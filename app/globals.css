@@ -76,7 +76,7 @@
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
   --radius: 0.625rem;
-  
+
   /* Brand Colors - Orange Theme */
   --brand-500: #f97316;
   --brand-600: #ea580c;
@@ -88,7 +88,39 @@
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
   }
+}
+
+/* Custom Blockquote Styling for AI Summary */
+.prose blockquote {
+  border-left: 4px solid #f97316;
+  /* orange-500 */
+  background-color: rgba(249, 115, 22, 0.1);
+  /* orange-400/10 */
+  padding: 0.75rem 1rem;
+  margin: 1rem 0;
+  border-radius: 0 0.5rem 0.5rem 0;
+  font-style: normal;
+  color: inherit;
+}
+
+.prose blockquote p {
+  margin: 0;
+}
+
+/* Heading Hierarchy for AI Summary */
+.prose h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-top: 2.5rem;
+  margin-bottom: 0.75rem;
+}
+
+/* Horizontal Rule Spacing */
+.prose hr {
+  margin: 2rem 0;
+  border-color: rgba(255, 255, 255, 0.1);
 }
