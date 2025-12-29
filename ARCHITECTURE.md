@@ -27,9 +27,14 @@ graph TD
     Worker -->|Write Content| DB
 ```
 
+### Frontend Architecture (React Query & State)
+*   **Single Source of Truth**: The React Query Cache (`useSubscriptions`) is the master state for all subscription data.
+*   **Optimistic UI**: All mutations (Add/Delete) use `onMutate` to immediately update the cache with temporary data, and `onSuccess` to swap in real data (or `onError` to rollback).
+*   **UI Components**: Dumb components that render data from the cache. `useChannelManager` handles *UI state* (modals, forms) but delegates *Data Logic* to `useSubscriptions` hooks.
+
 ---
 
-## �️ Navigation Guide (Where do I modify...?)
+## 🧭 Navigation Guide (Where do I modify...?)
 
 Use this guide to quickly find the file you need to change based on your intent.
 
@@ -39,7 +44,8 @@ Use this guide to quickly find the file you need to change based on your intent.
 | **Homepage** (Landing) | `app/[locale]/page.tsx` |
 | **Feed Page** (Reader) | `app/[locale]/feed/page.tsx` |
 | **Subscription Manager** | `components/subscription/ChannelManager/index.tsx` |
-| **Subscription Logic** | `components/subscription/ChannelManager/useChannelManager.ts` (State/Logic) |
+| **Subscription mutations (Add/Delete)** | `hooks/useSubscriptions.ts` (Core Logic) |
+| **Subscription UI State (Modals)** | `components/subscription/ChannelManager/useChannelManager.ts` |
 | **Colors / Theme** | `app/globals.css` |
 | **Button Styles** | `components/ui/Button.tsx` |
 | **Card Design** | `components/subscription/ChannelManager/SubscriptionCard.tsx` |

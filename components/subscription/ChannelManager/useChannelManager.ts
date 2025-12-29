@@ -1,12 +1,12 @@
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useLocale, useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import { useQueryClient } from '@tanstack/react-query';
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { useQuota } from "@/components/providers/QuotaProvider";
-import { useAddChannelMutation, useAddPodcastMutation } from "@/hooks/useSubscriptions";
+import { useAddChannelMutation, useAddPodcastMutation, useDeleteChannelMutation, useDeletePodcastMutation } from "@/hooks/useSubscriptions";
 import { ChannelManagerProps, YoutubeChannel } from './types';
 import { GuestChannel } from '@/lib/types';
 import { SummaryStyle } from '@/components/ui/StyleSelector';
@@ -27,6 +27,8 @@ export function useChannelManager({
     // Mutations (handle optimistic updates via React Query)
     const addChannelMutation = useAddChannelMutation();
     const addPodcastMutation = useAddPodcastMutation();
+    const deleteChannelMutation = useDeleteChannelMutation();
+    const deletePodcastMutation = useDeletePodcastMutation();
 
     // Form state
     const [youtubeUrl, setYoutubeUrl] = useState('');
@@ -41,38 +43,13 @@ export function useChannelManager({
     // Guest mode state
     const [localChannels, setLocalChannels] = useLocalStorage<GuestChannel[]>('guest_channels', []);
 
-    // Optimistic UI state for deletions (list of "${type}-${id}")
-    const [optimisticDeletedIds, setOptimisticDeletedIds] = useState<string[]>([]);
-
     // Optimistic UI state for style/language changes
     const [optimisticStyles, setOptimisticStyles] = useState<Record<string, SummaryStyle>>({});
     const [optimisticLanguages, setOptimisticLanguages] = useState<Record<string, SummaryLanguage>>({});
 
     // Determine which channels to display
-    const displayChannels = session
-        ? initialChannels.filter(channel => !optimisticDeletedIds.includes(`youtube-${channel.id}`))
-        : localChannels.filter(channel => !optimisticDeletedIds.includes(`youtube-${channel.id}`));
-
-    const displayPodcasts = initialPodcasts
-        .filter(podcast => !optimisticDeletedIds.includes(`podcast-${podcast.id}`));
-
-    // Auto-clear optimisticDeletedIds when data confirms deletion
-    useEffect(() => {
-        setOptimisticDeletedIds(prev => prev.filter(key => {
-            const [type, idStr] = key.split('-');
-            const id = parseInt(idStr);
-            if (type === 'youtube') {
-                // Keep suppressing if it STILL exists in data (stale)
-                // Remove (stop suppressing) if it is GONE from data (confirmed delete)
-                return session
-                    ? initialChannels.some(c => c.id === id)
-                    : localChannels.some(c => c.id === id);
-            } else if (type === 'podcast') {
-                return initialPodcasts.some(p => p.id === id);
-            }
-            return false;
-        }));
-    }, [initialChannels, initialPodcasts, localChannels, session]);
+    const displayChannels = session ? initialChannels : localChannels;
+    const displayPodcasts = initialPodcasts;
 
     // Check if user can add more channels
     const canAddMore = !quota || quota.isAdmin || quota.current < (quota.limit || 1);
@@ -191,11 +168,10 @@ export function useChannelManager({
         if (!deleteTarget) return;
 
         const { id: targetId, type: targetType, name: targetName } = deleteTarget;
-        const optimisticKey = `${targetType}-${targetId}`;
 
         setShowDeleteDialog(false);
-        setOptimisticDeletedIds(prev => [...prev, optimisticKey]);
 
+        // Guest Mode Deletion (Local State)
         if (!session && targetType === 'youtube') {
             const updatedLocal = localChannels.filter(c => c.id !== targetId);
             setLocalChannels(updatedLocal);
@@ -204,37 +180,34 @@ export function useChannelManager({
             return;
         }
 
-        toast.success(`Successfully unsubscribed from ${targetName}!`);
-
-        try {
-            const endpoint = targetType === 'youtube' ? '/api/channels' : '/api/podcasts';
-            const idKey = targetType === 'youtube' ? 'channelId' : 'podcastId';
-
-            const res = await fetch(endpoint, {
-                method: 'DELETE',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ [idKey]: targetId }),
-            });
-
-            if (!res.ok) {
-                const data = await res.json().catch(() => ({}));
-                throw new Error(data.error || 'Failed to unsubscribe');
-            }
-
-            // Invalidate to refresh data
-            queryClient.invalidateQueries({ queryKey: ['subscriptions'] });
-            queryClient.invalidateQueries({ queryKey: ['feed'] });
-
-            // NOTE: We do NOT manually clear optimisticDeletedIds here anymore.
-            // The useEffect above handles cleanup once the new data (without the item) arrives.
-            // This prevents the "flashback" where item reappears briefly before vanish.
-        } catch (err: any) {
-            // Revert on error
-            setOptimisticDeletedIds(prev => prev.filter(key => key !== optimisticKey));
-            toast.error(err.message || "Failed to unsubscribe");
-        } finally {
-            setDeleteTarget(null);
+        // Authenticated Mode Deletion (React Query Mutation)
+        if (targetType === 'youtube') {
+            deleteChannelMutation.mutate(
+                { channelId: targetId },
+                {
+                    onSuccess: () => {
+                        toast.success(`Successfully unsubscribed from ${targetName}!`);
+                    },
+                    onError: (err) => {
+                        toast.error(err.message || "Failed to unsubscribe");
+                    }
+                }
+            );
+        } else {
+            deletePodcastMutation.mutate(
+                { podcastId: targetId },
+                {
+                    onSuccess: () => {
+                        toast.success(`Successfully unsubscribed from ${targetName}!`);
+                    },
+                    onError: (err) => {
+                        toast.error(err.message || "Failed to unsubscribe");
+                    }
+                }
+            );
         }
+
+        setDeleteTarget(null);
     };
 
     const copyRssLink = (id: number, type: 'youtube' | 'podcast') => {

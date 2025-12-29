@@ -148,29 +148,18 @@ export function useAddChannelMutation() {
         },
 
         onSuccess: (data, variables, context) => {
-            console.log('[useAddChannelMutation] onSuccess called with data:', data);
-            console.log('[useAddChannelMutation] subscription.channel:', data?.subscription?.channel);
             // Merge real subscription data into cache, replacing optimistic entry
             if (data?.subscription) {
-                if (!data.subscription.channel) {
-                    console.error('[useAddChannelMutation] WARNING: subscription.channel is missing!');
-                }
-                console.log('[useAddChannelMutation] Merging subscription into cache:', JSON.stringify(data.subscription, null, 2));
                 queryClient.setQueryData<SubscriptionData>(['subscriptions'], (old) => {
-                    console.log('[useAddChannelMutation] Old youtube array:', old?.youtube);
                     if (!old) return old;
                     // Remove optimistic entry (negative id) and add real subscription
                     const filteredYoutube = old.youtube.filter(s => s.id > 0);
-                    console.log('[useAddChannelMutation] Filtered youtube (removed optimistic):', filteredYoutube);
                     const newData = {
                         ...old,
                         youtube: [data.subscription, ...filteredYoutube],
                     };
-                    console.log('[useAddChannelMutation] New youtube array:', newData.youtube);
                     return newData;
                 });
-            } else {
-                console.log('[useAddChannelMutation] No subscription in response, skipping cache update');
             }
         },
 
@@ -265,6 +254,113 @@ export function useAddPodcastMutation() {
 
         onSettled: () => {
             // Invalidate feed to show new content when available
+            queryClient.invalidateQueries({ queryKey: ['feed'] });
+        },
+    });
+}
+
+/**
+ * Mutation hook for deleting a YouTube channel.
+ */
+export function useDeleteChannelMutation() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: async ({ channelId }: { channelId: number }) => {
+            const res = await fetch('/api/channels', {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ channelId }),
+            });
+            if (!res.ok) {
+                const data = await res.json().catch(() => ({}));
+                throw new Error(data.error || 'Failed to delete channel');
+            }
+            return res.json();
+        },
+
+        onMutate: async ({ channelId }) => {
+            // 1. Cancel any in-flight refetches
+            await queryClient.cancelQueries({ queryKey: ['subscriptions'] });
+
+            // 2. Snapshot current data
+            const previousData = queryClient.getQueryData<SubscriptionData>(['subscriptions']);
+
+            // 3. Optimistically update: Remove the channel
+            queryClient.setQueryData<SubscriptionData>(['subscriptions'], (old) => {
+                if (!old) return old;
+                return {
+                    ...old,
+                    youtube: old.youtube.filter(s => s.channelId !== channelId),
+                    quota: {
+                        ...old.quota,
+                        current: Math.max(0, old.quota.current - 1),
+                    }
+                };
+            });
+
+            return { previousData };
+        },
+
+        onError: (err, variables, context) => {
+            // Rollback on error
+            if (context?.previousData) {
+                queryClient.setQueryData(['subscriptions'], context.previousData);
+            }
+        },
+
+        onSettled: () => {
+            queryClient.invalidateQueries({ queryKey: ['feed'] });
+        },
+    });
+}
+
+/**
+ * Mutation hook for deleting a Podcast.
+ */
+export function useDeletePodcastMutation() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: async ({ podcastId }: { podcastId: number }) => {
+            const res = await fetch('/api/podcasts', {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ podcastId }),
+            });
+            if (!res.ok) {
+                const data = await res.json().catch(() => ({}));
+                throw new Error(data.error || 'Failed to delete podcast');
+            }
+            return res.json();
+        },
+
+        onMutate: async ({ podcastId }) => {
+            await queryClient.cancelQueries({ queryKey: ['subscriptions'] });
+            const previousData = queryClient.getQueryData<SubscriptionData>(['subscriptions']);
+
+            queryClient.setQueryData<SubscriptionData>(['subscriptions'], (old) => {
+                if (!old) return old;
+                return {
+                    ...old,
+                    podcasts: old.podcasts.filter(s => s.podcastId !== podcastId),
+                    quota: {
+                        ...old.quota,
+                        current: Math.max(0, old.quota.current - 1),
+                    }
+                };
+            });
+
+            return { previousData };
+        },
+
+        onError: (err, variables, context) => {
+            if (context?.previousData) {
+                queryClient.setQueryData(['subscriptions'], context.previousData);
+            }
+        },
+
+        onSettled: () => {
             queryClient.invalidateQueries({ queryKey: ['feed'] });
         },
     });
