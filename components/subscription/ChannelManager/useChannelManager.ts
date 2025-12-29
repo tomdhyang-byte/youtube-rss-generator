@@ -6,7 +6,8 @@ import { toast } from 'sonner';
 import { useQueryClient } from '@tanstack/react-query';
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { useQuota } from "@/components/providers/QuotaProvider";
-import { ChannelManagerProps, YoutubeChannel, YoutubeChannelWithSubscription, PodcastWithSubscription } from './types';
+import { useAddChannelMutation, useAddPodcastMutation } from "@/hooks/useSubscriptions";
+import { ChannelManagerProps, YoutubeChannel } from './types';
 import { GuestChannel } from '@/lib/types';
 import { SummaryStyle } from '@/components/ui/StyleSelector';
 import { SummaryLanguage } from '@/components/ui/LanguageSelector';
@@ -18,15 +19,18 @@ export function useChannelManager({
     onRefresh
 }: ChannelManagerProps) {
     const { data: session } = useSession();
-    const { quota, refreshQuota } = useQuota();
+    const { quota } = useQuota();
     const queryClient = useQueryClient();
     const locale = useLocale();
     const t = useTranslations('Subscriptions');
 
+    // Mutations (handle optimistic updates via React Query)
+    const addChannelMutation = useAddChannelMutation();
+    const addPodcastMutation = useAddPodcastMutation();
+
     // Form state
     const [youtubeUrl, setYoutubeUrl] = useState('');
     const [podcastUrl, setPodcastUrl] = useState('');
-    const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
 
     // Modal state
@@ -37,41 +41,28 @@ export function useChannelManager({
     // Guest mode state
     const [localChannels, setLocalChannels] = useLocalStorage<GuestChannel[]>('guest_channels', []);
 
-    // Optimistic UI state for deletions
+    // Optimistic UI state for deletions (keep for delete flow)
     const [optimisticDeletedIds, setOptimisticDeletedIds] = useState<number[]>([]);
-
-    // Optimistic UI state for additions
-    const [optimisticChannels, setOptimisticChannels] = useState<YoutubeChannel[]>([]);
-    const [optimisticPodcasts, setOptimisticPodcasts] = useState<any[]>([]);
-
-    // Recently added items (Bridging state to prevent flicker)
-    const [recentlyAddedChannels, setRecentlyAddedChannels] = useState<YoutubeChannel[]>([]);
-    const [recentlyAddedPodcasts, setRecentlyAddedPodcasts] = useState<any[]>([]);
 
     // Optimistic UI state for style/language changes
     const [optimisticStyles, setOptimisticStyles] = useState<Record<string, SummaryStyle>>({});
     const [optimisticLanguages, setOptimisticLanguages] = useState<Record<string, SummaryLanguage>>({});
 
     // Determine which channels to display
-    const realChannels = session ? initialChannels : localChannels;
+    // For authenticated users, use initialChannels from React Query cache (includes optimistic data)
+    // For guests, use localChannels from localStorage
+    const displayChannels = session
+        ? initialChannels.filter(channel => !optimisticDeletedIds.includes(channel.id))
+        : localChannels.filter(channel => !optimisticDeletedIds.includes(channel.id));
 
-    // Memoized deduping: recently added items that are NOT yet in realChannels
-    const uniqueRecentChannels = recentlyAddedChannels.filter(
-        recent => !realChannels.some(real => real.id === recent.id)
-    );
-    // Explicitly cast optimisticChannels to YoutubeChannelWithSubscription[] (or similar) to match displayChannels type if needed, 
-    // but here we just combine them. The rendering component handles the display.
-    const displayChannels = [...optimisticChannels, ...uniqueRecentChannels, ...realChannels]
-        .filter(channel => !optimisticDeletedIds.includes(channel.id));
-
-    const uniqueRecentPodcasts = recentlyAddedPodcasts.filter(
-        recent => !initialPodcasts.some(real => real.id === recent.id)
-    );
-    const displayPodcasts = [...optimisticPodcasts, ...uniqueRecentPodcasts, ...initialPodcasts]
+    const displayPodcasts = initialPodcasts
         .filter(podcast => !optimisticDeletedIds.includes(podcast.id));
 
     // Check if user can add more channels
     const canAddMore = !quota || quota.isAdmin || quota.current < (quota.limit || 1);
+
+    // Loading state comes from mutations
+    const loading = addChannelMutation.isPending || addPodcastMutation.isPending;
 
     // --- Handlers ---
 
@@ -88,7 +79,6 @@ export function useChannelManager({
             return;
         }
 
-        setLoading(true);
         setError('');
 
         // Guest mode: Fetch real channel info via backend proxy
@@ -129,74 +119,26 @@ export function useChannelManager({
             } catch (err: any) {
                 setError(err.message);
                 toast.error(err.message);
-            } finally {
-                setLoading(false);
             }
             return;
         }
 
-        // Authenticated mode: Optimistic Update via React Query Cache
-        const optimisticId = -Date.now();
+        // Authenticated mode: Use mutation (handles optimistic update automatically)
         const urlToSubmit = youtubeUrl;
-
-        // Create optimistic subscription entry matching the cache structure
-        const optimisticSub = {
-            id: optimisticId,
-            channelId: optimisticId,
-            userId: session.user.id,
-            summaryStyle: 'DEFAULT' as const,
-            summaryLanguage: locale === 'zh-TW' ? 'ZH_TW' as const : 'EN' as const,
-            createdAt: new Date().toISOString(),
-            channel: {
-                id: optimisticId,
-                youtube_id: 'pending-' + optimisticId,
-                title: t('adding_channel'),
-                description: t('adding_channel_desc'),
-                rss_url: '',
-                last_updated: new Date().toISOString(),
-            }
-        };
-
-        // Snapshot for rollback
-        const previousData = queryClient.getQueryData(['subscriptions']);
-
-        // Optimistically update the cache
-        queryClient.setQueryData(['subscriptions'], (old: any) => {
-            if (!old) return old;
-            return {
-                ...old,
-                youtube: [optimisticSub, ...(old.youtube || [])],
-            };
-        });
-
         setYoutubeUrl('');
 
-        try {
-            const res = await fetch('/api/channels', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ url: urlToSubmit, locale }),
-            });
-
-            if (!res.ok) {
-                const data = await res.json().catch(() => ({}));
-                throw new Error(data.error || 'Failed to add channel');
+        addChannelMutation.mutate(
+            { url: urlToSubmit, locale },
+            {
+                onSuccess: () => {
+                    toast.success(t('channel_added_success'));
+                },
+                onError: (err) => {
+                    setError(err.message);
+                    toast.error(err.message);
+                },
             }
-
-            toast.success(t('channel_added_success'));
-
-            // Invalidate to get fresh data from server
-            await queryClient.invalidateQueries({ queryKey: ['subscriptions'] });
-            queryClient.invalidateQueries({ queryKey: ['feed'] });
-            refreshQuota();
-        } catch (err: any) {
-            // Rollback on error
-            queryClient.setQueryData(['subscriptions'], previousData);
-            setError(err.message);
-            toast.error(err.message);
-        } finally {
-            setLoading(false);
-        }
+        );
     };
 
     const handlePodcastSubmit = async (e: React.FormEvent) => {
@@ -206,54 +148,22 @@ export function useChannelManager({
             return;
         }
 
-        setLoading(true);
         setError('');
-
-        const optimisticId = -Date.now();
         const urlToSubmit = podcastUrl;
-
-        const optimisticPodcast = {
-            id: optimisticId,
-            feed_url: 'pending',
-            title: t('adding_podcast'),
-            description: t('adding_podcast_desc'),
-            site_url: '',
-            image_url: null,
-            last_updated: new Date(),
-        };
-
-        setOptimisticPodcasts(prev => [optimisticPodcast, ...prev]);
         setPodcastUrl('');
 
-        try {
-            const res = await fetch('/api/podcasts', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ url: urlToSubmit, locale }),
-            });
-
-            if (!res.ok) {
-                const data = await res.json().catch(() => ({}));
-                throw new Error(data.error || 'Failed to add podcast');
+        addPodcastMutation.mutate(
+            { url: urlToSubmit, locale },
+            {
+                onSuccess: () => {
+                    toast.success(t('podcast_added_success'));
+                },
+                onError: (err) => {
+                    setError(err.message);
+                    toast.error(err.message);
+                },
             }
-
-            toast.success(t('podcast_added_success'));
-            const data = await res.json();
-
-            if (data.podcast) {
-                setRecentlyAddedPodcasts(prev => [data.podcast, ...prev]);
-            }
-
-            setOptimisticPodcasts(prev => prev.filter(p => p.id !== optimisticId));
-            onRefresh?.();
-            refreshQuota();
-        } catch (err: any) {
-            setOptimisticPodcasts(prev => prev.filter(p => p.id !== optimisticId));
-            setError(err.message);
-            toast.error(err.message);
-        } finally {
-            setLoading(false);
-        }
+        );
     };
 
     const handleUnsubscribe = (channelId: number, type: 'youtube' | 'podcast', name: string) => {
@@ -294,13 +204,13 @@ export function useChannelManager({
                 throw new Error(data.error || 'Failed to unsubscribe');
             }
 
-            onRefresh?.();
-            refreshQuota();
+            // Invalidate to refresh data
+            queryClient.invalidateQueries({ queryKey: ['subscriptions'] });
+            queryClient.invalidateQueries({ queryKey: ['feed'] });
         } catch (err: any) {
             setOptimisticDeletedIds(prev => prev.filter(id => id !== targetId));
             toast.error(err.message || "Failed to unsubscribe");
         } finally {
-            setLoading(false);
             setDeleteTarget(null);
         }
     };
@@ -337,7 +247,7 @@ export function useChannelManager({
         })
             .then(async res => {
                 if (!res.ok) throw new Error('Failed to update style');
-                await onRefresh?.();
+                queryClient.invalidateQueries({ queryKey: ['subscriptions'] });
                 setOptimisticStyles(prev => {
                     const next = { ...prev };
                     delete next[key];
@@ -372,7 +282,7 @@ export function useChannelManager({
         })
             .then(async res => {
                 if (!res.ok) throw new Error('Failed to update language');
-                await onRefresh?.();
+                queryClient.invalidateQueries({ queryKey: ['subscriptions'] });
                 setOptimisticLanguages(prev => {
                     const next = { ...prev };
                     delete next[key];

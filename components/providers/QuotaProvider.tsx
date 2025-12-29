@@ -1,7 +1,8 @@
 'use client';
 
-import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
+import { createContext, useContext, ReactNode } from 'react';
 import { useSession } from 'next-auth/react';
+import { useSubscriptions } from '@/hooks/useSubscriptions';
 
 export interface Quota {
     current: number;
@@ -12,44 +13,36 @@ export interface Quota {
 interface QuotaContextType {
     quota: Quota | null;
     isLoading: boolean;
-    refreshQuota: () => Promise<void>;
+    /**
+     * @deprecated No longer needed - quota is derived from React Query cache.
+     * Mutations automatically update the cache, so quota stays in sync.
+     */
+    refreshQuota: () => void;
 }
 
 const QuotaContext = createContext<QuotaContextType | undefined>(undefined);
 
+/**
+ * QuotaProvider - Now derives quota from React Query cache (single source of truth).
+ * 
+ * Previously, this component made independent API calls to fetch quota,
+ * which could desync from the subscription list. Now it reads directly from
+ * the same cache that useSubscriptions() uses.
+ */
 export function QuotaProvider({ children }: { children: ReactNode }) {
     const { status } = useSession();
-    const [quota, setQuota] = useState<Quota | null>(null);
-    const [isLoading, setIsLoading] = useState(false);
+    const { data, isLoading } = useSubscriptions();
 
-    const refreshQuota = useCallback(async () => {
-        if (status !== 'authenticated') {
-            setQuota(null);
-            return;
-        }
+    // Derive quota from React Query cache (single source of truth)
+    const quota: Quota | null = status === 'authenticated' && data?.quota
+        ? data.quota
+        : null;
 
-        setIsLoading(true);
-        try {
-            const res = await fetch('/api/subscriptions');
-            const data = await res.json();
-            if (data.quota) {
-                setQuota(data.quota);
-            }
-        } catch (err) {
-            console.error('Failed to fetch quota:', err);
-        } finally {
-            setIsLoading(false);
-        }
-    }, [status]);
-
-    // Fetch quota when auth status changes
-    useEffect(() => {
-        if (status === 'authenticated') {
-            refreshQuota();
-        } else if (status === 'unauthenticated') {
-            setQuota(null);
-        }
-    }, [status, refreshQuota]);
+    // refreshQuota is now a no-op since mutations handle cache updates
+    const refreshQuota = () => {
+        // No-op: React Query mutations automatically update the cache
+        // This function is kept for backward compatibility with existing code
+    };
 
     return (
         <QuotaContext.Provider value={{ quota, isLoading, refreshQuota }}>
@@ -59,14 +52,15 @@ export function QuotaProvider({ children }: { children: ReactNode }) {
 }
 
 /**
- * Hook to access quota state throughout the app
+ * Hook to access quota state throughout the app.
+ * Quota is now derived from the same React Query cache as subscriptions,
+ * ensuring consistency.
  * 
  * @example
- * const { quota, isLoading, refreshQuota } = useQuota();
- * 
- * // After subscribing/unsubscribing, refresh the quota:
- * await handleSubscribe();
- * refreshQuota();
+ * const { quota, isLoading } = useQuota();
+ * if (quota && quota.current >= (quota.limit || Infinity)) {
+ *     // Show quota exceeded message
+ * }
  */
 export function useQuota() {
     const context = useContext(QuotaContext);
