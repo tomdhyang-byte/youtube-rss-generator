@@ -137,7 +137,7 @@ export async function POST(request: Request) {
 
         // 7. Upsert Channel & Create Subscription
         console.log('[API] Saving to DB...');
-        channel = await prisma.youtubeChannel.upsert({
+        const channel = await prisma.youtubeChannel.upsert({
             where: { youtube_id: channelId },
             update: {
                 ...(title !== 'New Channel' ? { title, description } : {}),
