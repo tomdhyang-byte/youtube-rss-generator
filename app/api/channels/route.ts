@@ -104,40 +104,6 @@ export async function POST(request: Request) {
             }, { status: 403 });
         }
 
-        // 5. Check if already subscribed
-        const existingSub = await prisma.youtubeSubscription.findUnique({
-            where: {
-                userId_channelId: {
-                    userId,
-                    channelId: 0, // We need the DB ID, not youtube_id
-                }
-            }
-        });
-
-        // First, find or create the channel
-        let channel = await prisma.youtubeChannel.findUnique({
-            where: { youtube_id: channelId }
-        });
-
-        if (channel) {
-            // Check if user already subscribed
-            const alreadySubscribed = await prisma.youtubeSubscription.findUnique({
-                where: {
-                    userId_channelId: {
-                        userId,
-                        channelId: channel.id
-                    }
-                }
-            });
-
-            if (alreadySubscribed) {
-                return NextResponse.json({
-                    error: 'You are already subscribed to this channel',
-                    channel
-                }, { status: 409 });
-            }
-        }
-
         // 6. Fetch Channel Details (Title, Desc)
         let title = 'New Channel';
         let description = 'Waiting for worker to update...';
@@ -189,13 +155,26 @@ export async function POST(request: Request) {
         const defaultLanguage = localeToSummaryLanguage(locale || 'en');
         console.log(`[API] Creating subscription with language: ${defaultLanguage}`);
 
-        await prisma.youtubeSubscription.create({
-            data: {
-                userId,
-                channelId: channel.id,
-                summaryLanguage: defaultLanguage,
+        try {
+            await prisma.youtubeSubscription.create({
+                data: {
+                    userId,
+                    channelId: channel.id,
+                    summaryLanguage: defaultLanguage,
+                }
+            });
+        } catch (error: any) {
+            // Handle unique constraint violation (P2002) - User double-clicked or race condition
+            if (error.code === 'P2002') {
+                console.log('[API] Subscription already exists (race condition handled)');
+                return NextResponse.json({
+                    success: true,
+                    channel,
+                    message: 'Already subscribed'
+                });
             }
-        });
+            throw error;
+        }
 
         // 9. Trigger Background Worker
         await triggerWorker('YOUTUBE', channel.id);
