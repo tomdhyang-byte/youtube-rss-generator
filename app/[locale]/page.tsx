@@ -5,7 +5,7 @@ import { useRouter } from "@/routing";
 import { useEffect, useState } from "react";
 import { Loader2, Play, Podcast, Rss } from "lucide-react";
 import { Button } from "@/components/ui/Button";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import LanguageSwitcher from "@/components/ui/LanguageSwitcher";
 
 export default function LandingPage() {
@@ -14,6 +14,7 @@ export default function LandingPage() {
   const [isLoading, setIsLoading] = useState(false);
   const t = useTranslations('Home');
   const tCommon = useTranslations('Common');
+  const locale = useLocale();
 
   // Redirect authenticated users to feed
   useEffect(() => {
@@ -24,7 +25,7 @@ export default function LandingPage() {
 
   const handleTryIt = async () => {
     setIsLoading(true);
-    await signIn("google", { callbackUrl: "/feed" });
+    await signIn("google", { callbackUrl: `/${locale}/feed` });
   };
 
   // Show loading while checking session or redirecting

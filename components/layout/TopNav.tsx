@@ -65,7 +65,7 @@ export function TopNav() {
                                     ? "text-red-400 bg-red-900/20 border-red-900/50"
                                     : "text-green-400 bg-green-900/20 border-green-900/50"
                             )}>
-                                {t('free_plan')} • {(quota.limit ?? 0) - quota.current} {t('left')}
+                                {t('free_plan')} • {t('quota_remaining', { count: (quota.limit ?? 0) - quota.current })}
                             </div>
                         )
                     ) : null

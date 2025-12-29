@@ -37,7 +37,7 @@
         "switch_account": "Switch Account",
         "sign_out": "Sign Out",
         "free_plan": "Free",
-        "left": "left",
+        "quota_remaining": "{count} quota left",
         "language": "Language"
     },
     "Feed": {
