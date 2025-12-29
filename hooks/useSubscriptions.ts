@@ -54,5 +54,6 @@ export function useSubscriptions() {
         queryKey: ['subscriptions'],
         queryFn: fetchSubscriptions,
         staleTime: 0,
+        refetchOnMount: false, // Prevent auto-refetch from overwriting optimistic updates
     });
 }
