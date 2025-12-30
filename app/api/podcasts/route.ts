@@ -29,6 +29,17 @@ export async function POST(request: Request) {
     const userId = session.user.id;
     const userEmail = session.user.email;
 
+    // Defensive check: Verify user exists in database (catches auth ID mismatch bugs)
+    const userExists = await prisma.user.findUnique({ where: { id: userId }, select: { id: true } });
+    if (!userExists) {
+        console.error(`[API] User ID mismatch: session.user.id=${userId} not found in database. User needs to logout and login again.`);
+        return NextResponse.json({
+            error: 'Session expired or invalid. Please logout and login again.',
+            code: 'USER_NOT_FOUND'
+        }, { status: 401 });
+    }
+
+
     try {
         const { url, locale } = await request.json();
         console.log(`[API] Received URL: ${url}, locale: ${locale || 'default'}`);

@@ -16,6 +16,13 @@ declare module "next-auth" {
     }
 }
 
+// Extend JWT type to include our custom userId field
+declare module "next-auth/jwt" {
+    interface JWT {
+        userId?: string;
+    }
+}
+
 
 export const authOptions: NextAuthOptions = {
     adapter: PrismaAdapter(prisma) as any,
