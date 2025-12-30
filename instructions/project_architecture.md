@@ -208,3 +208,29 @@ sequenceDiagram
     Worker->>Video: Next new video
     Worker->>VideoSummary: Generate DEFAULT summary
 ```
+
+## 🔗 Critical Dependencies (READ THIS to avoid "Fix A Break B")
+
+This section explicitly lists **coupled** parts of the system. If you touch one, you MUST check the other.
+
+### 1. Database Schema ↔ Python Worker
+*   **Context**: The Python worker (`backend/worker/`) uses raw SQL or a DB driver that expects the exact table structure defined in `prisma/schema.prisma`.
+*   **Rule**: If you modify `prisma/schema.prisma` (especially table names or column names), you MUST grep the `backend/worker` directory for the old name and update the SQL queries/logic accordingly.
+*   **Risk**: The worker will crash silently or fail to pick up jobs if the queue table schema changes.
+
+### 2. Processing Queue Status ↔ UI Feedback
+*   **Context**: The Frontend monitors `ProcessingQueue` status (PENDING, PROCESSING, COMPLETED, FAILED).
+*   **Rule**: These status strings are HARDCODED in `backend/worker/daemon.py` (or `common.py`) and `prisma/schema.prisma`.
+*   **Risk**: Changing a Status Enum in Prisma without updating the Python Worker's state machine will cause infinite "Processing" spinners in the UI.
+
+### 3. Summary Style Enums ↔ Style Selector
+*   **Context**: `SummaryStyle` (DEFAULT, QUICK_READ) and `SummaryLanguage` are Enums.
+*   **Rule**: If you add a new Style:
+    1.  Add to `prisma/schema.prisma`.
+    2.  Add to Frontend `components/ui/StyleSelector.tsx`.
+    3.  Add prompt logic in `backend/worker/summarize.py`.
+*   **Risk**: Users select a new style, but the Worker defaults to "DEFAULT" because it doesn't know the new Enum value.
+
+### 4. YouTube API ↔ Quota Management
+*   **Context**: `backend/worker/youtube.py` and `config.py` manage daily limits.
+*   **Rule**: Do not bypass `config.py` limits to "fix" a bug where videos aren't fetching. The limit is there for a reason (cost/ban prevention).
