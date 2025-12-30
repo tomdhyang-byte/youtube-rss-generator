@@ -36,17 +36,20 @@ export const authOptions: NextAuthOptions = {
         strategy: "jwt",
     },
     callbacks: {
-        async session({ session, token }) {
-            if (session.user) {
-                session.user.id = token.sub!;
-            }
-            return session;
-        },
         async jwt({ token, user }) {
+            // On first sign-in, user object comes from PrismaAdapter with the correct cuid
             if (user) {
-                token.sub = user.id;
+                // Store the Prisma user ID explicitly to avoid confusion with OAuth subject ID
+                token.userId = user.id;
             }
             return token;
+        },
+        async session({ session, token }) {
+            if (session.user) {
+                // Use our explicit userId, falling back to sub for backwards compatibility
+                session.user.id = (token.userId as string) || token.sub!;
+            }
+            return session;
         },
     },
     pages: {
