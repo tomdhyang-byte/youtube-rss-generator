@@ -49,12 +49,18 @@ model User {
   emailVerified        DateTime?              @map("email_verified")
   image                String?
   feedToken            String?                @unique @default(cuid()) @map("feed_token")
+  // Subscription tier fields
+  tier                 SubscriptionTier       @default(FREE)
+  tierExpiresAt        DateTime?              @map("tier_expires_at")
+  paymentCustomerId    String?                @unique @map("payment_customer_id")
+  // Relations
   accounts             Account[]
   sessions             Session[]
   youtubeSubscriptions YoutubeSubscription[]
   podcastSubscriptions PodcastSubscription[]
   userVideoStyles      UserVideoStyle[]
   userEpisodeStyles    UserEpisodeStyle[]
+  tierHistory          TierHistory[]
 
   @@map("users")
 }
@@ -80,6 +86,12 @@ enum SummaryStyle {
 enum SummaryLanguage {
   EN
   ZH_TW
+}
+
+enum SubscriptionTier {
+  FREE
+  PLUS
+  PRO
 }
 
 // ============================================
@@ -262,4 +274,21 @@ model ProcessingQueue {
 
   @@index([status, createdAt])
   @@map("processing_queue")
+}
+
+// ============================================
+// Subscription Tier History
+// ============================================
+
+model TierHistory {
+  id        Int              @id @default(autoincrement())
+  userId    String           @map("user_id")
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tier      SubscriptionTier
+  expiresAt DateTime?        @map("expires_at")
+  reason    String?          // "admin_upgrade", "payment_subscription", "promo"
+  createdAt DateTime         @default(now()) @map("created_at")
+
+  @@index([userId])
+  @@map("tier_history")
 }

@@ -38,7 +38,12 @@
         "sign_out": "登出",
         "free_plan": "免費版",
         "quota_remaining": "剩餘 {count} 個額度",
-        "language": "語言"
+        "left": "剩餘",
+        "language": "語言",
+        "tier_free": "免費版",
+        "tier_plus": "Plus",
+        "tier_pro": "Pro",
+        "tier_expired": "已過期"
     },
     "Feed": {
         "title": "最新摘要",
@@ -95,7 +100,10 @@
         "language_zh_desc": "摘要將以繁體中文生成",
         "language_updated": "摘要語言已更新！新設定將從下一篇新內容開始生效。",
         "channel_added_success": "YouTube 頻道已成功新增！",
-        "podcast_added_success": "Podcast 已成功新增！"
+        "podcast_added_success": "Podcast 已成功新增！",
+        "channel_locked": "此頻道已鎖定",
+        "channel_locked_desc": "您的訂閱方案已到期或超出限額。請升級以解鎖。",
+        "upgrade_to_unlock": "升級以解鎖更多頻道"
     },
     "Detail": {
         "ai_summary": "AI 摘要",

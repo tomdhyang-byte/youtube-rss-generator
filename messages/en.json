@@ -38,7 +38,12 @@
         "sign_out": "Sign Out",
         "free_plan": "Free",
         "quota_remaining": "{count} quota left",
-        "language": "Language"
+        "left": "left",
+        "language": "Language",
+        "tier_free": "Free",
+        "tier_plus": "Plus",
+        "tier_pro": "Pro",
+        "tier_expired": "Expired"
     },
     "Feed": {
         "title": "Your Feed",
@@ -95,7 +100,10 @@
         "language_zh_desc": "Summaries generated in Traditional Chinese",
         "language_updated": "Language updated! New setting will apply to new content.",
         "channel_added_success": "YouTube channel added successfully!",
-        "podcast_added_success": "Podcast added successfully!"
+        "podcast_added_success": "Podcast added successfully!",
+        "channel_locked": "Channel Locked",
+        "channel_locked_desc": "Your subscription has expired or you've exceeded your limit. Upgrade to unlock.",
+        "upgrade_to_unlock": "Upgrade to unlock more channels"
     },
     "Detail": {
         "ai_summary": "AI Summary",

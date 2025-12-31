@@ -1,6 +1,11 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getSession, isAdmin } from '@/lib/auth';
+import {
+    SubscriptionTier,
+    getEffectiveTier,
+    getMaxSubscriptions
+} from '@/lib/types/subscription-tier';
 
 // Ensure this route is always dynamic and never cached statically
 export const dynamic = 'force-dynamic';
@@ -18,11 +23,11 @@ export async function GET(request: Request) {
     const userEmail = session.user.email;
 
     try {
-        // 2. Fetch user's feedToken and subscriptions
+        // 2. Fetch user's feedToken, tier info, and subscriptions
         const [user, youtubeSubscriptions, podcastSubscriptions] = await Promise.all([
             prisma.user.findUnique({
                 where: { id: userId },
-                select: { feedToken: true },
+                select: { feedToken: true, tier: true, tierExpiresAt: true },
             }),
             prisma.youtubeSubscription.findMany({
                 where: { userId },
@@ -46,10 +51,21 @@ export async function GET(request: Request) {
 
         const totalSubs = youtubeSubscriptions.length + podcastSubscriptions.length;
         const isAdminUser = isAdmin(userEmail);
+
+        // Get tier info with proper expiration handling
+        const tier = (user?.tier as SubscriptionTier) || 'FREE';
+        const expiresAt = user?.tierExpiresAt || null;
+        const effectiveTier = getEffectiveTier(tier, expiresAt);
+        const isExpired = tier !== 'FREE' && effectiveTier === 'FREE';
+
         const quota = {
             current: totalSubs,
-            limit: isAdminUser ? null : 1,
+            limit: isAdminUser ? null : getMaxSubscriptions(effectiveTier),
             isAdmin: isAdminUser,
+            tier,
+            effectiveTier,
+            expiresAt: expiresAt?.toISOString() || null,
+            isExpired,
         };
 
         return NextResponse.json({
@@ -64,3 +80,4 @@ export async function GET(request: Request) {
         return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
     }
 }
+

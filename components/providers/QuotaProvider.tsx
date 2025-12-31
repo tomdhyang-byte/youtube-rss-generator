@@ -3,11 +3,17 @@
 import { createContext, useContext, ReactNode } from 'react';
 import { useSession } from 'next-auth/react';
 import { useSubscriptions } from '@/hooks/useSubscriptions';
+import { SubscriptionTier } from '@/lib/types/subscription-tier';
 
 export interface Quota {
     current: number;
     limit: number | null;
     isAdmin: boolean;
+    // Tier info
+    tier: SubscriptionTier;
+    effectiveTier: SubscriptionTier;
+    expiresAt: string | null;
+    isExpired: boolean;
 }
 
 interface QuotaContextType {
