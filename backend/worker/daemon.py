@@ -23,7 +23,7 @@ class TaskProcessor:
         logger.info("Initializing Daemon...")
         if not validate_config():
             raise Exception("Configuration validation failed")
-        self.last_maintenance = time.time()
+        self.last_maintenance = 0
         
     def get_conn(self):
         return get_db_connection()
