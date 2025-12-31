@@ -174,12 +174,29 @@ def fetch_supadata_transcript(video_id: str) -> str | None:
         response.raise_for_status()
         data = response.json()
         
-        if isinstance(data, dict) and 'content' in data:
-            return data['content']
-        elif isinstance(data, str):
+        # Check for error response from Supadata
+        if isinstance(data, dict):
+            # Error response: {'error': 'transcript-unavailable', ...}
+            if 'error' in data:
+                print(f"    - Supadata returned error: {data.get('error')} - {data.get('message', '')}")
+                return None
+            
+            # Success response: {'content': '...'}
+            if 'content' in data:
+                content = data['content']
+                # Validate content is a non-empty string
+                if isinstance(content, str) and content.strip():
+                    return content
+                print("    - Supadata returned empty content")
+                return None
+        
+        # Handle direct string response (rare but possible)
+        if isinstance(data, str) and data.strip():
             return data
-        else:
-            return str(data)
+        
+        # Unknown format - log and return None
+        print(f"    - Supadata returned unexpected format: {type(data)}")
+        return None
 
     except Exception as e:
         print(f"  - Supadata Error: {e}")
