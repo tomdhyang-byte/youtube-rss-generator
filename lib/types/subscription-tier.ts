@@ -5,7 +5,7 @@
  * Tiers determine the maximum number of feeds a user can have.
  */
 
-export type SubscriptionTier = 'FREE' | 'PLUS' | 'PRO';
+export type SubscriptionTier = 'FREE' | 'PLUS' | 'PRO' | 'ADMIN';
 
 export const TIER_LIMITS: Record<SubscriptionTier, number> = {
     FREE: 1,
