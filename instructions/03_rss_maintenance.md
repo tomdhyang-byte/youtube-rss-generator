@@ -1,14 +1,12 @@
----
-description: RSS Feed 維護守則與快取避免指南
----
-
 # RSS Feed 維護守則
 
-## 🚨 重要規則
+> RSS Feed 是系統的核心產品。如果它壞了，用戶無法閱讀內容。
 
-### 1. 快取防護 Headers（必須存在）
+---
 
-所有 RSS feed route （位於 `app/[locale]/feed/`）的 Response **必須**包含以下 headers：
+## 🚨 快取防護 Headers（必須存在）
+
+所有 RSS feed route（位於 `app/[locale]/feed/`）的 Response **必須**包含以下 headers：
 
 ```typescript
 return new Response(rssXml, {
@@ -29,9 +27,11 @@ return new Response(rssXml, {
 - `Vercel-CDN-Cache-Control` 才能控制 Vercel Edge 層
 - 其他 headers 確保所有層級都不快取
 
-### 2. Middleware Rewrite（必須存在）
+---
 
-RSS feed 路徑必須在 `middleware.ts` 中被 rewrite，**不可以被 redirect**：
+## 🔀 Middleware Rewrite（必須存在）
+
+RSS feed 路徑必須在 `middleware.ts` 中被 **rewrite**，不可以被 redirect：
 
 ```typescript
 // middleware.ts
@@ -44,26 +44,34 @@ if (req.nextUrl.pathname.startsWith('/feed/user/')) {
 }
 ```
 
-**為什麼？**
-- `rewrite`: 內部路由轉換，URL 不變，回傳 200
-- `redirect`: 會回傳 307，部分 RSS Reader 不支援跟隨
-- `return`: 跳過 middleware 但路由找不到 `[locale]`，會 404
+---
+
+## 📋 RSS Compliance Checklist
+
+修改 Feed 邏輯時，**必須**確保：
+
+1. **Strict XML Structure**
+   - `<rss version="2.0" xmlns:itunes="...">` header 存在
+   - 所有 user input（Titles, Descriptions）包在 `<![CDATA[ ... ]]>` 中
+   - Special characters (`&`, `<`, `>`) 在 CDATA 外要 escape
+
+2. **Podcast Player Requirements** (Apple/Castbox/Pocket Casts)
+   - `<itunes:image>`: 有效的 URL
+   - `<enclosure>`: 音訊 URL、length (bytes)、type (`audio/mpeg`)
+   - `<guid>`: 唯一 ID
 
 ---
 
 ## ✅ 修改 RSS 前的檢查清單
 
-1. [ ] 確認所有 headers 都在
-2. [ ] 確認 `middleware.ts` 的 rewrite 規則沒被動到
-3. [ ] 確認路由在 `app/[locale]/feed/` 下
-4. [ ] 部署後用 `curl -I` 測試
+- [ ] 確認所有 cache headers 都在
+- [ ] 確認 `middleware.ts` 的 rewrite 規則沒被動到
+- [ ] 確認路由在 `app/[locale]/feed/` 下
+- [ ] 部署後用 `curl -I` 測試
 
 ---
 
-## 🧪 測試方法
-
-// turbo
-### 快速驗證（每次部署後執行）
+## 🧪 快速驗證
 
 ```bash
 # 1. 確認沒有 307 redirect
@@ -72,10 +80,7 @@ curl -I "https://youtube-rss-generator.vercel.app/feed/user/YOUR_TOKEN/channel/1
 
 # 2. 確認快取 headers
 curl -I "https://youtube-rss-generator.vercel.app/en/feed/user/YOUR_TOKEN/channel/12" | grep -i cache
-# 期望: 
-#   cache-control: no-cache, no-store, must-revalidate
-#   cdn-cache-control: no-store, max-age=0
-#   x-vercel-cache: MISS
+# 期望: cache-control: no-cache, no-store, must-revalidate
 ```
 
 ---
