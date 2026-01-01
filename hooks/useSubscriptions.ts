@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import { Channel, PodcastChannel } from '@/lib/types';
 import { SummaryStyle, SummaryLanguage } from '@prisma/client';
+import { SubscriptionTier } from '@/lib/types/subscription-tier';
 
 // --- Type Definitions ---
 
@@ -33,8 +34,8 @@ export interface SubscriptionData {
         limit: number | null;
         isAdmin: boolean;
         // Tier info (added for subscription tier system)
-        tier: 'FREE' | 'PLUS' | 'PRO' | 'ADMIN';
-        effectiveTier: 'FREE' | 'PLUS' | 'PRO' | 'ADMIN';
+        tier: SubscriptionTier;
+        effectiveTier: SubscriptionTier;
         expiresAt: string | null;
         isExpired: boolean;
     };
