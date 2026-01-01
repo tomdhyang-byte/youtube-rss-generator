@@ -1,9 +1,24 @@
 {
     "Home": {
         "title": "TubeSummary",
-        "subtitle": "AI-Powered YouTube & Podcast Summaries",
-        "description": "Transform YouTube videos into readable summaries. Read directly on our site, or grab an RSS feed for your favorite reader.",
-        "get_started": "Try it Free",
+        "subtitle": "Turn Videos into Summaries, Save Time for Life",
+        "description": "Read summaries first, watch later if you are intrigued.\nRead directly on TubeSummary, or get your RSS feed and read on your RSS reader.",
+        "get_started": "Get Started",
+        "pain_point_title": "A summary is enough 80% of the times",
+        "pain_point_body": "YouTube is a primary source of learning,\nbut TubeSummary helps you filter fast:\nWhich ones to skim? Which ones to dive deep?",
+        "demo_title": "Here's the summary",
+        "demo_description": "See how TubeSummary condenses a 1-hour video into a 3-minute read.",
+        "tutorial_title": "How it works?",
+        "tutorial_web_title": "Web Users",
+        "tutorial_web_step1": "Sign in with Google",
+        "tutorial_web_step2": "Add your favorite YouTube channels or podcasts",
+        "tutorial_web_step3": "Read AI summaries directly here",
+        "tutorial_web_step4": "New summaries generated automatically on channel updates",
+        "tutorial_rss_title": "RSS Users",
+        "tutorial_rss_step1": "Sign in with Google",
+        "tutorial_rss_step2": "Add channels, copy RSS link",
+        "tutorial_rss_step3": "Paste to your favorite RSS reader",
+        "tutorial_rss_step4": "New summaries auto-pushed on channel updates",
         "features": {
             "youtube": {
                 "title": "YouTube Channels",

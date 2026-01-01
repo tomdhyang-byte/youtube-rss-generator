@@ -124,3 +124,127 @@
   margin: 2rem 0;
   border-color: rgba(255, 255, 255, 0.1);
 }
+
+/* Landing Page Gradient Glow Background */
+.landing-glow-bg {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(180deg,
+      hsl(0 0% 5%) 0%,
+      hsl(0 0% 8%) 50%,
+      hsl(0 0% 5%) 100%);
+}
+
+.landing-glow-bg::before,
+.landing-glow-bg::after {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(120px);
+  opacity: 0.4;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.landing-glow-bg::before {
+  width: 600px;
+  height: 600px;
+  background: linear-gradient(135deg, #ef4444, #f97316);
+  top: -200px;
+  left: -200px;
+}
+
+.landing-glow-bg::after {
+  width: 800px;
+  height: 800px;
+  background: linear-gradient(135deg, #8b5cf6, #6366f1);
+  bottom: -200px;
+  right: -200px;
+}
+
+/* Demo Screenshot Frame - MacOS Browser Style */
+.demo-frame {
+  border-radius: 8px;
+  box-shadow:
+    0 25px 50px -12px rgba(0, 0, 0, 0.5),
+    0 0 0 1px rgba(255, 255, 255, 0.1);
+}
+
+/* Demo Section Orb Effect */
+.demo-section {
+  position: relative;
+}
+
+.demo-section::before {
+  content: '';
+  position: absolute;
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(249, 115, 22, 0.15) 0%, transparent 70%);
+  top: 50%;
+  left: 20%;
+  transform: translate(-50%, -50%);
+  filter: blur(80px);
+  pointer-events: none;
+}
+
+/* Tutorial Section Bottom Glow */
+.tutorial-section {
+  position: relative;
+}
+
+.tutorial-section::after {
+  content: '';
+  position: absolute;
+  width: 600px;
+  height: 300px;
+  background: linear-gradient(90deg, rgba(249, 115, 22, 0.1), rgba(239, 68, 68, 0.1));
+  bottom: -100px;
+  left: 50%;
+  transform: translateX(-50%);
+  filter: blur(100px);
+  pointer-events: none;
+}
+
+/* Glassmorphism Card */
+.glass-card {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 2rem;
+}
+
+/* Floating decorative orbs */
+.demo-visual {
+  position: relative;
+}
+
+.demo-visual::before,
+.demo-visual::after {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+/* Small orange orb */
+.demo-visual::before {
+  width: 12px;
+  height: 12px;
+  background: #f97316;
+  top: 10%;
+  right: -20px;
+  box-shadow: 0 0 20px rgba(249, 115, 22, 0.5);
+}
+
+/* Small purple orb */
+.demo-visual::after {
+  width: 8px;
+  height: 8px;
+  background: #8b5cf6;
+  bottom: 20%;
+  left: -15px;
+  box-shadow: 0 0 15px rgba(139, 92, 246, 0.5);
+}

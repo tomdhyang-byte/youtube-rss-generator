@@ -1,9 +1,24 @@
 {
     "Home": {
         "title": "TubeSummary",
-        "subtitle": "你的 AI 閱讀助手",
-        "description": "將 YouTube 影片轉換成摘要總結，直接在本網站上閱讀，或者取得 RSS，用你習慣的 RSS Reader 閱讀。",
-        "get_started": "免費試用",
+        "subtitle": "把影片變成摘要，時間留給生活",
+        "description": "將 YouTube 影片濃縮成 3 分鐘摘要——快速判斷哪些值得花時間深入看。你可以直接在網站閱讀，或者將摘要轉換成 RSS 訂閱源並推送到你的閱讀器。",
+        "get_started": "立即使用",
+        "pain_point_title": "80% 的影片，看摘要就夠了",
+        "pain_point_body": "YouTube 是現代人的主要學習管道，\nTubeSummary 幫你快速過濾，\n哪些看摘要就好？哪些值得深入學習？",
+        "demo_title": "摘要長這樣",
+        "demo_description": "看看 TubeSummary 如何把 1 小時的影片濃縮成 3 分鐘的摘要。",
+        "tutorial_title": "如何使用？",
+        "tutorial_web_title": "網頁版用戶",
+        "tutorial_web_step1": "使用 Google 登入",
+        "tutorial_web_step2": "加入你喜歡的 YouTube 頻道或 Podcast",
+        "tutorial_web_step3": "直接在網站上閱讀 AI 摘要",
+        "tutorial_web_step4": "頻道更新時，自動生成新摘要",
+        "tutorial_rss_title": "RSS 用戶",
+        "tutorial_rss_step1": "使用 Google 登入",
+        "tutorial_rss_step2": "加入頻道後，複製 RSS 連結",
+        "tutorial_rss_step3": "貼到你慣用的 RSS 閱讀器",
+        "tutorial_rss_step4": "頻道更新時，自動推送到閱讀器",
         "features": {
             "youtube": {
                 "title": "YouTube 頻道",
