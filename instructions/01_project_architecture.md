@@ -234,3 +234,12 @@ This section explicitly lists **coupled** parts of the system. If you touch one,
 ### 4. YouTube API ↔ Quota Management
 *   **Context**: `backend/worker/youtube.py` and `config.py` manage daily limits.
 *   **Rule**: Do not bypass `config.py` limits to "fix" a bug where videos aren't fetching. The limit is there for a reason (cost/ban prevention).
+
+### 5. Subscription Tier ↔ Multiple Files
+*   **Context**: `SubscriptionTier` Enum is defined in `prisma/schema.prisma` AND manually typed in `lib/types/subscription-tier.ts`.
+*   **Rule**: When adding a new Tier:
+    1.  Add to `prisma/schema.prisma`.
+    2.  Add to `lib/types/subscription-tier.ts` (update `SubscriptionTier` type + `TIER_LIMITS`).
+    3.  Update Frontend badge logic in `components/layout/TopNav.tsx`.
+    4.  (Optional) Update i18n in `messages/*.json`.
+*   **Risk**: If the manual TypeScript type isn't updated, the build will fail even if VS Code looks fine (due to generated client lag).
