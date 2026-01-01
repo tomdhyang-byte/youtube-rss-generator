@@ -27,6 +27,27 @@
 
 ---
 
+### 2026-01-01: 手動定義的 Type 沒有同步更新
+
+**情境**：
+- 在 `prisma/schema.prisma` 加入 `ADMIN` 到 `SubscriptionTier` enum
+- 在 `TIER_LIMITS` 常量加入 `ADMIN: Infinity`
+- 但忘記更新 **手動定義的 TypeScript type**
+
+**根因**：
+- `lib/types/subscription-tier.ts` 中的 `SubscriptionTier` 是手動定義的 union type（不是從 Prisma 自動生成）
+- 只加了 `ADMIN` 到使用處，沒加到類型定義本身
+
+**教訓**：
+1. 區分「手動定義的類型」和「自動生成的類型」
+2. 手動類型需要**同步手動更新**
+3. 本地 lint 看不到問題不代表 build 會成功
+
+**相關檔案**：
+- `lib/types/subscription-tier.ts` (line 8: `export type SubscriptionTier = ...`)
+
+---
+
 ## 🟡 一般教訓
 
 ### Timeouts
