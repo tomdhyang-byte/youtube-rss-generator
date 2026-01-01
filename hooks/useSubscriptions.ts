@@ -32,6 +32,11 @@ export interface SubscriptionData {
         current: number;
         limit: number | null;
         isAdmin: boolean;
+        // Tier info (added for subscription tier system)
+        tier: 'FREE' | 'PLUS' | 'PRO';
+        effectiveTier: 'FREE' | 'PLUS' | 'PRO';
+        expiresAt: string | null;
+        isExpired: boolean;
     };
     feedToken?: string;
 }
