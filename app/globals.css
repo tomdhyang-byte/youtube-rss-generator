@@ -206,6 +206,33 @@
   pointer-events: none;
 }
 
+/* Mobile responsive: shrink glows to prevent overflow */
+@media (max-width: 768px) {
+  .landing-glow-bg::before {
+    width: 300px;
+    height: 300px;
+    top: -100px;
+    left: -100px;
+  }
+
+  .landing-glow-bg::after {
+    width: 400px;
+    height: 400px;
+    bottom: -100px;
+    right: -100px;
+  }
+
+  .demo-section::before {
+    width: 200px;
+    height: 200px;
+  }
+
+  .tutorial-section::after {
+    width: 300px;
+    height: 150px;
+  }
+}
+
 /* Glassmorphism Card */
 .glass-card {
   background: rgba(255, 255, 255, 0.05);
