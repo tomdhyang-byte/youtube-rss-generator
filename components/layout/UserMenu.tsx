@@ -5,6 +5,7 @@ import { useState, useRef, useEffect, useTransition } from 'react';
 import { LogIn, LogOut, ChevronDown, RefreshCw, Globe, Check } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { useTranslations, useLocale } from 'next-intl';
+import { useQuota } from '@/components/providers/QuotaProvider';
 import { usePathname, useRouter } from '@/routing';
 
 const LANGUAGE_OPTIONS = [
@@ -14,6 +15,7 @@ const LANGUAGE_OPTIONS = [
 
 export function UserMenu() {
     const { data: session, status } = useSession();
+    const { quota } = useQuota();
     const [isOpen, setIsOpen] = useState(false);
     const menuRef = useRef<HTMLDivElement>(null);
 
@@ -73,7 +75,7 @@ export function UserMenu() {
                     )}
                     <div className="hidden sm:block text-left">
                         <p className="text-sm font-medium">{session.user?.name}</p>
-                        {session.user?.email === process.env.NEXT_PUBLIC_ADMIN_EMAIL && (
+                        {quota?.isAdmin && (
                             <span className="text-xs font-semibold text-purple-600 dark:text-purple-400">
                                 {t('admin')}
                             </span>

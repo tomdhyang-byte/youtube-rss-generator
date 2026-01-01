@@ -49,9 +49,17 @@ export function TopNav() {
                 {/* Quota Badge */}
                 {status === 'authenticated' && (
                     quota ? (
-                        quota.isAdmin ? (
+                        quota.tier === 'ADMIN' ? (
                             <div className="mr-3 px-3 py-1 rounded-full text-xs border bg-purple-600 text-white border-purple-500 font-bold">
                                 {t('admin')} ∞
+                            </div>
+                        ) : quota.tier === 'PRO' ? (
+                            <div className="mr-3 px-3 py-1 rounded-full text-xs border font-medium text-blue-400 bg-blue-900/20 border-blue-900/50">
+                                Pro • {(quota.limit ?? 0) - quota.current} {t('left')}
+                            </div>
+                        ) : quota.tier === 'PLUS' ? (
+                            <div className="mr-3 px-3 py-1 rounded-full text-xs border font-medium text-yellow-400 bg-yellow-900/20 border-yellow-900/50">
+                                Plus • {(quota.limit ?? 0) - quota.current} {t('left')}
                             </div>
                         ) : (
                             <div className={cn(

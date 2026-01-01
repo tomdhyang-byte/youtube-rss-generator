@@ -11,6 +11,7 @@ export const TIER_LIMITS: Record<SubscriptionTier, number> = {
     FREE: 1,
     PLUS: 5,
     PRO: 10,
+    ADMIN: Infinity,
 };
 
 export interface TierInfo {

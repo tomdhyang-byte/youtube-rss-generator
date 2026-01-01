@@ -34,12 +34,6 @@ export async function checkUserQuota(user: User): Promise<QuotaCheckResult> {
         return { allowed: false, error: 'User email/id missing' };
     }
 
-    // 1. Admin Bypass - preserve existing behavior
-    if (isAdmin(user.email)) {
-        console.log(`[API] Admin user detected - skipping quota check`);
-        return { allowed: true };
-    }
-
     console.log(`[API] Checking quota for user ${user.id}`);
 
     // Fetch user with tier info and subscription counts
@@ -51,6 +45,12 @@ export async function checkUserQuota(user: User): Promise<QuotaCheckResult> {
         prisma.youtubeSubscription.count({ where: { userId: user.id } }),
         prisma.podcastSubscription.count({ where: { userId: user.id } }),
     ]);
+
+    // 1. Admin Bypass - Check if user has ADMIN tier
+    if (dbUser?.tier === 'ADMIN') {
+        console.log(`[API] Admin user detected (tier=ADMIN) - skipping quota check`);
+        return { allowed: true };
+    }
 
     const totalSubs = ytSubCount + podcastSubCount;
 

@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { getSession, isAdmin } from '@/lib/auth';
+import { getSession } from '@/lib/auth';
 import {
     SubscriptionTier,
     getEffectiveTier,
@@ -50,7 +50,7 @@ export async function GET(request: Request) {
         ]);
 
         const totalSubs = youtubeSubscriptions.length + podcastSubscriptions.length;
-        const isAdminUser = isAdmin(userEmail);
+        const isAdminUser = user?.tier === 'ADMIN';
 
         // Get tier info with proper expiration handling
         const tier = (user?.tier as SubscriptionTier) || 'FREE';
