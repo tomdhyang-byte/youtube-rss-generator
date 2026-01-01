@@ -1,6 +1,5 @@
 
 import { prisma } from '@/lib/prisma';
-import { isAdmin } from '@/lib/auth';
 import { User } from 'next-auth';
 import {
     SubscriptionTier,
