@@ -24,11 +24,14 @@ cd "$(dirname "$0")/.."
 
 PYTHON_EXEC=""
 
-# 1. Try to find a local virtual environment (.venv or venv)
-if [ -f "$(dirname "$0")/../.venv/bin/python3" ]; then
-    PYTHON_EXEC="$(dirname "$0")/../.venv/bin/python3"
-elif [ -f "$(dirname "$0")/../venv/bin/python3" ]; then
-    PYTHON_EXEC="$(dirname "$0")/../venv/bin/python3"
+# 1. Try to find and ACTIVATE a local virtual environment (.venv or venv)
+# This ensures CLI tools (like yt-dlp) installed in venv are in PATH
+if [ -f "$(dirname "$0")/../.venv/bin/activate" ]; then
+    source "$(dirname "$0")/../.venv/bin/activate"
+    PYTHON_EXEC="python3"
+elif [ -f "$(dirname "$0")/../venv/bin/activate" ]; then
+    source "$(dirname "$0")/../venv/bin/activate"
+    PYTHON_EXEC="python3"
 else
     # 2. Fallback to system python (Legacy behavior)
     # Check if the hardcoded path exists, if not, find python3 in path
@@ -40,10 +43,25 @@ else
 fi
 
 # Verify the executable exists
-if [ -z "$PYTHON_EXEC" ] || [ ! -x "$PYTHON_EXEC" ]; then
+# Use `which` for relative names like "python3", use -x for absolute paths
+if [ -z "$PYTHON_EXEC" ]; then
     echo "Error: Could not find a suitable Python executable."
     echo "Please create a virtual environment: python3 -m venv .venv"
     exit 1
+fi
+
+if [[ "$PYTHON_EXEC" != /* ]]; then
+    # Relative path (e.g., "python3") - verify with which
+    if ! which "$PYTHON_EXEC" > /dev/null 2>&1; then
+        echo "Error: Could not find $PYTHON_EXEC in PATH."
+        exit 1
+    fi
+else
+    # Absolute path - verify file exists and is executable
+    if [ ! -x "$PYTHON_EXEC" ]; then
+        echo "Error: $PYTHON_EXEC is not executable."
+        exit 1
+    fi
 fi
 
 

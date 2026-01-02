@@ -69,6 +69,12 @@
 - 修改 `summarize.py` 的 prompts 可能破壞 JSON parsing
 - 永遠強制 strict output format，並在 prompt 變更後測試
 
+### Virtual Environment CLI Tools
+- 直接呼叫 `.venv/bin/python3` **不等於**啟用虛擬環境
+- 如果 Python 用 `subprocess.run(["yt-dlp", ...])` 呼叫 CLI 工具，系統會去 `$PATH` 找，而不是 `.venv/bin`
+- **解法**：腳本中用 `source .venv/bin/activate` 才能讓 CLI 工具可用
+- 相關檔案：`backend/run_worker.sh`
+
 ### YouTube Rate Limits
 - `youtube-transcript-api` 太頻繁會被 IP ban
 - Worker 有內建 cooldown logic，不要移除 `sleep` calls

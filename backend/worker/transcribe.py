@@ -297,17 +297,30 @@ def transcribe_audio_file(file_path: str) -> str | None:
     }
     
     try:
-        print(f"    - Uploading audio to Deepgram: {file_path}")
+        file_size = os.path.getsize(file_path)
+        print(f"    - Uploading audio to Deepgram: {file_path} ({file_size / 1024 / 1024:.2f} MB)")
+        
         with open(file_path, 'rb') as audio_file:
             response = requests.post(url, headers=headers, data=audio_file, timeout=600)
         
+        print(f"    - Deepgram response status: {response.status_code}")
         response.raise_for_status()
         result = response.json()
         
         # Extract transcript
         transcript = result.get('results', {}).get('channels', [{}])[0].get('alternatives', [{}])[0].get('transcript', '')
-        return transcript
+        
+        if transcript:
+            print(f"    - ✅ Deepgram transcription successful ({len(transcript)} chars)")
+        else:
+            print(f"    - ⚠️ Deepgram returned empty transcript")
+            print(f"    - Deepgram raw response: {json.dumps(result, ensure_ascii=False)[:500]}...")
+        
+        return transcript if transcript else None
     except Exception as e:
         print(f"    - Deepgram file upload error: {e}")
+        if hasattr(e, 'response') and e.response is not None:
+            print(f"    - Response status: {e.response.status_code}")
+            print(f"    - Response body: {e.response.text[:500]}")
         return None
 
