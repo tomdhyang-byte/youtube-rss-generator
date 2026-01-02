@@ -61,7 +61,7 @@ Use this guide to quickly find the file you need to change based on your intent.
 | **Transcript Fetching** | `backend/worker/transcribe.py` (Multi-tier: Free API → Supadata → Deepgram) |
 | **YouTube Fetch Logic** | `backend/worker/youtube.py` |
 | **Podcast Fetch Logic** | `backend/worker/podcast.py` |
-| **Worker Shared Logic** | `backend/worker/common.py` (New Shared Utils) |
+| **Worker Shared Logic** | `backend/worker/common.py` (Shared Utils: Multi-language checks `ensure_missing_summaries`) |
 | **Worker Cleanup** | `backend/worker/cleanup.py` (Video Retention Policy - 15 limit) |
 | **Worker Config** | `backend/worker/config.py` (API limits, cooldowns) |
 | **Worker Daemon** | `backend/worker/daemon.py` (New Entry Point) |

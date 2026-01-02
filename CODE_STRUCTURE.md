@@ -62,7 +62,7 @@ graph TD
 | **逐字稿擷取** | `backend/worker/transcribe.py` (多層級：免費 API → Supadata → Deepgram) |
 | **YouTube 擷取邏輯** | `backend/worker/youtube.py` |
 | **Podcast 擷取邏輯** | `backend/worker/podcast.py` |
-| **Worker 共享邏輯** | `backend/worker/common.py` (新的共享工具) |
+| **Worker 共享邏輯** | `backend/worker/common.py` (共享工具：多語言摘要檢查 `ensure_missing_summaries`) |
 | **Worker 清理** | `backend/worker/cleanup.py` (影片保留策略 - 上限 15 部) |
 | **Worker 設定** | `backend/worker/config.py` (API 限制、冷卻時間) |
 | **Worker 常駐程式** | `backend/worker/daemon.py` (新進入點) |
