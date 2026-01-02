@@ -311,6 +311,7 @@ You are writing a deep-read report on a YouTube video for subscribers. The goal 
 - Keep the summary within 1200-1500 words.
 - Tone: Professional, polished, but with narrative tension (Storytelling).
 - Strictly follow the HTML format below (never use Markdown).
+- Your output should be in English.
 
 <Output Format>
 Follow this HTML structure exactly. Do not use Markdown code blocks:
@@ -388,6 +389,7 @@ You are writing a deep-read report on a Podcast episode for subscribers. The goa
 - Keep the summary within 1200-1500 words.
 - Tone: Professional, polished, but with narrative tension (Storytelling).
 - Strictly follow the HTML format below (never use Markdown).
+- Your output should be in English.
 
 <Output Format>
 Follow this HTML structure exactly. Do not use Markdown code blocks:
@@ -463,6 +465,7 @@ You are processing a video transcript. The user's time is extremely valuable. Th
    - The video's core thesis (in one sentence)
    - The 3 most critical conclusions (Key Takeaways)
    - The speaker's stance or unique perspective
+   - Your output should be in English.
 
 <Constraints>
 - Strictly keep summary between 600-800 words
@@ -520,6 +523,7 @@ You are processing a Podcast transcript. The user's time is extremely valuable. 
 - Strictly keep summary between 600-800 words
 - Use direct, assertive English (e.g., "This strategy works", "This view is outdated")
 - Strictly follow the HTML format below (never use Markdown)
+- Your output should be in English.
 
 <Output Format>
 Follow this HTML structure exactly. Do not add Markdown markers:
