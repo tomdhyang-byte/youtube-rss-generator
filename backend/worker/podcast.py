@@ -15,7 +15,7 @@ import re
 
 from .transcribe import transcribe_audio
 from .summarize import generate_summary
-from .common import lock_user_styles
+from .common import lock_user_styles, ensure_missing_summaries
 
 
 def strip_html(text: str) -> str:
@@ -107,7 +107,17 @@ def process_podcast_channel(conn, podcast: dict) -> None:
         if existing:
             episode_db_id = existing[0]
             print(f"    - Episode already exists (ID: {episode_db_id}), checking for missing user styles...")
-            # Still need to lock styles for any new subscribers
+            
+            # 1. Fetch transcript for summary generation if needed
+            cursor.execute("SELECT transcript FROM podcast_episodes WHERE id = %s", (episode_db_id,))
+            row = cursor.fetchone()
+            transcript = row[0] if row else None
+            
+            # 2. Ensure missing summaries (e.g. new language demanded)
+            if transcript:
+                ensure_missing_summaries(conn, episode_db_id, transcript, demanded_combos, is_podcast=True)
+                
+            # 3. Lock user styles
             lock_user_styles(conn, episode_db_id, subscriber_list, 'user_episode_styles', 'episode_id')
             continue
             

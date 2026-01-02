@@ -25,7 +25,7 @@ import urllib.request
 
 from .transcribe import fetch_transcript_with_fallback, transcribe_audio_file
 from .summarize import generate_summary
-from .common import lock_user_styles
+from .common import lock_user_styles, ensure_missing_summaries
 from .cleanup import enforce_video_retention
 
 
@@ -327,7 +327,17 @@ def process_youtube_channel(conn, channel: dict) -> None:
         if existing:
             video_db_id = existing[0]
             print(f"    - Video already exists (ID: {video_db_id}), checking for missing user styles...")
-            # Still need to lock styles for any new subscribers
+            
+            # 1. Fetch transcript for summary generation if needed
+            cursor.execute("SELECT transcript FROM youtube_videos WHERE id = %s", (video_db_id,))
+            row = cursor.fetchone()
+            transcript = row[0] if row else None
+            
+            # 2. Ensure missing summaries (e.g. new language demanded)
+            if transcript:
+                ensure_missing_summaries(conn, video_db_id, transcript, demanded_combos, is_podcast=False)
+
+            # 3. Lock user styles
             lock_user_styles(conn, video_db_id, subscriber_list, 'user_video_styles', 'video_id')
             continue
             

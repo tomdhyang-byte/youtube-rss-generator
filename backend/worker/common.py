@@ -4,6 +4,7 @@ Shared logic between youtube.py and podcast.py to reduce code duplication.
 """
 
 from datetime import datetime, timezone
+from .summarize import generate_summary
 
 # Tier limits configuration
 TIER_LIMITS = {
@@ -110,3 +111,52 @@ def lock_user_styles(conn, entity_id: int, subscriber_list: list, table_name: st
         print(f"    - Locked styles for {locked_count} users in {table_name}.")
         
     return locked_count
+
+
+def ensure_missing_summaries(conn, entity_id: int, transcript: str, demanded_combos: set, is_podcast: bool = False):
+    """
+    Ensure that summaries exist for all requested (style, language) combinations.
+    If any are missing (e.g., new subscriber with different language), generate them.
+    
+    Args:
+        conn: Database connection
+        entity_id: The database ID of the video or episode
+        transcript: The content transcript
+        demanded_combos: Set of tuples (style, language) that are needed
+        is_podcast: Boolean flag to switch between video/episode tables
+    """
+    table = "episode_summaries" if is_podcast else "video_summaries"
+    id_field = "episode_id" if is_podcast else "video_id"
+    
+    # 1. Query existing summaries
+    cursor = conn.cursor()
+    # Safe f-string because table/id_field are internal strings controlled by boolean flag
+    cursor.execute(f"SELECT style, language FROM {table} WHERE {id_field} = %s", (entity_id,))
+    existing_summaries = set((row[0], row[1]) for row in cursor.fetchall())
+    
+    # 2. Identify missing combos
+    missing_combos = demanded_combos - existing_summaries
+    
+    if not missing_combos:
+        return
+        
+    print(f"    - Found missing summaries for ID {entity_id}: {missing_combos}")
+    
+    # 3. Generate and save missing summaries
+    for (style, language) in missing_combos:
+        try:
+            print(f"      - Generating missing {style}/{language} summary...")
+            summary = generate_summary(transcript, style=style, language=language, is_podcast=is_podcast)
+            
+            cursor.execute(f"""
+                INSERT INTO {table} ({id_field}, style, language, content, created_at)
+                VALUES (%s, %s, %s, %s, NOW())
+                ON CONFLICT ({id_field}, style, language) DO UPDATE SET content = EXCLUDED.content
+            """, (entity_id, style, language, summary))
+            
+            print(f"      - Saved missing summary ({style}/{language})")
+            
+        except Exception as e:
+            print(f"      - ⚠️ Failed to generate missing {style}/{language}: {e}")
+            
+    conn.commit()
