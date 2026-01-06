@@ -135,7 +135,7 @@ AI 將會處理最新的影片 (新頻道通常需要約 5 分鐘)。完成後�
 -   **UI 元件**: 自定義元件庫 (Button, IconButton, Input, Badge) + Shadcn
 -   **後端**: Python Worker, OpenAI, Supabase (PostgreSQL)
 
-👉 **[閱讀代碼結構與架構說明](CODE_STRUCTURE.md)** 以深入了解程式碼結構、資料庫架構和資料流。
+👉 **[閱讀代碼結構與架構說明](instructions/01_project_architecture.md)** 以深入了解程式碼結構、資料庫架構和資料流。
 
 ### 快速設定
 
