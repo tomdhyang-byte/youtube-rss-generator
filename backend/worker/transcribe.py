@@ -290,7 +290,7 @@ def transcribe_audio_file(file_path: str) -> str | None:
         print(f"    - Audio file not found: {file_path}")
         return None
     
-    url = "https://api.deepgram.com/v1/listen?model=nova-2&smart_format=true&detect_language=true"
+    url = "https://api.deepgram.com/v1/listen?model=nova-2&smart_format=true&language=multi"
     headers = {
         "Authorization": f"Token {DEEPGRAM_API_KEY}",
         "Content-Type": "audio/mpeg"  # Works for mp3
