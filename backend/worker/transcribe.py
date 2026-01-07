@@ -278,49 +278,48 @@ def transcribe_audio(audio_url: str) -> str | None:
 
 def transcribe_audio_file(file_path: str) -> str | None:
     """
-    Transcribe audio file using Deepgram API (file upload).
+    Transcribe audio file using OpenAI Whisper API.
     Used for YouTube videos without subtitles.
     Returns the transcript text or None if unavailable.
     """
-    if not DEEPGRAM_API_KEY:
-        print("    - Deepgram API Key missing.")
+    from openai import OpenAI
+    from .config import OPENAI_API_KEY
+    
+    if not OPENAI_API_KEY:
+        print("    - OpenAI API Key missing.")
         return None
     
     if not os.path.exists(file_path):
         print(f"    - Audio file not found: {file_path}")
         return None
     
-    url = "https://api.deepgram.com/v1/listen?model=nova-2&smart_format=true&language=multi"
-    headers = {
-        "Authorization": f"Token {DEEPGRAM_API_KEY}",
-        "Content-Type": "audio/mpeg"  # Works for mp3
-    }
+    client = OpenAI(api_key=OPENAI_API_KEY)
     
     try:
         file_size = os.path.getsize(file_path)
-        print(f"    - Uploading audio to Deepgram: {file_path} ({file_size / 1024 / 1024:.2f} MB)")
+        print(f"    - Uploading audio to Whisper: {file_path} ({file_size / 1024 / 1024:.2f} MB)")
         
-        with open(file_path, 'rb') as audio_file:
-            response = requests.post(url, headers=headers, data=audio_file, timeout=600)
+        # Check file size limit (25MB)
+        if file_size > 25 * 1024 * 1024:
+            print(f"    - ⚠️ File size {file_size / 1024 / 1024:.2f} MB exceeds Whisper 25MB limit")
+            # In future: Implement splitting
+            return None
+            
+        with open(file_path, "rb") as audio_file:
+            transcription = client.audio.transcriptions.create(
+                model="whisper-1", 
+                file=audio_file,
+                response_format="text"
+            )
         
-        print(f"    - Deepgram response status: {response.status_code}")
-        response.raise_for_status()
-        result = response.json()
-        
-        # Extract transcript
-        transcript = result.get('results', {}).get('channels', [{}])[0].get('alternatives', [{}])[0].get('transcript', '')
-        
-        if transcript:
-            print(f"    - ✅ Deepgram transcription successful ({len(transcript)} chars)")
+        if transcription:
+            print(f"    - ✅ Whisper transcription successful ({len(transcription)} chars)")
+            return transcription
         else:
-            print(f"    - ⚠️ Deepgram returned empty transcript")
-            print(f"    - Deepgram raw response: {json.dumps(result, ensure_ascii=False)[:500]}...")
-        
-        return transcript if transcript else None
+            print(f"    - ⚠️ Whisper returned empty transcript")
+            return None
+            
     except Exception as e:
-        print(f"    - Deepgram file upload error: {e}")
-        if hasattr(e, 'response') and e.response is not None:
-            print(f"    - Response status: {e.response.status_code}")
-            print(f"    - Response body: {e.response.text[:500]}")
+        print(f"    - Whisper transcription error: {e}")
         return None
 

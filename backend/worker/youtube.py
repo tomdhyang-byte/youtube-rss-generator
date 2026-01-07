@@ -223,6 +223,7 @@ def download_and_transcribe_audio(video_id: str) -> str | None:
             "yt-dlp",
             "--extract-audio",
             "--audio-format", "mp3",
+            "--audio-quality", "9",  # Low bitrate (~48kbps) to keep file size < 25MB for Whisper
             "--output", output_path,
             f"https://www.youtube.com/watch?v={video_id}"
         ]
