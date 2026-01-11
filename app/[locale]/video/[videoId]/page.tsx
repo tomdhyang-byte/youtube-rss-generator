@@ -3,11 +3,11 @@ import { notFound } from 'next/navigation';
 import { getFormatter, getTranslations } from 'next-intl/server';
 
 interface PageProps {
-    params: Promise<{ videoId: string }>;
+    params: Promise<{ videoId: string; locale: string }>;
 }
 
 export default async function VideoSummaryPage({ params }: PageProps) {
-    const { videoId } = await params;
+    const { videoId, locale } = await params;
     const t = await getTranslations('Detail');
     const format = await getFormatter();
 
@@ -24,8 +24,14 @@ export default async function VideoSummaryPage({ params }: PageProps) {
         notFound();
     }
 
-    // Get the first available summary (prefer DEFAULT)
-    const summary = video.summaries.find(s => s.style === 'DEFAULT')
+    // Convert URL locale to SummaryLanguage
+    const preferredLanguage = locale === 'zh-TW' ? 'ZH_TW' : 'EN';
+
+    // Priority: DEFAULT+preferred language → any+preferred language → DEFAULT+any → fallback
+    const summary =
+        video.summaries.find(s => s.style === 'DEFAULT' && s.language === preferredLanguage)
+        || video.summaries.find(s => s.language === preferredLanguage)
+        || video.summaries.find(s => s.style === 'DEFAULT')
         || video.summaries[0];
 
     const formattedDate = format.dateTime(new Date(video.published_at), { dateStyle: 'medium' });

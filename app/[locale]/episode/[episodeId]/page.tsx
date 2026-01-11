@@ -3,11 +3,11 @@ import { notFound } from 'next/navigation';
 import { getFormatter, getTranslations } from 'next-intl/server';
 
 interface PageProps {
-    params: Promise<{ episodeId: string }>;
+    params: Promise<{ episodeId: string; locale: string }>;
 }
 
 export default async function EpisodeSummaryPage({ params }: PageProps) {
-    const { episodeId } = await params;
+    const { episodeId, locale } = await params;
     const id = parseInt(episodeId);
     const t = await getTranslations('Detail');
     const format = await getFormatter();
@@ -29,8 +29,14 @@ export default async function EpisodeSummaryPage({ params }: PageProps) {
         notFound();
     }
 
-    // Get the first available summary (prefer DEFAULT)
-    const summary = episode.summaries.find(s => s.style === 'DEFAULT')
+    // Convert URL locale to SummaryLanguage
+    const preferredLanguage = locale === 'zh-TW' ? 'ZH_TW' : 'EN';
+
+    // Priority: DEFAULT+preferred language → any+preferred language → DEFAULT+any → fallback
+    const summary =
+        episode.summaries.find(s => s.style === 'DEFAULT' && s.language === preferredLanguage)
+        || episode.summaries.find(s => s.language === preferredLanguage)
+        || episode.summaries.find(s => s.style === 'DEFAULT')
         || episode.summaries[0];
 
     const formattedDate = format.dateTime(new Date(episode.published_at), { dateStyle: 'medium' });

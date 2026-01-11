@@ -41,7 +41,7 @@ export async function GET(
         FROM user_video_styles uvs
         INNER JOIN youtube_videos v ON v.id = uvs.video_id
         INNER JOIN youtube_channels c ON c.id = v.channel_id
-        INNER JOIN video_summaries vs ON vs.video_id = v.id AND vs.style::text = uvs.style::text
+        INNER JOIN video_summaries vs ON vs.video_id = v.id AND vs.style::text = uvs.style::text AND vs.language::text = uvs.language::text
         INNER JOIN youtube_subscriptions ys ON ys.user_id = uvs.user_id AND ys.channel_id = c.id
         WHERE uvs.user_id = ${user.id}
         ORDER BY v.published_at DESC
@@ -63,7 +63,7 @@ export async function GET(
         FROM user_episode_styles ues
         INNER JOIN podcast_episodes e ON e.id = ues.episode_id
         INNER JOIN podcast_channels p ON p.id = e.podcast_id
-        INNER JOIN episode_summaries es ON es.episode_id = e.id AND es.style::text = ues.style::text
+        INNER JOIN episode_summaries es ON es.episode_id = e.id AND es.style::text = ues.style::text AND es.language::text = ues.language::text
         INNER JOIN podcast_subscriptions ps ON ps.user_id = ues.user_id AND ps.podcast_id = p.id
         WHERE ues.user_id = ${user.id}
         ORDER BY e.published_at DESC
