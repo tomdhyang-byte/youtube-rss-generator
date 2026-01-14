@@ -87,3 +87,24 @@
 - [ ] Merge conflict 後，是否理解 remote 的變更內容？
 - [ ] 是否執行 `npm run build` 確認編譯通過？
 - [ ] 修改 prompts 後，是否測試了 output format？
+
+### 2026-01-15: 數據隔離不完整導致的語言洩漏 (Language Leak)
+
+**情境**：
+- 系統設計支援多語言摘要（繁中、英文）。
+- 資料庫有 `episode_summaries` 表，用 `(episode_id, style, language)` 作為 key。
+- 用戶在 RSS Reader 看到英文摘要，但其設定是中文。
+
+**根因**：
+- 在 SQL JOIN 時，只用了 `style` 條件，漏了 `language` 條件。
+- 錯誤寫法：`INNER JOIN episode_summaries es ON es.episode_id = e.id AND es.style = ues.style`
+- 結果：資料庫同時有中英文摘要時，JOIN 結果會隨機返回其中一個（通常是先建立的那個），導致語言洩漏。
+
+**教訓**：
+1. **多維度資料的 JOIN**：當資料表有多個維度（如 Style + Language）作為主鍵時，JOIN **必須**包含所有維度。
+2. **複製貼上的代價**：Per-podcast feed 的路由是從舊版複製的，當時還沒有語言功能，導致 bug 被複製到多個檔案。
+3. **全面搜尋**：當 Schema 增加新維度（如 adding `language` column）時，必須全域搜尋該表的所有 SQL Query 並更新 JOIN 條件。
+
+**相關檔案**：
+- `app/[locale]/feed/user/[token]/route.ts`
+- `app/[locale]/feed/user/[token]/podcast/[podcastId]/route.ts`
