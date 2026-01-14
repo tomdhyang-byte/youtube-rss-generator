@@ -69,7 +69,7 @@ export async function GET(
         FROM user_episode_styles ues
         INNER JOIN podcast_episodes e ON e.id = ues.episode_id
         INNER JOIN podcast_channels p ON p.id = e.podcast_id
-        INNER JOIN episode_summaries es ON es.episode_id = e.id AND es.style::text = ues.style::text
+        INNER JOIN episode_summaries es ON es.episode_id = e.id AND es.style::text = ues.style::text AND es.language::text = ues.language::text
         WHERE ues.user_id = ${user.id}
           AND p.id = ${podcastId}
         ORDER BY e.published_at DESC

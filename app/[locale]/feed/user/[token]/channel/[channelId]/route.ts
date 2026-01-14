@@ -68,7 +68,7 @@ export async function GET(
         FROM user_video_styles uvs
         INNER JOIN youtube_videos v ON v.id = uvs.video_id
         INNER JOIN youtube_channels c ON c.id = v.channel_id
-        INNER JOIN video_summaries vs ON vs.video_id = v.id AND vs.style::text = uvs.style::text
+        INNER JOIN video_summaries vs ON vs.video_id = v.id AND vs.style::text = uvs.style::text AND vs.language::text = uvs.language::text
         WHERE uvs.user_id = ${user.id}
           AND c.id = ${channelId}
         ORDER BY v.published_at DESC
