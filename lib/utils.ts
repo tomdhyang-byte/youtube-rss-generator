@@ -12,3 +12,7 @@ export function getSourceColor(type: 'video' | 'episode') {
 export function getSourceLabel(type: 'video' | 'episode') {
   return type === 'video' ? 'YouTube' : 'Podcast';
 }
+
+export function stripHtml(html: string): string {
+  return html.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').trim();
+}

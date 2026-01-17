@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { EpisodeQueryResult } from '@/lib/types/feed';
+import { createShareFooter } from '@/lib/rss-utils';
 
 /**
  * GET /feed/user/[token]/podcast/[podcastId]
@@ -79,9 +80,12 @@ export async function GET(
     // 4. Generate RSS XML
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://youtube-rss-generator.vercel.app';
 
+    const shareFooter = (shareUrl: string) => createShareFooter(shareUrl, baseUrl);
+
     const items = episodeItems.map(e => ({
         title: e.title,
         link: `${baseUrl}/episode/${e.id}`,
+        shareUrl: `${baseUrl}/episode/${e.id}`,
         guid: `episode-${e.id}`,
         pubDate: new Date(e.published_at).toUTCString(),
         description: e.summary || 'No summary available.',
@@ -92,6 +96,7 @@ export async function GET(
         items.push({
             title: "Welcome to Your RSS Feed!",
             link: `${baseUrl}/episode/welcome`,
+            shareUrl: '',
             guid: `welcome-msg-podcast-${podcastId}-user-${user.id}`,
             pubDate: new Date('2000-01-01').toUTCString(),
             description: "This feed is empty because no episodes have been processed yet. Our AI worker processes new podcasts every few hours. Please check back later.",
@@ -118,8 +123,8 @@ export async function GET(
         <link>${item.link}</link>
         <guid isPermaLink="false">${item.guid}</guid>
         <pubDate>${item.pubDate}</pubDate>
-        <description><![CDATA[${item.description}]]></description>
-        <content:encoded><![CDATA[${item.description}]]></content:encoded>
+        <description><![CDATA[${item.description}${item.shareUrl ? shareFooter(item.shareUrl) : ''}]]></description>
+        <content:encoded><![CDATA[${item.description}${item.shareUrl ? shareFooter(item.shareUrl) : ''}]]></content:encoded>
     </item>`).join('')}
 </channel>
 </rss>`;

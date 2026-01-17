@@ -1,6 +1,9 @@
 import { prisma } from '@/lib/prisma';
 import { notFound } from 'next/navigation';
 import { getFormatter, getTranslations } from 'next-intl/server';
+import { stripHtml } from '@/lib/utils';
+import { Metadata } from 'next';
+import { CTABanner } from '@/components/ui/CTABanner';
 
 interface PageProps {
     params: Promise<{ videoId: string; locale: string }>;
@@ -89,6 +92,9 @@ export default async function VideoSummaryPage({ params }: PageProps) {
                     )}
                 </section>
 
+                {/* CTA Banner */}
+                <CTABanner />
+
                 {/* Footer */}
                 <footer className="mt-8 text-center text-muted-foreground text-sm">
                     <a
@@ -105,22 +111,42 @@ export default async function VideoSummaryPage({ params }: PageProps) {
     );
 }
 
-// Generate metadata for SEO
-export async function generateMetadata({ params }: PageProps) {
+// Generate metadata for SEO and Open Graph
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
     const { videoId } = await params;
     const t = await getTranslations('Detail');
 
     const video = await prisma.youtubeVideo.findUnique({
         where: { youtube_video_id: videoId },
-        include: { channel: true },
+        include: { channel: true, summaries: true },
     });
 
     if (!video) {
         return { title: 'Video Not Found' };
     }
 
+    const summary = video.summaries[0];
+    const description = summary
+        ? stripHtml(summary.content).slice(0, 160)
+        : `${t('ai_summary')}: ${video.title}`;
+    const title = `${video.title} | ${t('ai_summary')}`;
+    const imageUrl = `https://i.ytimg.com/vi/${videoId}/maxresdefault.jpg`;
+
     return {
-        title: `${video.title} | ${t('ai_summary')}`,
-        description: `AI-generated summary for ${video.title} by ${video.channel.title}`,
+        title,
+        description,
+        openGraph: {
+            title: video.title,
+            description,
+            type: 'article',
+            siteName: 'TubeSummary',
+            images: [imageUrl],
+        },
+        twitter: {
+            card: 'summary_large_image',
+            title: video.title,
+            description,
+            images: [imageUrl],
+        },
     };
 }

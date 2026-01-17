@@ -1,6 +1,9 @@
 import { prisma } from '@/lib/prisma';
 import { notFound } from 'next/navigation';
 import { getFormatter, getTranslations } from 'next-intl/server';
+import { stripHtml } from '@/lib/utils';
+import { Metadata } from 'next';
+import { CTABanner } from '@/components/ui/CTABanner';
 
 interface PageProps {
     params: Promise<{ episodeId: string; locale: string }>;
@@ -105,6 +108,9 @@ export default async function EpisodeSummaryPage({ params }: PageProps) {
                     )}
                 </section>
 
+                {/* CTA Banner */}
+                <CTABanner />
+
                 {/* Footer */}
                 <footer className="mt-8 text-center text-muted-foreground text-sm">
                     {episode.podcast.site_url && (
@@ -123,8 +129,8 @@ export default async function EpisodeSummaryPage({ params }: PageProps) {
     );
 }
 
-// Generate metadata for SEO
-export async function generateMetadata({ params }: PageProps) {
+// Generate metadata for SEO and Open Graph
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
     const { episodeId } = await params;
     const id = parseInt(episodeId);
     const t = await getTranslations('Detail');
@@ -135,15 +141,35 @@ export async function generateMetadata({ params }: PageProps) {
 
     const episode = await prisma.podcastEpisode.findUnique({
         where: { id },
-        include: { podcast: true },
+        include: { podcast: true, summaries: true },
     });
 
     if (!episode) {
         return { title: 'Episode Not Found' };
     }
 
+    const summary = episode.summaries[0];
+    const description = summary
+        ? stripHtml(summary.content).slice(0, 160)
+        : `${t('ai_summary')}: ${episode.title}`;
+    const title = `${episode.title} | ${t('ai_summary')}`;
+    const imageUrl = episode.podcast.image_url || undefined;
+
     return {
-        title: `${episode.title} | ${t('ai_summary')}`,
-        description: `AI-generated summary for ${episode.title} from ${episode.podcast.title}`,
+        title,
+        description,
+        openGraph: {
+            title: episode.title,
+            description,
+            type: 'article',
+            siteName: 'TubeSummary',
+            ...(imageUrl && { images: [imageUrl] }),
+        },
+        twitter: {
+            card: imageUrl ? 'summary_large_image' : 'summary',
+            title: episode.title,
+            description,
+            ...(imageUrl && { images: [imageUrl] }),
+        },
     };
 }

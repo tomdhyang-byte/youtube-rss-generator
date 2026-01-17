@@ -90,6 +90,8 @@ curl -I "https://youtube-rss-generator.vercel.app/en/feed/user/YOUR_TOKEN/channe
 | 檔案 | 用途 |
 |------|------|
 | `middleware.ts` | RSS rewrite 規則 |
+| `lib/rss-utils.ts` | RSS 共用工具（分享連結 footer） |
 | `app/[locale]/feed/user/[token]/route.ts` | 主 feed |
 | `app/[locale]/feed/user/[token]/channel/[channelId]/route.ts` | 單一頻道 feed |
 | `app/[locale]/feed/user/[token]/podcast/[podcastId]/route.ts` | 單一 podcast feed |
+

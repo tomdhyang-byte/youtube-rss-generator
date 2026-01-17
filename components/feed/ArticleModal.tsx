@@ -5,6 +5,7 @@ import { getSourceLabel } from '@/lib/utils';
 import { FeedItem } from '@/lib/types';
 import { IconButton } from '@/components/ui/IconButton';
 import { Badge } from '@/components/ui/Badge';
+import { ShareButton } from '@/components/ui/ShareButton';
 import {
     Dialog,
     DialogContent,
@@ -38,6 +39,12 @@ export function ArticleModal({ isOpen, onClose, article }: ArticleModalProps) {
                         </span>
                     </div>
                     <div className="flex items-center gap-2">
+                        <ShareButton
+                            url={article.type === 'video'
+                                ? `/video/${article.youtubeVideoId}`
+                                : `/episode/${article.id}`
+                            }
+                        />
                         {externalUrl && (
                             <a
                                 href={externalUrl}

@@ -127,5 +127,13 @@
         "download_audio": "下載音檔",
         "visit_website": "前往 Podcast 官方網站",
         "watch_on_youtube": "在 YouTube 上觀看原始影片"
+    },
+    "Share": {
+        "copy_link": "分享",
+        "copied": "已複製！",
+        "copy_failed": "複製失敗",
+        "cta_title": "這篇摘要由 <brand>TubeSummary</brand> AI 自動產生",
+        "cta_subtitle": "想自動收到你訂閱頻道的高品質摘要？",
+        "cta_button": "免費試用"
     }
 }

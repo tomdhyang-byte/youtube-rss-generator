@@ -10,6 +10,7 @@
 | 修改前端 Hooks | `02_hooks_guidelines.md` |
 | 修改 RSS/Feed | `03_rss_maintenance.md` |
 | Worker 問題 | `04_worker_troubleshooting.md` |
+| 實作分享功能 | `05_share_feature.md` |
 | **任何改動前** | `99_lessons_learned.md` ⚠️ |
 
 ## ⚡ 快速指令

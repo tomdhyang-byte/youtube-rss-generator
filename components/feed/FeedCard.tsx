@@ -1,12 +1,14 @@
 import Image from 'next/image';
 import { Play, Podcast } from 'lucide-react';
-import { cn, getSourceLabel } from '@/lib/utils';
+import { cn, getSourceLabel, stripHtml } from '@/lib/utils';
 import { Badge } from '@/components/ui/Badge';
+import { ShareButton } from '@/components/ui/ShareButton';
 import { useFormatter, useTranslations } from 'next-intl';
 
 interface FeedCardProps {
     type: 'video' | 'episode';
     id: string;
+    youtubeVideoId?: string;
     title: string;
     source: string;
     summary: string;
@@ -16,7 +18,7 @@ interface FeedCardProps {
     onRead?: () => void;
 }
 
-export function FeedCard({ type, id, title, source, summary, publishedAt, thumbnail, isRead = false, onRead }: FeedCardProps) {
+export function FeedCard({ type, id, youtubeVideoId, title, source, summary, publishedAt, thumbnail, isRead = false, onRead }: FeedCardProps) {
     const tCommon = useTranslations('Common');
     const format = useFormatter();
     const formattedDate = formatRelativeDate(publishedAt, tCommon, format);
@@ -73,6 +75,12 @@ export function FeedCard({ type, id, title, source, summary, publishedAt, thumbn
                     >
                         {getSourceLabel(type)}
                     </Badge>
+                    {/* Share button - visible on hover */}
+                    <div className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <ShareButton
+                            url={type === 'video' ? `/video/${youtubeVideoId}` : `/episode/${id}`}
+                        />
+                    </div>
                 </div>
 
                 {/* Content */}
@@ -110,6 +118,3 @@ function formatRelativeDate(dateString: string, t: any, format: any): string {
     return format.dateTime(date, { dateStyle: 'medium' });
 }
 
-function stripHtml(html: string): string {
-    return html.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').trim();
-}

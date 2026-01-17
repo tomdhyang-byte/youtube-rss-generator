@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { VideoQueryResult, EpisodeQueryResult } from '@/lib/types/feed';
+import { createShareFooter } from '@/lib/rss-utils';
 
 /**
  * GET /feed/user/[token]
@@ -71,6 +72,8 @@ export async function GET(
     `;
 
     // 4. Combine and sort items
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://youtube-rss-generator.vercel.app';
+
     const allItems = [
         ...videoItems.map(v => ({
             type: 'video' as const,
@@ -80,6 +83,7 @@ export async function GET(
             pubDate: new Date(v.published_at).toUTCString(),
             description: v.summary || 'No summary available.',
             source: v.channel_title,
+            shareUrl: `${baseUrl}/video/${v.youtube_video_id}`,
         })),
         ...episodeItems.map(e => ({
             type: 'podcast' as const,
@@ -89,12 +93,13 @@ export async function GET(
             pubDate: new Date(e.published_at).toUTCString(),
             description: e.summary || 'No summary available.',
             source: e.podcast_title,
+            shareUrl: `${baseUrl}/episode/${e.id}`,
         })),
     ].sort((a, b) => new Date(b.pubDate).getTime() - new Date(a.pubDate).getTime())
         .slice(0, 50);
 
     // 5. Generate RSS XML
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://youtube-rss-generator.vercel.app';
+    const shareFooter = (shareUrl: string) => createShareFooter(shareUrl, baseUrl);
 
     const rssXml = `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
@@ -114,6 +119,7 @@ export async function GET(
         <description><![CDATA[
             <p><strong>From: ${item.source}</strong></p>
             ${item.description}
+            ${shareFooter(item.shareUrl)}
         ]]></description>
     </item>`).join('')}
 </channel>

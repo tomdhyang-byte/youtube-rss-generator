@@ -51,6 +51,10 @@ Use this guide to quickly find the file you need to change based on your intent.
 | **Card Design** | `components/subscription/ChannelManager/SubscriptionCard.tsx` |
 | **Summary Style Selector** | `components/ui/StyleSelector.tsx` |
 | **Article Modal** | `components/feed/ArticleModal.tsx` |
+| **Share Button** | `components/ui/ShareButton.tsx` |
+| **CTA Banner** (Public pages) | `components/ui/CTABanner.tsx` |
+| **Public Video Summary** | `app/[locale]/video/[videoId]/page.tsx` |
+| **Public Episode Summary** | `app/[locale]/episode/[episodeId]/page.tsx` |
 | **i18n Translations** | `messages/en.json`, `messages/zh-TW.json` |
 | **i18n Routing** | `routing.ts`, `middleware.ts` |
 
@@ -126,6 +130,8 @@ youtube-rss-generator/
 │   │   ├── Badge.tsx             # Status/Type Label
 │   │   ├── StyleSelector.tsx     # Summary Style Picker
 │   │   ├── LanguageSelector.tsx  # Summary Language Picker (NEW)
+│   │   ├── ShareButton.tsx       # Copy-to-clipboard Share
+│   │   ├── CTABanner.tsx         # CTA for Public Pages
 │   │   ├── dialog.tsx            # Modal Base (Shadcn)
 │   │   └── tabs.tsx              # Tab Component
 │   │
@@ -147,7 +153,8 @@ youtube-rss-generator/
 │
 ├── lib/                          # Utilities
 │   ├── prisma.ts                 # Database Client
-│   ├── utils.ts                  # Helper Functions
+│   ├── utils.ts                  # Helper Functions (incl. stripHtml)
+│   ├── rss-utils.ts              # RSS Feed Helpers (Share Footer)
 │   ├── api-utils.ts              # Shared API Helpers (Auth/Quota)
 │   └── security.ts               # Security Validators (SSRF)
 │
