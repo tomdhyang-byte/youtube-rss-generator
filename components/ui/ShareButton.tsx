@@ -3,6 +3,7 @@
 import { Share2, Check, X } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
+import { toast } from 'sonner';
 import { IconButton } from './IconButton';
 
 interface ShareButtonProps {
@@ -24,6 +25,7 @@ export function ShareButton({ url, className }: ShareButtonProps) {
         try {
             await navigator.clipboard.writeText(fullUrl);
             setCopyState('copied');
+            toast.success(t('toast_success'));
         } catch {
             // Fallback for older browsers or restricted contexts
             try {
@@ -36,8 +38,10 @@ export function ShareButton({ url, className }: ShareButtonProps) {
                 document.execCommand('copy');
                 document.body.removeChild(textArea);
                 setCopyState('copied');
+                toast.success(t('toast_success'));
             } catch {
                 setCopyState('failed');
+                toast.error(t('toast_failed'));
             }
         }
 

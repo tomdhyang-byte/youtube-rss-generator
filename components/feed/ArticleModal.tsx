@@ -45,17 +45,7 @@ export function ArticleModal({ isOpen, onClose, article }: ArticleModalProps) {
                                 : `/episode/${article.id}`
                             }
                         />
-                        {externalUrl && (
-                            <a
-                                href={externalUrl}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="p-2 hover:bg-accent rounded-lg transition-colors"
-                                title="在新分頁開啟"
-                            >
-                                <ExternalLink className="w-5 h-5 text-muted-foreground" />
-                            </a>
-                        )}
+                        {/* External link button removed */}
                     </div>
                 </div>
 

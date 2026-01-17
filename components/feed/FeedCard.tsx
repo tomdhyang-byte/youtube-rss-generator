@@ -36,7 +36,7 @@ export function FeedCard({ type, id, youtubeVideoId, title, source, summary, pub
     return (
         <div
             onClick={handleClick}
-            className="block group cursor-pointer"
+            className="block group cursor-pointer relative overflow-hidden"
         >
             <article className={cn(
                 "flex gap-4 p-4 rounded-xl border transition-all relative",
@@ -75,12 +75,6 @@ export function FeedCard({ type, id, youtubeVideoId, title, source, summary, pub
                     >
                         {getSourceLabel(type)}
                     </Badge>
-                    {/* Share button - visible on hover */}
-                    <div className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <ShareButton
-                            url={type === 'video' ? `/video/${youtubeVideoId}` : `/episode/${id}`}
-                        />
-                    </div>
                 </div>
 
                 {/* Content */}
@@ -99,6 +93,19 @@ export function FeedCard({ type, id, youtubeVideoId, title, source, summary, pub
                     <p className="text-sm text-muted-foreground/80 mt-2 hidden md:line-clamp-1">
                         {summaryPreview}
                     </p>
+                </div>
+
+                {/* Action Bar - Slide-in from right on hover/focus */}
+                <div className="absolute right-0 top-0 bottom-0 w-20 z-10
+                    bg-gradient-to-l from-card via-card/80 to-transparent
+                    flex items-center justify-center
+                    transform transition-transform duration-200 ease-out
+                    translate-x-0
+                    md:translate-x-full md:group-hover:translate-x-0 md:group-focus-within:translate-x-0">
+                    <ShareButton
+                        url={type === 'video' ? `/video/${youtubeVideoId}` : `/episode/${id}`}
+                        className="shadow-md"
+                    />
                 </div>
             </article>
         </div>
