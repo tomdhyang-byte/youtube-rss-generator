@@ -6,7 +6,13 @@ import Parser from 'rss-parser';
 import { checkUserQuota, triggerWorker } from '@/lib/api-utils';
 import { isSafePodcastUrl } from '@/lib/security';
 
-const parser = new Parser();
+const parser = new Parser({
+    requestOptions: {
+        headers: {
+            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36'
+        }
+    }
+});
 
 /**
  * Strip HTML tags from a string
