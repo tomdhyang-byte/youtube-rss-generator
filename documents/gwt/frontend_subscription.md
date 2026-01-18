@@ -41,6 +41,23 @@ And 背景發送 DELETE API 請求
 And **失敗時** (onError):
   - Rollback Cache (卡片會跳回來)
   - 顯示 Toast Error
+
+### Single Episode Submission
+> **Rationale**: 
+> 單集處理流程較長（下載 -> 轉錄 -> 摘要），且不屬於「訂閱」範疇。因此採用 "Task Queue" 模式，用戶提交後會看到即時的狀態變化，而非 Optimistic UI。
+
+```gherkin
+Given 用戶選擇 "Single Episode" 模式
+And 輸入有效 URL 並選擇 Style/Language
+When 點擊 "Generate Summary"
+Then **立即**顯示 "Submitting..." 狀態
+And 背景發送 POST `/api/single-episode`
+And **成功時** (onSuccess):
+  - 顯示 "Queued" 狀態與 "Check Status" 連結
+  - (Optional) 在 "Collections" Tab 顯示新項目 (Pending)
+And **失敗時** (onError):
+  - 顯示錯誤原因 (e.g., 不支援 Shorts, 無字幕)
+```
 ```
 
 ---

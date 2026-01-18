@@ -299,6 +299,99 @@ export function useChannelManager({
         return optimisticLanguages[key] ?? realLanguage;
     };
 
+    // Direct submission functions for UnifiedAddForm (bypass state race condition)
+    const addChannelDirect = async (url: string): Promise<void> => {
+        if (!url) {
+            toast.error(t('add_youtube_placeholder'));
+            return;
+        }
+
+        // Guest mode: Show login modal if trying to add 2nd channel
+        if (!session && localChannels.length >= 1) {
+            setLoginModalOpen(true);
+            return;
+        }
+
+        setError('');
+
+        // Guest mode: Fetch real channel info via backend proxy
+        if (!session) {
+            try {
+                toast.info('Fetching channel information...');
+                const response = await fetch('/api/channel-info', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url }),
+                });
+
+                if (!response.ok) {
+                    const data = await response.json().catch(() => ({}));
+                    throw new Error(data.error || 'Failed to fetch channel info');
+                }
+
+                const { youtube_id, title, description } = await response.json();
+                const mockId = -(Date.now());
+                const mockChannel: GuestChannel = {
+                    id: mockId,
+                    youtube_id: youtube_id || 'guest-' + mockId,
+                    title: title || 'YouTube Channel',
+                    description: description,
+                    rss_url: null,
+                    last_updated: new Date().toISOString(),
+                    url: url,
+                    cached_metadata: {
+                        youtube_id: youtube_id || 'guest-' + mockId,
+                        title: title || 'YouTube Channel',
+                        description: description,
+                    },
+                };
+
+                setLocalChannels([...localChannels, mockChannel]);
+                toast.success('Channel added! Sign in to save permanently.');
+            } catch (err: any) {
+                setError(err.message);
+                toast.error(err.message);
+            }
+            return;
+        }
+
+        // Authenticated mode: Use mutation
+        addChannelMutation.mutate(
+            { url, locale },
+            {
+                onSuccess: () => {
+                    toast.success(t('channel_added_success'));
+                },
+                onError: (err) => {
+                    setError(err.message);
+                    toast.error(err.message);
+                },
+            }
+        );
+    };
+
+    const addPodcastDirect = async (url: string): Promise<void> => {
+        if (!url) {
+            toast.error("Please enter a Podcast URL");
+            return;
+        }
+
+        setError('');
+
+        addPodcastMutation.mutate(
+            { url, locale },
+            {
+                onSuccess: () => {
+                    toast.success(t('podcast_added_success'));
+                },
+                onError: (err) => {
+                    setError(err.message);
+                    toast.error(err.message);
+                },
+            }
+        );
+    };
+
     return {
         // State
         youtubeUrl, setYoutubeUrl,
@@ -316,6 +409,8 @@ export function useChannelManager({
         // Actions
         handleYouTubeSubmit,
         handlePodcastSubmit,
+        addChannelDirect,
+        addPodcastDirect,
         handleUnsubscribe,
         confirmUnsubscribe,
         copyRssLink,

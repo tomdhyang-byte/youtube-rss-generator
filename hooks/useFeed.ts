@@ -1,7 +1,7 @@
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { FeedItem } from '@/lib/types';
 
-type FilterType = 'all' | 'youtube' | 'podcast';
+type FilterType = 'all' | 'youtube' | 'podcast' | 'single';
 
 interface FeedPage {
     items: FeedItem[];

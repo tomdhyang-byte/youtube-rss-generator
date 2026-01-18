@@ -44,6 +44,8 @@ Use this guide to quickly find the file you need to change based on your intent.
 | **Homepage** (Landing) | `app/[locale]/page.tsx` |
 | **Feed Page** (Reader) | `app/[locale]/feed/page.tsx` |
 | **Subscription Manager** | `components/subscription/ChannelManager/index.tsx` |
+| **Unified Add Form** | `components/subscription/ChannelManager/UnifiedAddForm.tsx` |
+| **Single Episode Status** | `components/subscription/SingleEpisodeStatus.tsx` |
 | **Subscription mutations (Add/Delete)** | `hooks/useSubscriptions.ts` (Core Logic) |
 | **Subscription UI State (Modals)** | `components/subscription/ChannelManager/useChannelManager.ts` |
 | **Colors / Theme** | `app/globals.css` |
@@ -66,6 +68,7 @@ Use this guide to quickly find the file you need to change based on your intent.
 | **YouTube Channel Orchestration** | `backend/worker/youtube.py` (Main loop, subscriber mgmt, error handling) |
 | **YouTube Metadata Fetching** | `backend/services/youtube_metadata.py` (RSS, Scrapetube, Shorts detection) |
 | **Podcast Fetch Logic** | `backend/worker/podcast.py` |
+| **Single Episode Worker** | `backend/worker/single.py` |
 | **Worker Shared Logic** | `backend/worker/common.py` (Shared Utils: Multi-language checks `ensure_missing_summaries`) |
 | **Worker Cleanup** | `backend/worker/cleanup.py` (Video Retention Policy - 15 limit) |
 | **Worker Config** | `backend/worker/config.py` (API limits, cooldowns) |
@@ -110,6 +113,11 @@ Understanding how a video becomes a summary:
 5.  **Retention Policy**:
     *   Worker automatically keeps only the latest **15 videos** per channel.
     *   Older content is cascade-deleted to maintain database health.
+
+6.  **Single Episode Request**:
+    *   **User Pastes URL**: `POST /api/single-episode` -> Enqueues `SINGLE_VIDEO` job.
+    *   **Worker**: Calls `process_single_task` -> Fetches -> Summarizes -> Updates Status (`COMPLETED`).
+    *   **Display**: Users check status via `SingleEpisodeStatus` component.
 
 ---
 
@@ -208,6 +216,7 @@ youtube-rss-generator/
 *   **Video/Episode**: Individual content items with `transcript`.
 *   **Subscription**: Link between `User` and `Channel`, includes `summaryStyle` preference.
 *   **ProcessingQueue**: Tracks background jobs for real-time processing.
+*   **UserSingleEpisode**: Stores individual video/episode requests outside subscription logic.
 
 ### Summary Style Tables
 *   **VideoSummary / EpisodeSummary**: Stores summaries per content, per style, **per language**. One video can have multiple summaries (e.g. DEFAULT-EN, DEFAULT-ZH, QUICK-EN...).

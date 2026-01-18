@@ -116,6 +116,95 @@ export async function GET(request: Request) {
             })));
         }
 
+        // Query single episodes (only for 'single' or 'all' filter)
+        if (filter === 'single' || filter === 'all') {
+            const cursorCondition = cursor
+                ? `AND use.created_at < '${new Date(cursor).toISOString()}'::timestamp`
+                : '';
+
+            // Query single videos with completed status
+            const singleVideoItems = await prisma.$queryRawUnsafe<any[]>(`
+                SELECT 
+                    v.id,
+                    v.title,
+                    v.youtube_video_id,
+                    use.created_at,
+                    c.title as channel_title,
+                    c.youtube_id as channel_youtube_id,
+                    vs.content as summary,
+                    use.style,
+                    use.language
+                FROM user_single_episodes use
+                INNER JOIN youtube_videos v ON v.id = use.video_id
+                INNER JOIN youtube_channels c ON c.id = v.channel_id
+                INNER JOIN video_summaries vs ON vs.video_id = v.id AND vs.style::text = use.style::text AND vs.language::text = use.language::text
+                WHERE use.user_id = '${userId}'
+                AND use.status = 'COMPLETED'
+                AND use.video_id IS NOT NULL
+                ${cursorCondition}
+                ORDER BY use.created_at DESC
+                LIMIT ${limit + 1}
+            `);
+
+            items.push(...singleVideoItems.map(video => ({
+                type: 'video' as const,
+                id: video.youtube_video_id,
+                title: video.title,
+                source: video.channel_title,
+                sourceId: video.channel_youtube_id,
+                summary: video.summary || 'No summary available.',
+                publishedAt: new Date(video.created_at).toISOString(),
+                thumbnail: `https://i.ytimg.com/vi/${video.youtube_video_id}/mqdefault.jpg`,
+                youtubeVideoId: video.youtube_video_id,
+                isSingleEpisode: true,
+                singleEpisodeStyle: video.style,
+                singleEpisodeLanguage: video.language,
+            })));
+
+            // Query single podcast episodes with completed status
+            const singleEpisodeItems = await prisma.$queryRawUnsafe<any[]>(`
+                SELECT 
+                    e.id,
+                    e.title,
+                    e.guid,
+                    e.audio_url,
+                    use.created_at,
+                    p.title as podcast_title,
+                    p.id as podcast_id,
+                    p.image_url,
+                    p.site_url,
+                    es.content as summary,
+                    use.style,
+                    use.language
+                FROM user_single_episodes use
+                INNER JOIN podcast_episodes e ON e.id = use.episode_id
+                INNER JOIN podcast_channels p ON p.id = e.podcast_id
+                INNER JOIN episode_summaries es ON es.episode_id = e.id AND es.style::text = use.style::text AND es.language::text = use.language::text
+                WHERE use.user_id = '${userId}'
+                AND use.status = 'COMPLETED'
+                AND use.episode_id IS NOT NULL
+                ${cursorCondition}
+                ORDER BY use.created_at DESC
+                LIMIT ${limit + 1}
+            `);
+
+            items.push(...singleEpisodeItems.map(episode => ({
+                type: 'episode' as const,
+                id: episode.id.toString(),
+                title: episode.title,
+                source: episode.podcast_title || 'Unknown Podcast',
+                sourceId: episode.podcast_id.toString(),
+                summary: episode.summary || '',
+                publishedAt: new Date(episode.created_at).toISOString(),
+                thumbnail: episode.image_url || null,
+                audioUrl: episode.audio_url,
+                siteUrl: episode.site_url,
+                isSingleEpisode: true,
+                singleEpisodeStyle: episode.style,
+                singleEpisodeLanguage: episode.language,
+            })));
+        }
+
         // Sort combined items by publishedAt
         items.sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime());
 

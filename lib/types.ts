@@ -49,4 +49,23 @@ export interface FeedItem {
     youtubeVideoId?: string;
     audioUrl?: string;
     siteUrl?: string | null;
+    isSingleEpisode?: boolean;
+    singleEpisodeStyle?: string;
+    singleEpisodeLanguage?: string;
+}
+
+// Single Episode Types
+export type SingleEpisodeStatus = 'PENDING' | 'PROCESSING' | 'COMPLETED' | 'FAILED';
+
+export interface SingleEpisodeItem {
+    id: number;
+    type: 'video' | 'podcast';
+    externalId: string;
+    title: string;
+    thumbnailUrl?: string;
+    style: string;
+    language: string;
+    status: SingleEpisodeStatus;
+    failureReason?: string | null;
+    createdAt: string;
 }

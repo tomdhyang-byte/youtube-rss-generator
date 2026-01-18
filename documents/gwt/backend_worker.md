@@ -74,6 +74,22 @@ When 處理完當前任務或空閒時
 Then 執行 legacy full scan (worker.py main())
 ```
 
+### Single Episode Processing (single.py)
+> **Rationale**: 
+> 單集處理與頻道掃描不同，它是針對「特定這個物件」做一次性處理。且包含「FIFO 自動清理」機制以控制資料庫大小。
+
+```gherkin
+Given 取得 SINGLE_VIDEO 或 SINGLE_EPISODE 類型任務
+When 執行 process_single_task()
+Then 檢查目標影片/單集是否存在
+  - 若不存在 (YT) → 建立 Placeholder Channel 與 Video 記錄
+  - 若不存在 (Podcast) → 建立 Episode 記錄 (需 fetch metadata)
+And 執行轉錄與摘要 (流程同一般影片)
+And **完成後**:
+  - 更新 UserSingleEpisode 狀態為 COMPLETED
+  - 觸發 FIFO 清理：若該用戶單集數 > 50，刪除最舊的一筆 (created_at ASC)
+```
+
 ---
 
 ## YouTube Processing (youtube.py) - 頻道處理

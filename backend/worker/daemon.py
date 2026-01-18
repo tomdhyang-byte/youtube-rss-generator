@@ -5,6 +5,7 @@ import sys
 from .db import get_db_connection, fetch_as_dict
 from .youtube import process_youtube_channel
 from .podcast import process_podcast_channel
+from .single import process_single_task
 from .config import validate_config, POLL_INTERVAL, MAINTENANCE_INTERVAL, STUCK_TASK_THRESHOLD
 
 # Configure Logging
@@ -56,16 +57,17 @@ class TaskProcessor:
         task = None
         try:
             cursor = conn.cursor()
-            # Select and lock the next task
+            # Select and lock the next task (include single episode fields)
             cursor.execute("""
-                SELECT id, type, "entityId", attempts
+                SELECT id, type, "entityId", attempts,
+                       requested_by_user_id, requested_style, requested_language
                 FROM "processing_queue"
                 WHERE status = 'PENDING'
                 ORDER BY priority DESC, "createdAt" ASC
                 LIMIT 1
             """)
             task = cursor.fetchone()
-            
+
             if task:
                 task_id = task[0]
                 # Mark as PROCESSING immediately
@@ -75,12 +77,15 @@ class TaskProcessor:
                     WHERE id = %s
                 """, (task_id,))
                 conn.commit()
-                
+
                 return {
                     'id': task[0],
                     'type': task[1],
                     'entityId': task[2],
-                    'attempts': task[3]
+                    'attempts': task[3],
+                    'requestedByUserId': task[4],
+                    'requestedStyle': task[5],
+                    'requestedLanguage': task[6]
                 }
         except Exception as e:
             logger.error(f"Polling error: {e}")
@@ -93,13 +98,20 @@ class TaskProcessor:
         task_id = task['id']
         entity_type = task['type']
         entity_id = task['entityId']
-        
+
         logger.info(f"Processing Task #{task_id}: {entity_type} ID={entity_id}")
-        
+
         conn = self.get_conn()
         try:
             cursor = conn.cursor()
-            
+
+            # Handle single episode tasks (SINGLE_VIDEO, SINGLE_EPISODE)
+            if entity_type in ('SINGLE_VIDEO', 'SINGLE_EPISODE'):
+                process_single_task(conn, task)
+                self.update_task_status(task_id, 'COMPLETED')
+                logger.info(f"Task #{task_id} COMPLETED")
+                return
+
             # 1. Check if entity has active subscriptions (Optimization)
             is_active = False
             if entity_type == 'YOUTUBE':
@@ -108,7 +120,7 @@ class TaskProcessor:
             elif entity_type == 'PODCAST':
                 cursor.execute('SELECT COUNT(*) FROM podcast_subscriptions WHERE podcast_id = %s', (entity_id,))
                 is_active = cursor.fetchone()[0] > 0
-                
+
             if not is_active:
                 logger.info(f"Task #{task_id} SKIPPED (No active subscriptions)")
                 self.update_task_status(task_id, 'SKIPPED', "No active subscriptions")
@@ -121,12 +133,12 @@ class TaskProcessor:
                 row = cursor.fetchone()
                 if row:
                     channel_dict = dict(zip(columns, row))
-                    # Note: We pass the connection to the processor. 
+                    # Note: We pass the connection to the processor.
                     # Ensure process_youtube_channel handles it correctly (it likely commit()s but doesn't close())
                     process_youtube_channel(conn, channel_dict)
                 else:
                     raise Exception(f"Channel {entity_id} not found")
-                    
+
             elif entity_type == 'PODCAST':
                 cursor.execute('SELECT * FROM podcast_channels WHERE id = %s', (entity_id,))
                 columns = [desc[0] for desc in cursor.description]

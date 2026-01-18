@@ -43,16 +43,16 @@ model Session {
 }
 
 model User {
-  id                   String                 @id @default(cuid())
+  id                   String                @id @default(cuid())
   name                 String?
-  email                String?                @unique
-  emailVerified        DateTime?              @map("email_verified")
+  email                String?               @unique
+  emailVerified        DateTime?             @map("email_verified")
   image                String?
-  feedToken            String?                @unique @default(cuid()) @map("feed_token")
+  feedToken            String?               @unique @default(cuid()) @map("feed_token")
   // Subscription tier fields
-  tier                 SubscriptionTier       @default(FREE)
-  tierExpiresAt        DateTime?              @map("tier_expires_at")
-  paymentCustomerId    String?                @unique @map("payment_customer_id")
+  tier                 SubscriptionTier      @default(FREE)
+  tierExpiresAt        DateTime?             @map("tier_expires_at")
+  paymentCustomerId    String?               @unique @map("payment_customer_id")
   // Relations
   accounts             Account[]
   sessions             Session[]
@@ -61,6 +61,7 @@ model User {
   userVideoStyles      UserVideoStyle[]
   userEpisodeStyles    UserEpisodeStyle[]
   tierHistory          TierHistory[]
+  singleEpisodes       UserSingleEpisode[]
 
   @@map("users")
 }
@@ -95,6 +96,13 @@ enum SubscriptionTier {
   ADMIN
 }
 
+enum SingleEpisodeStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
 // ============================================
 // YouTube Models
 // ============================================
@@ -113,23 +121,24 @@ model YoutubeChannel {
 }
 
 model YoutubeVideo {
-  id               Int              @id @default(autoincrement())
-  youtube_video_id String           @unique
+  id               Int                 @id @default(autoincrement())
+  youtube_video_id String              @unique
   channel_id       Int
-  channel          YoutubeChannel   @relation(fields: [channel_id], references: [id])
+  channel          YoutubeChannel      @relation(fields: [channel_id], references: [id])
   title            String
-  transcript       String?          @db.Text
+  transcript       String?             @db.Text
   published_at     DateTime
   summaries        VideoSummary[]
   userStyles       UserVideoStyle[]
+  singleEpisodes   UserSingleEpisode[]
 
   @@map("youtube_videos")
 }
 
 model VideoSummary {
-  id        Int          @id @default(autoincrement())
-  videoId   Int          @map("video_id")
-  video     YoutubeVideo @relation(fields: [videoId], references: [id], onDelete: Cascade)
+  id        Int             @id @default(autoincrement())
+  videoId   Int             @map("video_id")
+  video     YoutubeVideo    @relation(fields: [videoId], references: [id], onDelete: Cascade)
   style     SummaryStyle    @default(DEFAULT)
   language  SummaryLanguage @default(ZH_TW)
   content   String          @db.Text
@@ -187,25 +196,26 @@ model PodcastChannel {
 }
 
 model PodcastEpisode {
-  id           Int                @id @default(autoincrement())
-  podcast_id   Int
-  podcast      PodcastChannel     @relation(fields: [podcast_id], references: [id])
-  guid         String
-  title        String
-  audio_url    String
-  transcript   String?            @db.Text
-  published_at DateTime
-  summaries    EpisodeSummary[]
-  userStyles   UserEpisodeStyle[]
+  id             Int                 @id @default(autoincrement())
+  podcast_id     Int
+  podcast        PodcastChannel      @relation(fields: [podcast_id], references: [id])
+  guid           String
+  title          String
+  audio_url      String
+  transcript     String?             @db.Text
+  published_at   DateTime
+  summaries      EpisodeSummary[]
+  userStyles     UserEpisodeStyle[]
+  singleEpisodes UserSingleEpisode[]
 
   @@unique([podcast_id, guid])
   @@map("podcast_episodes")
 }
 
 model EpisodeSummary {
-  id        Int            @id @default(autoincrement())
-  episodeId Int            @map("episode_id")
-  episode   PodcastEpisode @relation(fields: [episodeId], references: [id], onDelete: Cascade)
+  id        Int             @id @default(autoincrement())
+  episodeId Int             @map("episode_id")
+  episode   PodcastEpisode  @relation(fields: [episodeId], references: [id], onDelete: Cascade)
   style     SummaryStyle    @default(DEFAULT)
   language  SummaryLanguage @default(ZH_TW)
   content   String          @db.Text
@@ -259,6 +269,8 @@ enum QueueStatus {
 enum QueueType {
   YOUTUBE
   PODCAST
+  SINGLE_VIDEO
+  SINGLE_EPISODE
 }
 
 model ProcessingQueue {
@@ -270,11 +282,47 @@ model ProcessingQueue {
   errorMessage String?
   attempts     Int         @default(0)
 
+  // Single episode processing fields
+  requestedByUserId String?          @map("requested_by_user_id")
+  requestedStyle    SummaryStyle?    @map("requested_style")
+  requestedLanguage SummaryLanguage? @map("requested_language")
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@index([status, createdAt])
   @@map("processing_queue")
+}
+
+// ============================================
+// Single Episode (User Favorites)
+// ============================================
+
+model UserSingleEpisode {
+  id     Int    @id @default(autoincrement())
+  userId String @map("user_id")
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Polymorphic: only one will have a value (enforced by DB check constraint)
+  videoId   Int?            @map("video_id")
+  video     YoutubeVideo?   @relation(fields: [videoId], references: [id], onDelete: Cascade)
+  episodeId Int?            @map("episode_id")
+  episode   PodcastEpisode? @relation(fields: [episodeId], references: [id], onDelete: Cascade)
+
+  // User-selected processing settings
+  style    SummaryStyle
+  language SummaryLanguage
+
+  // Processing status tracking
+  status        SingleEpisodeStatus @default(PENDING)
+  failureReason String?             @map("failure_reason")
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@unique([userId, videoId])
+  @@unique([userId, episodeId])
+  @@index([userId, createdAt])
+  @@map("user_single_episodes")
 }
 
 // ============================================
@@ -287,7 +335,7 @@ model TierHistory {
   user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
   tier      SubscriptionTier
   expiresAt DateTime?        @map("expires_at")
-  reason    String?          // "admin_upgrade", "payment_subscription", "promo"
+  reason    String? // "admin_upgrade", "payment_subscription", "promo"
   createdAt DateTime         @default(now()) @map("created_at")
 
   @@index([userId])

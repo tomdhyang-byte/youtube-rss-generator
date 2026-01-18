@@ -6,7 +6,7 @@ import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { LoginModal } from "@/components/auth/LoginModal";
 
 // Import sub-components
-import { AddChannelForm } from './AddChannelForm';
+import { UnifiedAddForm } from './UnifiedAddForm';
 import { SubscriptionCard } from './SubscriptionCard';
 import { ChannelManagerProps } from './types';
 import { useChannelManager } from './useChannelManager';
@@ -36,6 +36,8 @@ export default function ChannelManager(props: ChannelManagerProps) {
         // Actions
         handleYouTubeSubmit,
         handlePodcastSubmit,
+        addChannelDirect,
+        addPodcastDirect,
         handleUnsubscribe,
         confirmUnsubscribe,
         copyRssLink,
@@ -63,6 +65,15 @@ export default function ChannelManager(props: ChannelManagerProps) {
             />
 
             <div className="space-y-8">
+                {/* Unified Add Form - replaces separate YouTube/Podcast forms */}
+                <UnifiedAddForm
+                    onYouTubeSubmit={addChannelDirect}
+                    onPodcastSubmit={addPodcastDirect}
+                    loading={loading}
+                    canAddMore={canAddMore}
+                    error={error}
+                />
+
                 <Tabs defaultValue="youtube" className="w-full">
                     <TabsList className="grid w-full grid-cols-2 mb-8 bg-orange-950/30 rounded-lg p-1 h-auto">
                         <TabsTrigger
@@ -81,15 +92,6 @@ export default function ChannelManager(props: ChannelManagerProps) {
 
                     {/* YouTube Tab */}
                     <TabsContent value="youtube" className="space-y-8">
-                        <AddChannelForm
-                            type="youtube"
-                            value={youtubeUrl}
-                            onChange={setYoutubeUrl}
-                            onSubmit={handleYouTubeSubmit}
-                            loading={loading}
-                            canAddMore={canAddMore}
-                            error={error}
-                        />
 
                         <div className="flex flex-col items-center gap-4 w-full">
                             {displayChannels.map((channel) => (
@@ -123,15 +125,6 @@ export default function ChannelManager(props: ChannelManagerProps) {
 
                     {/* Podcast Tab */}
                     <TabsContent value="podcast" className="space-y-8">
-                        <AddChannelForm
-                            type="podcast"
-                            value={podcastUrl}
-                            onChange={setPodcastUrl}
-                            onSubmit={handlePodcastSubmit}
-                            loading={loading}
-                            canAddMore={canAddMore}
-                            error={error}
-                        />
 
                         <div className="flex flex-col items-center gap-4 w-full">
                             {displayPodcasts.map((podcast) => (

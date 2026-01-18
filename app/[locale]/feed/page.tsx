@@ -19,7 +19,7 @@ import { FeedItem } from "@/lib/types";
 import { Button } from "@/components/ui/Button";
 import { useTranslations } from "next-intl";
 
-type FilterType = 'all' | 'youtube' | 'podcast';
+type FilterType = 'all' | 'youtube' | 'podcast' | 'single';
 
 export default function FeedPage() {
     const { status } = useSession();
@@ -55,7 +55,7 @@ export default function FeedPage() {
     // Prefetch all feeds on mount to mask DB latency
     useEffect(() => {
         if (status === "authenticated") {
-            (['all', 'youtube', 'podcast'] as FilterType[]).forEach(filter => {
+            (['all', 'youtube', 'podcast', 'single'] as FilterType[]).forEach(filter => {
                 queryClient.prefetchInfiniteQuery({
                     queryKey: ['feed', filter],
                     queryFn: ({ pageParam }) => fetchFeed(filter, pageParam),
@@ -112,7 +112,7 @@ export default function FeedPage() {
                 {showFilters && (
                     <div className="flex items-center justify-between mb-6">
                         <div className="flex gap-1 bg-muted rounded-lg p-1">
-                            {(['all', 'youtube', 'podcast'] as FilterType[]).map((f) => (
+                            {(['all', 'youtube', 'podcast', 'single'] as FilterType[]).map((f) => (
                                 <Button
                                     key={f}
                                     variant="ghost"
@@ -125,7 +125,7 @@ export default function FeedPage() {
                                             : "text-muted-foreground hover:text-foreground"
                                     )}
                                 >
-                                    {f === 'all' ? t('filter_all') : f === 'youtube' ? t('filter_youtube') : t('filter_podcast')}
+                                    {f === 'all' ? t('filter_all') : f === 'youtube' ? t('filter_youtube') : f === 'podcast' ? t('filter_podcast') : t('filter_single')}
                                 </Button>
                             ))}
                         </div>
