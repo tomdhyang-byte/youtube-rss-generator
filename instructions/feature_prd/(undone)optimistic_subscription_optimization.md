@@ -76,11 +76,15 @@ model YoutubeChannel {
 Enhance `worker/youtube.py` and `worker/podcast.py`:
 1.  **Identify PENDING:** Select channels where `status = 'PENDING'`.
 2.  **Resolve:**
-    -   Use `pendingUrl` to fetch the real ID (scrapetube/requests for YT, iTunes/RSS for Podcast).
+    -   Use `pendingUrl` to fetch the real ID.
+    -   **YouTube:** Use `services/youtube_metadata.py` (contains `fetch_videos_from_rss`, `fetch_videos_from_scrapetube`).
+    -   **Podcast:** Use iTunes/RSS lookup.
     -   Fetch Metadata (Title, Desc).
 3.  **Update:**
     -   **Success:** Update `youtube_id`, `title`, `description`, set `status = 'READY'`, clear `pendingUrl`.
     -   **Failure:** Set `status = 'FAILED'`.
+
+> **Note (2026-01-18):** YouTube metadata fetching logic has been refactored into `backend/services/youtube_metadata.py`. The `worker/youtube.py` now handles orchestration only (~200 lines). Import metadata functions from the services layer.
 
 ### 3.4 Frontend Logic
 

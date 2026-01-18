@@ -2,6 +2,8 @@
 
 > **目標**：讓已登入使用者可以貼上「單集」YouTube 影片或 Podcast 單集連結，立即產生 AI 摘要，無需訂閱整個頻道。
 
+> 要思考一下如果已經有訂閱的頻道，使用者再貼上影片連結，是否會產生重複處理的問題？（比方說選擇了不同的語言或者風格，該如何處理）
+
 ---
 
 ## 🎯 核心價值
@@ -310,12 +312,19 @@ model ProcessingQueue {
 | **API** | `app/api/single-episodes/[id]/route.ts` | 新增 |
 | **Worker** | `backend/worker/daemon.py` | 修改：支援新 QueueType |
 | **Worker** | `backend/worker/single.py` | 新增：單集處理邏輯 |
+| **Services** | `backend/services/youtube_metadata.py` | 依賴：RSS/Scrapetube 取得影片 metadata |
+| **Worker** | `backend/worker/transcribe.py` | 依賴：`download_and_transcribe_audio` 函數 |
 | **UI** | `components/subscription/ChannelManager/AddChannelForm.tsx` | 重構：統一搜尋欄 |
 | **UI** | `components/subscription/ModeSelector.tsx` | 新增：下拉選單元件 |
 | **Hook** | `hooks/useSingleEpisodes.ts` | 新增 |
 | **Feed** | `app/[locale]/feed/user/[token]/route.ts` | 修改：納入單集 |
 | **i18n** | `messages/en.json`, `messages/zh-TW.json` | 新增翻譯鍵值 |
 | **Types** | `lib/types.ts` | 擴充 FeedItem 類型 |
+
+> **架構備註 (2026-01-18):**
+> - YouTube metadata 取得邏輯已重構至 `backend/services/youtube_metadata.py`
+> - 音訊下載+轉錄邏輯位於 `backend/worker/transcribe.py` (`download_and_transcribe_audio`)
+> - `single.py` 應從 services layer import metadata functions，從 transcribe.py import 轉錄函數
 
 ---
 
@@ -326,7 +335,7 @@ model ProcessingQueue {
 | Schema Migration | S | 新增 Model + 欄位 |
 | API: single-episode | M | URL 解析、Dedup 邏輯 |
 | API: single-episodes CRUD | S | 標準 CRUD |
-| Worker 單集處理 | M | 新流程，複用現有 transcribe/summarize |
+| Worker 單集處理 | M | 新流程，複用 `services/youtube_metadata` + `transcribe.py` + `summarize.py` |
 | UI 統一搜尋欄 | M | 重構現有表單 |
 | RSS Feed 整合 | S | Query 調整 |
 | i18n | S | 約 10-15 鍵值 |

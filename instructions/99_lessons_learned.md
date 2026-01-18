@@ -87,6 +87,35 @@
 - [ ] Merge conflict 後，是否理解 remote 的變更內容？
 - [ ] 是否執行 `npm run build` 確認編譯通過？
 - [ ] 修改 prompts 後，是否測試了 output format？
+- [ ] 修改 Python backend 後，是否執行 `python -m pytest tests/ -v` 確認測試通過？
+- [ ] 修改 services/ 或 worker/ 後，是否驗證 imports 正確？（`python -c "from backend.worker.youtube import process_youtube_channel"`）
+
+### 2026-01-18: God Module 重構模式 (Service Layer Extraction)
+
+**情境**：
+- `backend/worker/youtube.py` 膨脹到 416 行，同時處理：編排邏輯、RSS/Scrapetube 抓取、時間解析、Shorts 偵測、音訊下載等。
+- 難以單獨測試各個功能。
+
+**解決方案**：
+- 建立 `backend/services/` 目錄作為 Service Layer
+- 將純資料抓取邏輯移到 `youtube_metadata.py`（4 個 functions）
+- 將音訊下載邏輯移到 `transcribe.py`（與其他轉錄邏輯放一起）
+- `youtube.py` 只保留 ~200 行的編排邏輯
+
+**教訓**：
+1. **Service Layer 模式**：純函數放 `services/`，有副作用的編排放 `worker/`
+2. **測試優先**：移動函數後立即寫 unit tests 驗證行為不變
+3. **漸進式重構**：分 Phase 執行，每個 Phase 後驗證 imports 和 integration
+
+**相關檔案**：
+- `backend/services/youtube_metadata.py` (NEW)
+- `backend/worker/youtube.py` (416 → 197 lines)
+- `backend/worker/transcribe.py` (+43 lines)
+- `tests/test_youtube_metadata.py` (22 tests)
+- `tests/test_transcribe.py` (6 tests)
+- `instructions/technical/refactor_youtube_py.md` (完整重構計畫)
+
+---
 
 ### 2026-01-15: 數據隔離不完整導致的語言洩漏 (Language Leak)
 

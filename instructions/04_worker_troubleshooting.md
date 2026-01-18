@@ -7,6 +7,10 @@ The Python Worker (`backend/worker`) is the engine of the application. It runs l
 *   **Entry Point**: `backend/worker/daemon.py`
 *   **Loop**: Infinite `while True` loop with `time.sleep(POLL_INTERVAL)`.
 *   **State Source**: `ProcessingQueue` table in PostgreSQL.
+*   **Key Modules**:
+    - `worker/youtube.py` - Orchestration (~200 lines)
+    - `services/youtube_metadata.py` - RSS & Scrapetube fetching
+    - `worker/transcribe.py` - Transcript fetching (incl. yt-dlp+Whisper fallback)
 
 ## 🚨 Common Alerts & Fixes
 
@@ -54,3 +58,16 @@ The Python Worker (`backend/worker`) is the engine of the application. It runs l
 ### How to Restart (Supervisor / Systemd)
 *   If using Supervisor: `sudo supervisorctl restart youtube-worker`
 *   If using Docker: `docker restart youtube-worker`
+
+### How to Run Unit Tests
+Before deploying worker changes, verify unit tests pass:
+```bash
+# Run all tests
+python -m pytest tests/ -v
+
+# Run specific test file
+python -m pytest tests/test_youtube_metadata.py -v
+
+# Verify imports work (quick sanity check)
+python -c "from backend.services.youtube_metadata import fetch_videos_from_rss; from backend.worker.youtube import process_youtube_channel; print('OK')"
+```

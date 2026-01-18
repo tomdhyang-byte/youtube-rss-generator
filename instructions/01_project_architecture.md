@@ -62,8 +62,9 @@ Use this guide to quickly find the file you need to change based on your intent.
 | I want to change... | Go to File |
 |---------------------|------------|
 | **AI Summary Prompts** | `backend/worker/summarize.py` |
-| **Transcript Fetching** | `backend/worker/transcribe.py` (Multi-tier: Free API → Supadata → Deepgram) |
-| **YouTube Fetch Logic** | `backend/worker/youtube.py` |
+| **Transcript Fetching** | `backend/worker/transcribe.py` (Multi-tier: Free API → Supadata → yt-dlp+Whisper) |
+| **YouTube Channel Orchestration** | `backend/worker/youtube.py` (Main loop, subscriber mgmt, error handling) |
+| **YouTube Metadata Fetching** | `backend/services/youtube_metadata.py` (RSS, Scrapetube, Shorts detection) |
 | **Podcast Fetch Logic** | `backend/worker/podcast.py` |
 | **Worker Shared Logic** | `backend/worker/common.py` (Shared Utils: Multi-language checks `ensure_missing_summaries`) |
 | **Worker Cleanup** | `backend/worker/cleanup.py` (Video Retention Policy - 15 limit) |
@@ -75,6 +76,7 @@ Use this guide to quickly find the file you need to change based on your intent.
 | **Personalized RSS Feed** | `app/feed/user/[token]/route.ts` |
 | **API Shared Utilities** | `lib/api-utils.ts` (Quota/Worker triggers) |
 | **Security Validation** | `lib/security.ts` (SSRF Protection) |
+| **Unit Tests** | `tests/` (pytest-based tests for services and worker modules) |
 
 ---
 
@@ -98,7 +100,8 @@ Understanding how a video becomes a summary:
     │              ↓ (fail or cooldown)       │
     │ 2. Supadata API (paid)                  │
     │              ↓ (no subtitles)           │
-    │ 3. Deepgram + yt-dlp (audio → STT)      │
+    │ 3. yt-dlp + Whisper (audio → STT)       │
+    │    └─ Located in: transcribe.py         │
     └─────────────────────────────────────────┘
     ```
 4.  **Display**:
@@ -164,18 +167,26 @@ youtube-rss-generator/
 │   └── useReadStatus.ts          # Local storage for read status
 │
 ├── backend/                      # Python Worker (The "Brain")
-│   ├── worker/                   # Core Logic Modules
+│   ├── services/                 # Service Layer (Reusable Business Logic)
+│   │   ├── __init__.py           # Package marker
+│   │   └── youtube_metadata.py   # YouTube metadata fetching (RSS, Scrapetube, Shorts detection)
+│   ├── worker/                   # Core Worker Modules (Orchestration)
 │   │   ├── config.py             # Configuration & Constants (incl. API limits)
 │   │   ├── common.py             # Shared Worker Utilities
 │   │   ├── cleanup.py            # Video Retention Logic
 │   │   ├── daemon.py             # Real-time Polling Engine
-│   │   ├── transcribe.py         # Multi-tier Transcript Fetching (NEW)
+│   │   ├── transcribe.py         # Multi-tier Transcript Fetching (incl. yt-dlp+Whisper)
 │   │   ├── summarize.py          # AI Prompts & Logic
-│   │   ├── youtube.py            # YouTube API Handling
+│   │   ├── youtube.py            # YouTube Channel Orchestration (~200 lines)
 │   │   └── podcast.py            # Podcast API Handling
 │   ├── worker.py                 # (Legacy) Full Scan Routine
 │   ├── run_worker.sh             # Launch Script
 │   └── requirements.txt          # Python Dependencies
+│
+├── tests/                        # Python Unit Tests (pytest)
+│   ├── __init__.py               # Package marker
+│   ├── test_youtube_metadata.py  # Tests for youtube_metadata service (22 tests)
+│   └── test_transcribe.py        # Tests for transcribe module (6 tests)
 │
 ├── routing.ts                    # i18n Routing Config
 ├── i18n.ts                       # i18n Request Config
@@ -242,7 +253,17 @@ This section explicitly lists **coupled** parts of the system. If you touch one,
 *   **Context**: `backend/worker/youtube.py` and `config.py` manage daily limits.
 *   **Rule**: Do not bypass `config.py` limits to "fix" a bug where videos aren't fetching. The limit is there for a reason (cost/ban prevention).
 
-### 5. Subscription Tier ↔ Multiple Files
+### 5. YouTube Worker ↔ Services Layer
+*   **Context**: `backend/worker/youtube.py` imports from `backend/services/youtube_metadata.py`.
+*   **Rule**: The service layer (`services/`) contains pure functions for data fetching (RSS, Scrapetube). The worker layer (`worker/`) handles orchestration, DB operations, and error handling.
+*   **Functions in `youtube_metadata.py`**:
+    - `fetch_videos_from_rss()` - Primary method for video list
+    - `fetch_videos_from_scrapetube()` - Fallback method
+    - `is_short_video()` - Shorts detection via HTTP redirect
+    - `parse_relative_time()` - Parse "3 days ago" to datetime
+*   **Risk**: If you modify the return format of service functions, update `youtube.py` accordingly.
+
+### 6. Subscription Tier ↔ Multiple Files
 *   **Context**: `SubscriptionTier` Enum is defined in `prisma/schema.prisma` AND manually typed in `lib/types/subscription-tier.ts`.
 *   **Rule**: When adding a new Tier:
     1.  Add to `prisma/schema.prisma`.

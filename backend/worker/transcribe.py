@@ -7,6 +7,8 @@ Handles fetching transcripts from multiple sources:
 """
 import os
 import json
+import subprocess
+import tempfile
 import requests
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -322,4 +324,47 @@ def transcribe_audio_file(file_path: str) -> str | None:
     except Exception as e:
         print(f"    - Whisper transcription error: {e}")
         return None
+
+
+def download_and_transcribe_audio(video_id: str) -> str | None:
+    """
+    Downloads audio from a YouTube video using yt-dlp and transcribes it using Whisper.
+    Used as final fallback when no subtitles are available.
+
+    Args:
+        video_id: The YouTube video ID.
+
+    Returns:
+        The transcribed text, or None if transcription fails.
+    """
+    print(f"      - Attempting to download audio for {video_id}...")
+
+    # Create a temporary directory for the audio file
+    with tempfile.TemporaryDirectory() as tmpdir:
+        output_path = os.path.join(tmpdir, f"{video_id}.mp3")
+
+        # yt-dlp command to download audio
+        command = [
+            "yt-dlp",
+            "--extract-audio",
+            "--audio-format", "mp3",
+            "--audio-quality", "9",  # Low bitrate (~48kbps) to keep file size < 25MB for Whisper
+            "--output", output_path,
+            f"https://www.youtube.com/watch?v={video_id}"
+        ]
+
+        try:
+            subprocess.run(command, check=True, capture_output=True, text=True)
+            print(f"      - Audio downloaded to {output_path}")
+
+            # Transcribe the downloaded audio file
+            transcript = transcribe_audio_file(output_path)
+            return transcript
+
+        except subprocess.CalledProcessError as e:
+            print(f"      - yt-dlp failed for {video_id}: {e.stderr}")
+            return None
+        except Exception as e:
+            print(f"      - Error during audio download or transcription for {video_id}: {e}")
+            return None
 
