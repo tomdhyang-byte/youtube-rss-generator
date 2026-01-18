@@ -83,8 +83,8 @@ def process_podcast_channel(conn, podcast: dict) -> None:
         """, (new_title, new_desc, new_site, new_image, podcast_id))
         conn.commit()
 
-    # Process episodes (limit 1 latest)
-    for entry in feed.entries[:1]:
+    # Process episodes (limit 3 latest)
+    for entry in feed.entries[:3]:
         guid = entry.get('guid', entry.get('link'))
         title = entry.get('title', 'Untitled Episode')
         

@@ -61,12 +61,12 @@ def process_youtube_channel(conn, channel: dict) -> None:
     
     # Fetch videos: RSS first (precise timestamps), scrapetube fallback (relative time)
     print("  - Fetching video list from YouTube RSS...")
-    videos = fetch_videos_from_rss(youtube_id, limit=1)
+    videos = fetch_videos_from_rss(youtube_id, limit=3)
     video_source = "rss"
     
     if not videos:
         print("  - RSS unavailable, falling back to scrapetube...")
-        videos = fetch_videos_from_scrapetube(youtube_id, limit=1)
+        videos = fetch_videos_from_scrapetube(youtube_id, limit=3)
         video_source = "scrapetube"
     
     if not videos:
