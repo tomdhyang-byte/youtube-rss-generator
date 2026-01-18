@@ -103,10 +103,7 @@ def fetch_videos_from_rss(youtube_channel_id: str, limit: int = 15) -> list | No
     rss_url = f"https://www.youtube.com/feeds/videos.xml?channel_id={youtube_channel_id}"
 
     try:
-        # Use custom SSL context to handle certificate issues on some systems (e.g., macOS)
         ssl_context = ssl.create_default_context()
-        ssl_context.check_hostname = False
-        ssl_context.verify_mode = ssl.CERT_NONE
 
         req = urllib.request.Request(rss_url, headers={'User-Agent': 'Mozilla/5.0'})
         with urllib.request.urlopen(req, context=ssl_context, timeout=15) as response:
