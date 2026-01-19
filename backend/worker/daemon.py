@@ -24,7 +24,7 @@ class TaskProcessor:
         logger.info("Initializing Daemon...")
         if not validate_config():
             raise Exception("Configuration validation failed")
-        self.last_maintenance = 0
+        self.last_maintenance = time.time()  # Initialize to current time to avoid immediate maintenance
         
     def get_conn(self):
         return get_db_connection()
@@ -188,16 +188,17 @@ class TaskProcessor:
         
         while True:
             try:
-                # 1. Maintenance Check
-                if time.time() - self.last_maintenance > MAINTENANCE_INTERVAL:
-                    self.run_routine_maintenance()
-
-                # 2. Process Queue
+                # 1. Process Queue FIRST (single episodes & new subscriptions have priority)
                 task = self.poll_queue()
                 if task:
                     self.process_task(task)
+                    continue  # Immediately check for more tasks
+                
+                # 2. Only run maintenance when queue is empty
+                if time.time() - self.last_maintenance > MAINTENANCE_INTERVAL:
+                    self.run_routine_maintenance()
                 else:
-                    # No tasks, sleep
+                    # No tasks and no maintenance needed, sleep
                     time.sleep(POLL_INTERVAL)
                     
             except KeyboardInterrupt:

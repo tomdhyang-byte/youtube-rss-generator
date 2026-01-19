@@ -14,6 +14,7 @@ from datetime import datetime
 from .db import get_db_connection
 from .transcribe import fetch_transcript_with_fallback, download_and_transcribe_audio, transcribe_audio
 from .summarize import generate_summary
+from backend.services.youtube_metadata import fetch_single_video_metadata
 
 logger = logging.getLogger("single")
 
@@ -208,6 +209,21 @@ def process_single_video(
 
     transcript = row[0] if row else None
     current_title = row[1] if row else None
+
+    # Update placeholder title with real metadata
+    if current_title == 'Processing...':
+        logger.info(f"Fetching metadata to update placeholder title for {youtube_video_id}...")
+        metadata = fetch_single_video_metadata(youtube_video_id)
+        if metadata:
+            cursor.execute("""
+                UPDATE youtube_videos 
+                SET title = %s, published_at = %s 
+                WHERE id = %s
+            """, (metadata['title'], metadata['published_at'], video_db_id))
+            conn.commit()
+            logger.info(f"Updated video title to: {metadata['title']}")
+        else:
+            logger.warning(f"Could not fetch metadata for {youtube_video_id}, title remains as placeholder")
 
     if not transcript:
         # Need to fetch transcript

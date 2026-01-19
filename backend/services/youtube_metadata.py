@@ -9,6 +9,52 @@ from datetime import datetime, timedelta
 
 import feedparser
 import scrapetube
+import yt_dlp
+
+
+def fetch_single_video_metadata(video_id: str) -> dict | None:
+    """
+    Fetch metadata for a single YouTube video using yt-dlp.
+    
+    Args:
+        video_id: The YouTube video ID
+        
+    Returns:
+        dict with 'title', 'channel_id', 'channel_title', 'published_at'
+        or None if failed
+    """
+    try:
+        ydl_opts = {
+            'quiet': True,
+            'no_warnings': True,
+            'extract_flat': False,
+            'skip_download': True,
+        }
+        
+        url = f"https://www.youtube.com/watch?v={video_id}"
+        
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            info = ydl.extract_info(url, download=False)
+            
+            # Parse upload date (format: YYYYMMDD)
+            upload_date = info.get('upload_date', '')
+            if upload_date and len(upload_date) == 8:
+                published_at = datetime.strptime(upload_date, '%Y%m%d')
+            else:
+                published_at = datetime.now()
+            
+            return {
+                'title': info.get('title', 'Untitled'),
+                'channel_id': info.get('channel_id', ''),
+                'channel_title': info.get('channel', info.get('uploader', '')),
+                'published_at': published_at,
+                'description': info.get('description', ''),
+                'duration': info.get('duration', 0),
+            }
+            
+    except Exception as e:
+        print(f"    - Failed to fetch video metadata: {e}")
+        return None
 
 
 def parse_relative_time(text: str) -> datetime:

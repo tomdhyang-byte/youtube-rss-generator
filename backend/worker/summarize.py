@@ -58,9 +58,9 @@ YOUTUBE_DEFAULT_PROMPT_ZH = """<Role>
 
 <hr>
 
-<h3>� 金句與解析</h3>
+<h3>💡 金句與解析</h3>
 
-從逐字稿中挑選 5 句最能代表核心論點的「講者原話」。
+從逐字稿中挑選 5 段最能代表核心論點的「講者原話」。
 
 請根據影片類型，選擇最適合的金句類型：
 - 若為教學/知識型：萃取核心方法論或關鍵概念的原話
@@ -71,7 +71,7 @@ YOUTUBE_DEFAULT_PROMPT_ZH = """<Role>
 <blockquote>
 「(講者原話，保留原文語言，請勿翻譯)」
 </blockquote>
-<p><b>解析：</b>(用 2-3 句話說明這句話的脈絡、為什麼重要、以及它如何支撐影片的核心論點)</p>
+<p><b>解析：</b>(用一個段落說明這句話的脈絡、為什麼重要、請盡可能詳細，提供足夠的背景資訊和分析。確保用戶看完之後有所收穫)</p>
 
 篩選標準：
 - 必須直接支撐你歸納出的核心重點
@@ -123,9 +123,9 @@ PODCAST_DEFAULT_PROMPT_ZH = """<Role>
 
 <hr>
 
-<h3>💬 金句與解析</h3>
+<h3>💡 金句與解析</h3>
 
-從逐字稿中挑選 5 句最能代表核心論點的「對談原話」。
+從逐字稿中挑選 5 段最能代表核心論點的「對談原話」。
 
 請根據節目類型，選擇最適合的金句類型：
 - 若為訪談型：萃取來賓最具洞見或獨特觀點的原話
@@ -138,7 +138,7 @@ PODCAST_DEFAULT_PROMPT_ZH = """<Role>
 「(對談原話，保留原文語言，請勿翻譯)」
 <br>— <b>(誰說的：主持人/來賓名字)</b>
 </blockquote>
-<p><b>解析：</b>(用 2-3 句話說明這句話的脈絡、為什麼重要、以及它如何支撐節目的核心論點)</p>
+<p><b>解析：</b>(用一個段落說明這句話的脈絡、為什麼重要、請盡可能詳細，提供足夠的背景資訊 and 分析。確保用戶看完之後有所收穫)</p>
 
 篩選標準：
 - 必須直接支撐你歸納出的核心重點
@@ -301,9 +301,9 @@ No preamble, no pleasantries, no "this video is worth watching"—get straight t
 
 <hr>
 
-<h3>💬 Key Quotes & Analysis</h3>
+<h3>💡 Key Quotes & Analysis</h3>
 
-Select 5 of the most representative "speaker quotes" that embody the core arguments.
+Select 5 of the most representative "speaker segments" that embody the core arguments.
 
 Based on video type, choose the most appropriate quote types:
 - For educational/knowledge videos: Extract quotes about core methodologies or key concepts
@@ -314,7 +314,7 @@ For each quote, use this format:
 <blockquote>
 "(Speaker's original words, preserve original language, do not translate)"
 </blockquote>
-<p><b>Analysis:</b> (In 2-3 sentences, explain the context of this quote, why it matters, and how it supports the video's core argument)</p>
+<p><b>Analysis:</b> (Explain the context of this quote in a full paragraph. Be as detailed as possible, providing sufficient background info and analysis to ensure the user gains meaningful insights.)</p>
 
 Selection criteria:
 - Must directly support the core points you've identified
@@ -368,7 +368,7 @@ No preamble, no pleasantries, no "this episode is worth listening to"—get stra
 
 <hr>
 
-<h3>� Key Quotes & Analysis</h3>
+<h3> Key Quotes & Analysis</h3>
 
 Select 5 of the most representative "conversation quotes" that embody the core arguments.
 
@@ -383,7 +383,7 @@ For each quote, use this format:
 "(Original conversation quote, preserve original language, do not translate)"
 <br>— <b>(Who said it: Host/Guest name)</b>
 </blockquote>
-<p><b>Analysis:</b> (In 2-3 sentences, explain the context of this quote, why it matters, and how it supports the episode's core argument)</p>
+<p><b>Analysis:</b> (Explain the context of this quote in a full paragraph. Be as detailed as possible, providing sufficient background info and analysis to ensure the user gains meaningful insights.)</p>
 
 Selection criteria:
 - Must directly support the core points you've identified
