@@ -63,27 +63,27 @@ YOUTUBE_DEFAULT_PROMPT_ZH = """<Role>
 <h3>⭐️ 講者五大金句 (Top 5 Golden Quotes)</h3>
 
 <blockquote>
-"1. (插入第一句最具代表性的原話，請使用作者的語言，請勿「翻譯」)"
+"(插入第一句最具代表性的原話，請使用作者的語言，請勿「翻譯」)"
 </blockquote>
 <p><b>簡短註解：</b>這句話點出了什麼痛點？</p>
 
 <blockquote>
-"2. (插入第二句原話)"
+"(插入第二句原話)"
 </blockquote>
 <p><b>簡短註解：</b>(說明這句話的重要性)</p>
 
 <blockquote>
-"3. (插入第三句原話)"
+"(插入第三句原話)"
 </blockquote>
 <p><b>簡短註解：</b>(說明這句話的重要性)</p>
 
 <blockquote>
-"4. (插入第四句原話)"
+"(插入第四句原話)"
 </blockquote>
 <p><b>簡短註解：</b>(說明這句話的重要性)</p>
 
 <blockquote>
-"5. (插入第五句原話)"
+"(插入第五句原話)"
 </blockquote>
 <p><b>簡短註解：</b>這句話通常適合作為結論或行動呼籲</p>
 
@@ -144,31 +144,31 @@ PODCAST_DEFAULT_PROMPT_ZH = """<Role>
 <h3>⭐️ 對談五大金句 (Top 5 Golden Quotes)</h3>
 
 <blockquote>
-"1. (插入第一段最具代表性的原話，請使用講者的語言，請勿「翻譯」)"
+"(插入第一段最具代表性的原話，請使用講者的語言，請勿「翻譯」)"
 <br>— <b>(主持人/來賓名字)</b>
 </blockquote>
 <p><b>簡短註解：</b>這句話點出了什麼痛點？</p>
 
 <blockquote>
-"2. (插入第二段原話)"
+"(插入第二段原話)"
 <br>— <b>(主持人/來賓名字)</b>
 </blockquote>
 <p><b>簡短註解：</b>(說明這句話的重要性)</p>
 
 <blockquote>
-"3. (插入第三段原話)"
+"(插入第三段原話)"
 <br>— <b>(主持人/來賓名字)</b>
 </blockquote>
 <p><b>簡短註解：</b>(說明這句話的重要性)</p>
 
 <blockquote>
-"4. (插入第四段原話)"
+"(插入第四段原話)"
 <br>— <b>(主持人/來賓名字)</b>
 </blockquote>
 <p><b>簡短註解：</b>(說明這句話的重要性)</p>
 
 <blockquote>
-"5. (插入第五段原話)"
+"(插入第五段原話)"
 <br>— <b>(主持人/來賓名字)</b>
 </blockquote>
 <p><b>簡短註解：</b>這句話通常適合作為結論或行動呼籲</p>
@@ -341,27 +341,27 @@ In 3-5 flowing sentences, summarize the video's core theme, main arguments, and 
 <h3>⭐️ Top 5 Golden Quotes</h3>
 
 <blockquote>
-"1. (Insert the first most representative quote in the speaker's original language—do not translate)"
+"(Insert the first most representative quote in the speaker's original language—do not translate)"
 </blockquote>
 <p><b>Brief Note:</b> What pain point does this quote address?</p>
 
 <blockquote>
-"2. (Insert the second quote)"
+"(Insert the second quote)"
 </blockquote>
 <p><b>Brief Note:</b> (Explain the significance of this quote)</p>
 
 <blockquote>
-"3. (Insert the third quote)"
+"(Insert the third quote)"
 </blockquote>
 <p><b>Brief Note:</b> (Explain the significance of this quote)</p>
 
 <blockquote>
-"4. (Insert the fourth quote)"
+"(Insert the fourth quote)"
 </blockquote>
 <p><b>Brief Note:</b> (Explain the significance of this quote)</p>
 
 <blockquote>
-"5. (Insert the fifth quote)"
+"(Insert the fifth quote)"
 </blockquote>
 <p><b>Brief Note:</b> This quote typically serves as a conclusion or call to action</p>
 
@@ -423,31 +423,31 @@ In 3-5 flowing sentences, summarize this episode's core theme, main arguments, a
 <h3>⭐️ Top 5 Golden Quotes</h3>
 
 <blockquote>
-"1. (Insert the first most representative quote in the speaker's original language—do not translate)"
+"(Insert the first most representative quote in the speaker's original language—do not translate)"
 <br>— <b>(Host/Guest name)</b>
 </blockquote>
 <p><b>Brief Note:</b> What pain point does this quote address?</p>
 
 <blockquote>
-"2. (Insert the second quote)"
+"(Insert the second quote)"
 <br>— <b>(Host/Guest name)</b>
 </blockquote>
 <p><b>Brief Note:</b> (Explain the significance of this quote)</p>
 
 <blockquote>
-"3. (Insert the third quote)"
+"(Insert the third quote)"
 <br>— <b>(Host/Guest name)</b>
 </blockquote>
 <p><b>Brief Note:</b> (Explain the significance of this quote)</p>
 
 <blockquote>
-"4. (Insert the fourth quote)"
+"(Insert the fourth quote)"
 <br>— <b>(Host/Guest name)</b>
 </blockquote>
 <p><b>Brief Note:</b> (Explain the significance of this quote)</p>
 
 <blockquote>
-"5. (Insert the fifth quote)"
+"(Insert the fifth quote)"
 <br>— <b>(Host/Guest name)</b>
 </blockquote>
 <p><b>Brief Note:</b> This quote typically serves as a conclusion or call to action</p>
